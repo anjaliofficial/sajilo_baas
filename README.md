@@ -2,15 +2,4 @@
 
 A new Flutter project.
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Sajilo Baas is a Nepali mobile application designed to make finding and booking accommodations simple and convenient. Unlike traditional hotel apps, Sajilo Baas follows a peer-to-peer model, allowing anyone to list their rooms, apartments, or homes for rent. Guests can search for properties using a map or filters, view detailed property information including photos, amenities, and reviews, and book their stays directly through the app. The app also supports secure payments through popular Nepali payment systems such as eSewa and Khalti. Guests can chat with hosts to clarify details before booking and leave ratings and reviews after their stay, helping other users make informed choices. Hosts, on the other hand, can manage their listings, track bookings, communicate with guests, and monitor earnings through an intuitive dashboard. Sajilo Baas empowers local homeowners to earn from unused space while providing travelers, students, and professionals with affordable, flexible, and community-driven accommodation options. With features like map-based property search, instant booking, in-app chat, and integrated payment, Sajilo Baas combines convenience, security, and local relevance in one user-friendly platform.
