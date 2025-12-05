@@ -190,7 +190,7 @@ class SignUpPage extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: () {
                   // Successful sign up navigates to the Dashboard using named route
-                  Navigator.of(context).pushReplacementNamed('/dashboard');
+                  Navigator.of(context).pushReplacementNamed('/login');
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: primaryBlue,
