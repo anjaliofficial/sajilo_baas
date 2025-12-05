@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 
-// Note: This file assumes the necessary navigation routes (like '/onboarding')
-// are defined in the parent MaterialApp/context.
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Defined a specific blue color for consistency
     final Color primaryBlue = Colors.blue.shade700;
-    const Color buttonColor = Color(0xFF2196F3); // Consistent Blue
+    const Color buttonColor = Color(0xFF2196F3);
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -21,15 +18,17 @@ class SplashScreen extends StatelessWidget {
             children: <Widget>[
               const Spacer(flex: 1),
 
-              // --- Top Section: Logo ---
-              _buildLogo(primaryBlue),
+              /// --- Top Section: LOGO WITH WHITE BACKGROUND ---
+              _buildLogo(),
+
               const Spacer(flex: 2),
 
-              // --- Middle Section: Image Grid (Simplified) ---
+              /// --- Middle Image Collage ---
               _buildImageCollagePlaceholder(primaryBlue),
+
               const Spacer(flex: 3),
 
-              // --- Text and Button Section ---
+              /// --- Text & Button Section ---
               Column(
                 children: <Widget>[
                   const Text(
@@ -55,12 +54,13 @@ class SplashScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 60),
+
+                  /// Button
                   SizedBox(
                     width: double.infinity,
                     height: 55,
                     child: ElevatedButton(
                       onPressed: () {
-                        // Navigate to the Onboarding Screen using named route
                         Navigator.of(
                           context,
                         ).pushReplacementNamed('/onboarding');
@@ -85,6 +85,7 @@ class SplashScreen extends StatelessWidget {
                   ),
                 ],
               ),
+
               const Spacer(flex: 1),
             ],
           ),
@@ -93,44 +94,41 @@ class SplashScreen extends StatelessWidget {
     );
   }
 
-  // Helper function for the logo
-  Widget _buildLogo(Color primaryBlue) {
+  /// --------------------- LOGO (WHITE BACKGROUND) ---------------------
+  Widget _buildLogo() {
     return Container(
-      width: 60,
-      height: 60,
+      width: 70,
+      height: 70,
       decoration: BoxDecoration(
-        color: primaryBlue,
+        color: Colors.white, // White background
         borderRadius: BorderRadius.circular(15),
+        border: Border.all(color: Colors.grey.shade200, width: 2),
         boxShadow: [
           BoxShadow(
-            color: primaryBlue.withOpacity(0.4),
-            blurRadius: 10,
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 12,
             offset: const Offset(0, 4),
           ),
         ],
       ),
-      alignment: Alignment.center,
-      child: const Text(
-        'SB',
-        style: TextStyle(
-          fontSize: 24,
-          fontWeight: FontWeight.w900,
-          color: Colors.white,
-        ),
+      clipBehavior: Clip.hardEdge,
+      child: Image.asset(
+        'assets/images/logo.png',
+        height: 200,
+        width: 200,
+        fit: BoxFit.cover, // Fill full area
       ),
     );
   }
 
-  // Helper function for the image collage placeholder
+  /// --------------------- IMAGE COLLAGE ---------------------
   Widget _buildImageCollagePlaceholder(Color primaryBlue) {
-    // Simplified Stack to replicate the circular overlapping images
     return SizedBox(
       height: 300,
       width: 250,
       child: Stack(
         alignment: Alignment.center,
         children: [
-          // Center Placeholder (House)
           Positioned(
             child: _buildImageCircle(
               size: 180,
@@ -139,7 +137,6 @@ class SplashScreen extends StatelessWidget {
               iconColor: primaryBlue,
             ),
           ),
-          // Top Left
           Positioned(
             top: 20,
             left: 0,
@@ -150,7 +147,6 @@ class SplashScreen extends StatelessWidget {
               iconColor: primaryBlue,
             ),
           ),
-          // Bottom Right
           Positioned(
             bottom: 10,
             right: 10,
@@ -161,7 +157,6 @@ class SplashScreen extends StatelessWidget {
               iconColor: primaryBlue,
             ),
           ),
-          // Center-Right
           Positioned(
             top: 100,
             right: 0,
@@ -177,7 +172,7 @@ class SplashScreen extends StatelessWidget {
     );
   }
 
-  // Helper function for building a circular element
+  /// --------------------- CIRCLE ELEMENT ---------------------
   Widget _buildImageCircle({
     required double size,
     required Color color,

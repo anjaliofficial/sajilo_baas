@@ -13,7 +13,6 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Defined a specific color to match the design aesthetics in the previous file
     final Color primaryBlue = const Color.fromARGB(255, 154, 189, 224);
 
     return Scaffold(
@@ -26,7 +25,6 @@ class _LoginPageState extends State<LoginPage> {
             // --- Header ---
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -45,28 +43,26 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ],
                 ),
-                // Logo placeholder
-                CircleAvatar(
-                  backgroundColor: primaryBlue,
-                  radius: 18,
-                  child: const Text(
-                    'SB',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                    ),
+
+                // --- Logo instead of SB ---
+                SizedBox(
+                  width: 60,
+                  height: 60,
+                  child: Image.asset(
+                    'assets/images/logo.png',
+                    fit: BoxFit.contain,
                   ),
                 ),
               ],
             ),
+
             const SizedBox(height: 40),
 
-            // --- Email Field ---
+            // Email field
             const Text('Email', style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             TextFormField(
-              initialValue: 'sophat.leat@gmail.com',
+              initialValue: 'example@gmail.com',
               keyboardType: TextInputType.emailAddress,
               decoration: const InputDecoration(
                 hintText: 'Enter your email',
@@ -81,7 +77,7 @@ class _LoginPageState extends State<LoginPage> {
             ),
             const SizedBox(height: 20),
 
-            // --- Password Field ---
+            // Password field
             const Text(
               'Password',
               style: TextStyle(fontWeight: FontWeight.bold),
@@ -112,12 +108,13 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
             ),
+
             const SizedBox(height: 10),
 
-            // --- Remember Me / Forgot Password ---
+            // Remember me
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
+              children: [
                 Row(
                   children: [
                     Checkbox(
@@ -132,25 +129,23 @@ class _LoginPageState extends State<LoginPage> {
                   ],
                 ),
                 TextButton(
-                  onPressed: () {
-                    // Placeholder for forgot password logic
-                  },
+                  onPressed: () {},
                   child: const Text(
-                    'Forgot Password',
+                    'Forgot Password?',
                     style: TextStyle(color: Colors.red, fontSize: 13),
                   ),
                 ),
               ],
             ),
+
             const SizedBox(height: 20),
 
-            // --- Login Button ---
+            // Login button
             SizedBox(
               width: double.infinity,
               height: 55,
               child: ElevatedButton(
                 onPressed: () {
-                  // Successful login navigates to the Dashboard using named route
                   Navigator.of(context).pushReplacementNamed('/dashboard');
                 },
                 style: ElevatedButton.styleFrom(
@@ -160,7 +155,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
                 child: const Text(
-                  "Login", // Corrected text
+                  "Login",
                   style: TextStyle(
                     fontSize: 18,
                     color: Colors.white,
@@ -169,39 +164,35 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
             ),
-            const SizedBox(height: 20),
 
-            // --- Or With Divider ---
+            const SizedBox(height: 25),
+
             const Center(
               child: Text(
-                'Or With',
-                style: TextStyle(color: Colors.grey, fontSize: 13),
+                "Or Continue With",
+                style: TextStyle(color: Colors.grey),
               ),
             ),
+
             const SizedBox(height: 20),
 
-            // --- Social Login Buttons ---
+            // --- Only Google Button ---
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                _buildSocialButton('Gmail', Icons.mail_outline),
-                const SizedBox(width: 20),
-                _buildSocialButton('Facebook', Icons.facebook),
-              ],
+              children: [_buildSocialButton('Google', Icons.mail_outline)],
             ),
+
             const SizedBox(height: 40),
 
-            // --- Footer: Don't have an account? ---
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
+              children: [
                 const Text(
                   "Don't have an account?",
                   style: TextStyle(fontSize: 13),
                 ),
                 TextButton(
                   onPressed: () {
-                    // Navigate to the Sign Up page using named route
                     Navigator.of(context).pushNamed('/signup');
                   },
                   child: Text(
@@ -221,12 +212,11 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  // Google Button
   Widget _buildSocialButton(String label, IconData icon) {
     return Expanded(
       child: OutlinedButton.icon(
-        onPressed: () {
-          // Placeholder for social login action
-        },
+        onPressed: () {},
         style: OutlinedButton.styleFrom(
           padding: const EdgeInsets.symmetric(vertical: 15),
           shape: RoundedRectangleBorder(
