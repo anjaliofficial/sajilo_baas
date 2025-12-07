@@ -111,7 +111,7 @@ class SignUpPage extends StatelessWidget {
                   ],
                 ),
 
-                // --- Logo instead of SB ---
+                // Logo instead of SB
                 SizedBox(
                   width: 60,
                   height: 60,
@@ -204,7 +204,6 @@ class SignUpPage extends StatelessWidget {
 
             const SizedBox(height: 20),
 
-            // --- Only Google Button ---
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [_buildSocialButton("Google", Icons.mail_outline)],

@@ -10,7 +10,7 @@ class DashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // --- Custom App Bar / Header ---
+      //  Custom App Bar / Header
       appBar: AppBar(
         automaticallyImplyLeading: false, // Hide the back button
         backgroundColor: Colors.white,
@@ -19,7 +19,7 @@ class DashboardScreen extends StatelessWidget {
         title: _buildHeader(),
       ),
 
-      // --- Body Content ---
+      //  Body Content
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 10.0),
         child: Column(
@@ -27,11 +27,11 @@ class DashboardScreen extends StatelessWidget {
           children: <Widget>[
             const SizedBox(height: 10),
 
-            // --- Search Bar ---
+            //  Search Bar
             _buildSearchBar(),
             const SizedBox(height: 30),
 
-            // --- Nearby Section ---
+            //  Nearby Section
             _buildSectionHeader(
               title: 'Nearby your location',
               actionText: 'See all',
@@ -40,7 +40,7 @@ class DashboardScreen extends StatelessWidget {
             _buildNearbyPropertyCard(),
             const SizedBox(height: 40),
 
-            // --- Popular Destination Section ---
+            // Popular Destination Section
             _buildSectionHeader(title: 'Popular Destination'),
             const SizedBox(height: 15),
             _buildPopularDestinationList(),
@@ -49,12 +49,12 @@ class DashboardScreen extends StatelessWidget {
         ),
       ),
 
-      // --- Bottom Navigation Bar ---
+      //  Bottom Navigation Bar
       bottomNavigationBar: _buildBottomNavBar(context),
     );
   }
 
-  // --- Widget Builders ---
+  //  Widget Builders
 
   Widget _buildHeader() {
     return Row(
@@ -119,7 +119,6 @@ class DashboardScreen extends StatelessWidget {
           borderRadius: BorderRadius.circular(15),
           borderSide: const BorderSide(color: Colors.grey),
         ),
-        // FIXED: Removed 'const' because 'Colors.grey.shade300' is not a constant
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(15),
           borderSide: BorderSide(color: Colors.grey.shade300),
@@ -360,7 +359,7 @@ class DashboardScreen extends StatelessWidget {
     return BottomNavigationBar(
       type: BottomNavigationBarType.fixed,
       selectedItemColor: primaryBlue,
-      // FIXED: Removed 'const' around Colors.grey
+      // FIXED: Removed const around Colors.grey
       unselectedItemColor: Colors.grey,
       showSelectedLabels: false,
       showUnselectedLabels: false,

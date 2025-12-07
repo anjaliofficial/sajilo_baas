@@ -18,17 +18,14 @@ class SplashScreen extends StatelessWidget {
             children: <Widget>[
               const Spacer(flex: 1),
 
-              /// --- Top Section: LOGO WITH WHITE BACKGROUND ---
               _buildLogo(),
 
               const Spacer(flex: 2),
 
-              /// --- Middle Image Collage ---
               _buildImageCollagePlaceholder(primaryBlue),
 
               const Spacer(flex: 3),
 
-              /// --- Text & Button Section ---
               Column(
                 children: <Widget>[
                   const Text(
@@ -94,7 +91,7 @@ class SplashScreen extends StatelessWidget {
     );
   }
 
-  /// --------------------- LOGO (WHITE BACKGROUND) ---------------------
+  //LOGO
   Widget _buildLogo() {
     return Container(
       width: 70,
@@ -116,12 +113,12 @@ class SplashScreen extends StatelessWidget {
         'assets/images/logo.png',
         height: 200,
         width: 200,
-        fit: BoxFit.cover, // Fill full area
+        fit: BoxFit.cover,
       ),
     );
   }
 
-  /// --------------------- IMAGE COLLAGE ---------------------
+  ///  IMAGE COLLAGE
   Widget _buildImageCollagePlaceholder(Color primaryBlue) {
     return SizedBox(
       height: 300,
@@ -172,7 +169,7 @@ class SplashScreen extends StatelessWidget {
     );
   }
 
-  /// --------------------- CIRCLE ELEMENT ---------------------
+  ///  CIRCLE ELEMENT
   Widget _buildImageCircle({
     required double size,
     required Color color,

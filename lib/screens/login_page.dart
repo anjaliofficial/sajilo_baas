@@ -22,7 +22,6 @@ class _LoginPageState extends State<LoginPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            // --- Header ---
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -44,7 +43,6 @@ class _LoginPageState extends State<LoginPage> {
                   ],
                 ),
 
-                // --- Logo instead of SB ---
                 SizedBox(
                   width: 60,
                   height: 60,
@@ -176,7 +174,6 @@ class _LoginPageState extends State<LoginPage> {
 
             const SizedBox(height: 20),
 
-            // --- Only Google Button ---
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [_buildSocialButton('Google', Icons.mail_outline)],

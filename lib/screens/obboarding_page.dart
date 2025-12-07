@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-// --- Data Model for Onboarding Content (Integrated) ---
+// Data Model for Onboarding Content (Integrated)
 
 class ObboardContent {
   final String title;
@@ -28,7 +28,7 @@ List<ObboardContent> contents = [
   ),
 ];
 
-// --- Onboarding Screen Widget ---
+//  Onboarding Screen Widget
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -42,14 +42,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final PageController _controller = PageController();
   final Color primaryBlue = Colors.blue.shade700;
 
-  // Function to handle the button press (Next/Get Started)
   void _handleNext() {
     if (currentPage == contents.length - 1) {
-      // Last page: Navigate to the Login Screen using the named route
-      // Assumes '/login' is defined in the MaterialApp routes.
       Navigator.of(context).pushReplacementNamed('/login');
     } else {
-      // Not last page: Go to the next slide
       _controller.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeIn,
@@ -63,7 +59,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       backgroundColor: Colors.white,
       body: Column(
         children: [
-          // --- PageView (Slidable Content) ---
+          //  PageView (::::::::Slidable Content)
           Expanded(
             flex: 3,
             child: PageView.builder(
@@ -136,7 +132,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             ),
           ),
 
-          // --- Bottom Navigation (Dots and Button) ---
+          // Bottom Navigation (Dots and Button)
           Expanded(
             flex: 1,
             child: Padding(
