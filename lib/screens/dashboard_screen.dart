@@ -157,6 +157,7 @@ class DashboardScreen extends StatelessWidget {
           Stack(
             children: [
               // Placeholder for the main property image
+              // Inside _buildNearbyPropertyCard()
               Container(
                 height: 200,
                 decoration: BoxDecoration(
@@ -165,13 +166,17 @@ class DashboardScreen extends StatelessWidget {
                     top: Radius.circular(20),
                   ),
                 ),
-                child: const Center(
-                  child: Text(
-                    'Building Image Placeholder',
-                    style: TextStyle(color: Colors.black54),
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(20),
+                  ),
+                  child: Image.asset(
+                    'assets/images/shreshaApartment.jpeg', // Make sure this path matches your assets folder
+                    fit: BoxFit.cover,
                   ),
                 ),
               ),
+
               Positioned(
                 top: 10,
                 right: 10,
@@ -279,9 +284,11 @@ class DashboardScreen extends StatelessWidget {
             child: Container(
               height: 80,
               width: 80,
-              color: Colors.blue.shade50,
-              child: const Center(child: Text('Img')),
-            ),
+              child: Image.asset(
+                'assets/images/SindhupalchockImageIndashbaord.jpg',
+                fit: BoxFit.cover,
+              ),
+            ), // upload image here instead of Img
           ),
           const SizedBox(width: 15),
 
@@ -366,10 +373,7 @@ class DashboardScreen extends StatelessWidget {
       currentIndex: 0,
       items: const [
         BottomNavigationBarItem(icon: Icon(Icons.home_filled), label: 'Home'),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.chat_bubble_outline),
-          label: 'Chat',
-        ),
+
         BottomNavigationBarItem(
           icon: Icon(Icons.chat_bubble_outline),
           label: 'Messages',
