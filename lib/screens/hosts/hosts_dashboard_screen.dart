@@ -27,7 +27,7 @@ class HostDashboard extends StatelessWidget {
                   ),
                   CircleAvatar(
                     radius: 20,
-                    backgroundImage: AssetImage('assets/images/profile.jpeg'),
+                    backgroundImage: AssetImage('assets/images/profilee.jpeg'),
                   ),
                 ],
               ),
