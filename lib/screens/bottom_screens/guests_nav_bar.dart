@@ -9,6 +9,7 @@ class AppBottomNavBar extends StatelessWidget {
     required this.currentIndex,
     required this.onTap,
   });
+  //  check
 
   @override
   Widget build(BuildContext context) {

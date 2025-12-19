@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 
-// Import your pages
 import 'all_properties_page.dart';
 import 'bookings_page.dart';
 import 'profile_page.dart';
 import 'message_page.dart';
 
-// Import bottom navbar
 import '../bottom_screens/host_nav_bar.dart';
 
 class HostDashboard extends StatefulWidget {
