@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
-import 'screens/login_page.dart';
+
 import 'screens/splash_screen.dart';
 import 'screens/obboarding_page.dart';
+import 'screens/login_page.dart';
 import 'screens/signup_page.dart';
-import 'screens/dashboard_screen.dart';
-import 'screens/hosts/hosts_dashboard_screen.dart';
+
+// Navigation controllers
+import 'screens/guests/main_navigation.dart';
+import 'screens/hosts/host_main_navigation_screen.dart';
 
 class App extends StatelessWidget {
   const App({super.key});
@@ -13,17 +16,21 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'SmartBook App',
-      theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: true),
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(useMaterial3: true, primarySwatch: Colors.blue),
+      initialRoute: '/splash',
       routes: {
         '/': (context) => const SplashScreen(),
         '/splash': (context) => const SplashScreen(),
         '/onboarding': (context) => const OnboardingScreen(),
         '/login': (context) => const LoginPage(),
         '/signup': (context) => const SignUpPage(),
-        '/dashboard': (context) => const DashboardScreen(),
-        '/hosts_dashboard_screen': (context) => const HostDashboard(),
+
+        // ✅ Bottom Navigation Entrypoints
+        '/customer': (context) => const CustomerMainNavigation(),
+        '/host': (context) =>
+            const HostMainNavigationScreen(), // corrected here
       },
-      initialRoute: '/hosts_dashboard_screen',
     );
   }
 }

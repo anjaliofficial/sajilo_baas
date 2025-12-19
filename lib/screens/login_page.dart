@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+enum UserRole { customer, host }
+
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -8,20 +10,21 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  bool _rememberMe = true;
   bool _isPasswordVisible = false;
+  UserRole _selectedRole = UserRole.customer;
+
+  final Color primaryBlue = const Color.fromARGB(255, 154, 189, 224);
 
   @override
   Widget build(BuildContext context) {
-    final Color primaryBlue = const Color.fromARGB(255, 154, 189, 224);
-
     return Scaffold(
       appBar: AppBar(toolbarHeight: 0),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
+        padding: const EdgeInsets.all(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
+          children: [
+            // ---------------- HEADER ----------------
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -42,40 +45,32 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ],
                 ),
-
                 SizedBox(
                   width: 60,
                   height: 60,
-                  child: Image.asset(
-                    'assets/images/logo.png',
-                    fit: BoxFit.contain,
-                  ),
+                  child: Image.asset('assets/images/logo.png'),
                 ),
               ],
             ),
 
             const SizedBox(height: 40),
 
-            // Email field
+            // ---------------- EMAIL ----------------
             const Text('Email', style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             TextFormField(
-              initialValue: 'example@gmail.com',
               keyboardType: TextInputType.emailAddress,
               decoration: const InputDecoration(
                 hintText: 'Enter your email',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.all(Radius.circular(12)),
                 ),
-                contentPadding: EdgeInsets.symmetric(
-                  horizontal: 15,
-                  vertical: 15,
-                ),
               ),
             ),
+
             const SizedBox(height: 20),
 
-            // Password field
+            // ---------------- PASSWORD ----------------
             const Text(
               'Password',
               style: TextStyle(fontWeight: FontWeight.bold),
@@ -100,51 +95,22 @@ class _LoginPageState extends State<LoginPage> {
                 border: const OutlineInputBorder(
                   borderRadius: BorderRadius.all(Radius.circular(12)),
                 ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 15,
-                  vertical: 15,
-                ),
               ),
-            ),
-
-            const SizedBox(height: 10),
-
-            // Remember me
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    Checkbox(
-                      value: _rememberMe,
-                      onChanged: (bool? value) {
-                        setState(() {
-                          _rememberMe = value ?? false;
-                        });
-                      },
-                    ),
-                    const Text('Remember Me', style: TextStyle(fontSize: 13)),
-                  ],
-                ),
-                TextButton(
-                  onPressed: () {},
-                  child: const Text(
-                    'Forgot Password?',
-                    style: TextStyle(color: Colors.red, fontSize: 13),
-                  ),
-                ),
-              ],
             ),
 
             const SizedBox(height: 20),
 
-            // Login button
+            // ---------------- LOGIN BUTTON ----------------
             SizedBox(
               width: double.infinity,
               height: 55,
               child: ElevatedButton(
                 onPressed: () {
-                  Navigator.of(context).pushReplacementNamed('/dashboard');
+                  if (_selectedRole == UserRole.customer) {
+                    Navigator.pushReplacementNamed(context, '/customer');
+                  } else {
+                    Navigator.pushReplacementNamed(context, '/host');
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: primaryBlue,
@@ -165,41 +131,72 @@ class _LoginPageState extends State<LoginPage> {
 
             const SizedBox(height: 25),
 
+            // ---------------- OR CONTINUE WITH ----------------
             const Center(
               child: Text(
                 "Or Continue With",
                 style: TextStyle(color: Colors.grey),
               ),
             ),
-
             const SizedBox(height: 20),
 
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [_buildSocialButton('Google', Icons.mail_outline)],
-            ),
-
-            const SizedBox(height: 40),
-
+            // ---------------- GMAIL LOGIN BUTTON ----------------
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text(
-                  "Don't have an account?",
-                  style: TextStyle(fontSize: 13),
-                ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pushNamed('/signup');
-                  },
-                  child: Text(
-                    'Sign Up',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: primaryBlue,
-                      fontSize: 13,
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      // TODO: Add Gmail login logic
+                    },
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 15),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      side: const BorderSide(color: Colors.grey),
+                    ),
+                    icon: const Icon(Icons.mail_outline, color: Colors.red),
+                    label: const Text(
+                      "Login with Gmail",
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 20),
+
+            // ---------------- ROLE SELECTION ----------------
+            const Text(
+              "Login As",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                _roleButton(
+                  title: "Customer",
+                  isSelected: _selectedRole == UserRole.customer,
+                  onTap: () {
+                    setState(() {
+                      _selectedRole = UserRole.customer;
+                    });
+                  },
+                ),
+                const SizedBox(width: 12),
+                _roleButton(
+                  title: "Host",
+                  isSelected: _selectedRole == UserRole.host,
+                  onTap: () {
+                    setState(() {
+                      _selectedRole = UserRole.host;
+                    });
+                  },
                 ),
               ],
             ),
@@ -209,24 +206,29 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  // Google Button
-  Widget _buildSocialButton(String label, IconData icon) {
+  // ---------------- ROLE BUTTON ----------------
+  Widget _roleButton({
+    required String title,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
     return Expanded(
-      child: OutlinedButton.icon(
-        onPressed: () {},
-        style: OutlinedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(vertical: 15),
-          shape: RoundedRectangleBorder(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          decoration: BoxDecoration(
+            color: isSelected ? Colors.blue : Colors.grey.shade200,
             borderRadius: BorderRadius.circular(12),
           ),
-          side: const BorderSide(color: Colors.grey),
-        ),
-        icon: Icon(icon, color: Colors.black),
-        label: Text(
-          label,
-          style: const TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
+          child: Center(
+            child: Text(
+              title,
+              style: TextStyle(
+                color: isSelected ? Colors.white : Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ),
       ),
