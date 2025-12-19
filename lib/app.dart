@@ -23,7 +23,7 @@ class App extends StatelessWidget {
         '/dashboard': (context) => const DashboardScreen(),
         '/hosts_dashboard_screen': (context) => const HostDashboard(),
       },
-      initialRoute: '/hosts_dashboard_screen',
+      initialRoute: '/splash',
     );
   }
 }
