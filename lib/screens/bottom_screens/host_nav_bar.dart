@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-class AppBottomNavBar extends StatelessWidget {
+class HostBottomNavBar extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
 
-  const AppBottomNavBar({
+  const HostBottomNavBar({
     super.key,
     required this.currentIndex,
     required this.onTap,
@@ -21,14 +21,17 @@ class AppBottomNavBar extends StatelessWidget {
       showSelectedLabels: false,
       showUnselectedLabels: false,
       items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.home_filled), label: 'Home'),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.dashboard),
+          label: 'Dashboard',
+        ),
         BottomNavigationBarItem(
           icon: Icon(Icons.chat_bubble_outline),
           label: 'Messages',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.favorite_border),
-          label: 'Favorites',
+          icon: Icon(Icons.apartment_outlined),
+          label: 'Properties',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.shopping_bag_outlined),

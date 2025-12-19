@@ -1,20 +1,15 @@
 import 'package:flutter/material.dart';
-import './bottom_screens/guests_nav_bar.dart';
 
-class DashboardScreen extends StatefulWidget {
+// ---------------- DASHBOARD SCREEN ----------------
+class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
 
-  @override
-  State<DashboardScreen> createState() => _DashboardScreenState();
-}
-
-class _DashboardScreenState extends State<DashboardScreen> {
   final Color primaryBlue = const Color(0xFF007BFF);
-  int _currentIndex = 0;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         backgroundColor: Colors.white,
@@ -22,9 +17,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
         toolbarHeight: 80,
         title: _buildHeader(),
       ),
-
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 10.0),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -32,37 +26,30 @@ class _DashboardScreenState extends State<DashboardScreen> {
             _buildSearchBar(),
             const SizedBox(height: 30),
             _buildSectionHeader(
+              context: context,
               title: 'Nearby your location',
               actionText: 'See all',
+              onActionTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const NearbyPage()),
+                );
+              },
             ),
             const SizedBox(height: 15),
-            _buildNearbyPropertyCard(),
+            _buildNearbyPropertyList(),
             const SizedBox(height: 40),
-            _buildSectionHeader(title: 'Popular Destination'),
+            _buildSectionHeader(title: 'Popular Destination', context: context),
             const SizedBox(height: 15),
-            _buildPopularDestinationList(),
+            _buildPopularDestinationList(context),
+            const SizedBox(height: 20),
           ],
         ),
-      ),
-
-      // ✅ Using extracted Bottom Nav
-      bottomNavigationBar: AppBottomNavBar(
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-
-          // Navigation logic (later you can route pages)
-          // Example:
-          // if (index == 1) Navigator.push(...)
-        },
       ),
     );
   }
 
-  // ---------------- UI BUILDERS ----------------
-
+  // ================= HEADER =================
   Widget _buildHeader() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -76,10 +63,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             Row(
               children: [
-                Icon(Icons.location_on, size: 18),
+                Icon(Icons.location_on, size: 18, color: Colors.black),
+                SizedBox(width: 4),
                 Text(
                   'Kathmandu, Pepsicola',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
                 ),
                 Icon(Icons.keyboard_arrow_down),
               ],
@@ -98,10 +90,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
+  // ================= SEARCH BAR =================
   Widget _buildSearchBar() {
     return TextFormField(
       decoration: InputDecoration(
         hintText: 'Start Your Search',
+        hintStyle: const TextStyle(color: Colors.grey),
         prefixIcon: const Icon(Icons.search),
         suffixIcon: Container(
           margin: const EdgeInsets.all(8),
@@ -112,11 +106,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
           child: const Icon(Icons.tune, color: Colors.white),
         ),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: BorderSide(color: primaryBlue),
+        ),
       ),
     );
   }
 
-  Widget _buildSectionHeader({required String title, String? actionText}) {
+  // ================= SECTION HEADER =================
+  Widget _buildSectionHeader({
+    required String title,
+    String? actionText,
+    VoidCallback? onActionTap,
+    required BuildContext context,
+  }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -125,35 +133,120 @@ class _DashboardScreenState extends State<DashboardScreen> {
           style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         if (actionText != null)
-          Text(actionText, style: TextStyle(color: primaryBlue)),
+          GestureDetector(
+            onTap: onActionTap,
+            child: Text(
+              actionText,
+              style: TextStyle(
+                fontSize: 14,
+                color: primaryBlue,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
       ],
     );
   }
 
-  Widget _buildNearbyPropertyCard() {
+  // ================= NEARBY PROPERTY LIST =================
+  Widget _buildNearbyPropertyList() {
+    final List<Map<String, String>> nearbyList = [
+      {
+        'name': 'Shreshna Apartment',
+        'location': 'Nagarkot, Bhaktapur',
+        'rent': '20K/Day',
+        'image': 'assets/images/shreshaApartment.jpeg',
+      },
+      {
+        'name': 'Himalaya Residence',
+        'location': 'Bhaktapur, Kathmandu',
+        'rent': '18K/Day',
+        'image': 'assets/images/himalayan.jpeg',
+      },
+      {
+        'name': 'Peace Villa',
+        'location': 'Lalitpur, Kathmandu',
+        'rent': '22K/Day',
+        'image': 'assets/images/peacevilla.jpeg',
+      },
+    ];
+
+    return Column(
+      children: nearbyList.map((item) {
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 20),
+          child: _buildNearbyPropertyCard(
+            name: item['name']!,
+            location: item['location']!,
+            rent: item['rent']!,
+            image: item['image']!,
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildNearbyPropertyCard({
+    required String name,
+    required String location,
+    required String rent,
+    required String image,
+  }) {
     return Card(
+      elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            height: 200,
-            decoration: BoxDecoration(
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(20),
-              ),
-              color: Colors.blue.shade100,
-            ),
+          ClipRRect(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
             child: Image.asset(
-              'assets/images/shreshaApartment.jpeg',
+              image,
+              height: 200,
+              width: double.infinity,
               fit: BoxFit.cover,
             ),
           ),
-          const Padding(
-            padding: EdgeInsets.all(16),
-            child: Text(
-              'Shreshna Apartment\nNagarkot, Bhaktapur\nRENT - 20K/Day',
-              style: TextStyle(fontWeight: FontWeight.bold),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Row(
+                  children: [
+                    Icon(Icons.star, color: Colors.orange, size: 16),
+                    SizedBox(width: 4),
+                    Text('5.0', style: TextStyle(fontWeight: FontWeight.bold)),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  name,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(location, style: const TextStyle(color: Colors.grey)),
+                const SizedBox(height: 8),
+                RichText(
+                  text: TextSpan(
+                    text: 'RENT - ',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: primaryBlue,
+                      fontSize: 16,
+                    ),
+                    children: [
+                      TextSpan(
+                        text: rent,
+                        style: const TextStyle(color: Colors.black),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -161,17 +254,55 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildPopularDestinationList() {
+  // ================= POPULAR DESTINATION =================
+  Widget _buildPopularDestinationList(BuildContext context) {
+    final List<Map<String, String>> popularList = [
+      {
+        'title': 'Sindhupalchok',
+        'address': 'Helambu 34, Sindhupalchok',
+        'rent': '5.5K',
+        'image': 'assets/images/SindhupalchockImageIndashbaord.jpg',
+      },
+      {
+        'title': 'Nagarkot Hills',
+        'address': 'Nagarkot, Bhaktapur',
+        'rent': '6K',
+        'image': 'assets/images/nagarkothills.jpg',
+      },
+      {
+        'title': 'Bhaktapur Old Town',
+        'address': 'Bhaktapur, Kathmandu',
+        'rent': '7K',
+        'image': 'assets/images/bhaktapurOldVibe.jpg',
+      },
+    ];
+
     return Column(
       children: [
-        _buildPopularDestinationItem(
-          title: 'SindhuPalchock',
-          address: 'Helambu 34, Sindhupalchock',
-          rent: '5.5K',
-        ),
+        ...popularList.map((item) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 15),
+            child: _buildPopularDestinationItem(
+              title: item['title']!,
+              address: item['address']!,
+              rent: item['rent']!,
+              image: item['image']!,
+            ),
+          );
+        }).toList(),
         TextButton(
-          onPressed: () {},
-          child: Text('NEXT', style: TextStyle(color: primaryBlue)),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const PopularDestinationPage(),
+              ),
+            );
+          },
+          child: Text(
+            'NEXT',
+            style: TextStyle(color: primaryBlue, fontWeight: FontWeight.bold),
+          ),
         ),
       ],
     );
@@ -181,27 +312,86 @@ class _DashboardScreenState extends State<DashboardScreen> {
     required String title,
     required String address,
     required String rent,
+    required String image,
   }) {
     return Row(
       children: [
-        Image.asset(
-          'assets/images/SindhupalchockImageIndashbaord.jpg',
-          width: 80,
-          height: 80,
-          fit: BoxFit.cover,
+        ClipRRect(
+          borderRadius: BorderRadius.circular(10),
+          child: Image.asset(image, width: 80, height: 80, fit: BoxFit.cover),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: 15),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  RichText(
+                    text: TextSpan(
+                      text: 'RENT - ',
+                      style: TextStyle(
+                        color: primaryBlue,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      children: [
+                        TextSpan(
+                          text: rent,
+                          style: const TextStyle(color: Colors.black),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
               Text(address, style: const TextStyle(color: Colors.grey)),
-              Text('RENT - $rent'),
+              const SizedBox(height: 6),
+              Row(
+                children: List.generate(
+                  5,
+                  (index) =>
+                      const Icon(Icons.star, size: 14, color: Colors.orange),
+                ),
+              ),
             ],
           ),
         ),
       ],
+    );
+  }
+}
+
+// ---------------- NEARBY PAGE ----------------
+class NearbyPage extends StatelessWidget {
+  const NearbyPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Nearby Properties')),
+      body: const Center(child: Text('Nearby Properties List Page')),
+    );
+  }
+}
+
+// ---------------- POPULAR DESTINATION PAGE ----------------
+class PopularDestinationPage extends StatelessWidget {
+  const PopularDestinationPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Popular Destinations')),
+      body: const Center(child: Text('Popular Destinations List Page')),
     );
   }
 }
