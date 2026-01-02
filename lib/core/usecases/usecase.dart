@@ -1,10 +1,10 @@
 import 'package:dartz/dartz.dart';
-import '../error/failure.dart'; // Create a simple Failure class here
+import 'package:sajilo_baas/core/error/failure.dart';
 
-abstract class UsecaseWithParams<Type, Params> {
-  Future<Either<Failure, Type>> call(Params params);
+abstract interface class UseCaseWithParams<SuccessType, Params> {
+  Future<Either<Failure, SuccessType>> call(Params params);
 }
 
-abstract class UsecaseWithoutParams<Type> {
-  Future<Either<Failure, Type>> call();
+abstract interface class UsecaseWithoutParams<SuccessType> {
+  Future<Either<Failure, SuccessType>> call();
 }

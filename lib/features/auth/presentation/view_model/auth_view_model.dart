@@ -1,57 +1,80 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
 import 'package:sajilo_baas/features/auth/presentation/providers/usecase_provider.dart';
 import '../../domain/entities/auth_entity.dart';
 import '../../domain/usecases/login_usecase.dart';
 import '../../domain/usecases/register_usecase.dart';
 import '../state/auth_state.dart';
 
-final authViewModelProvider = StateNotifierProvider<AuthViewModel, AuthState>((
-  ref,
-) {
-  return AuthViewModel(
-    ref.read(registerUseCaseProvider),
-    ref.read(loginUseCaseProvider),
-  );
-});
+final authViewModelProvider = NotifierProvider<AuthViewModel, AuthState>(
+  () => AuthViewModel(),
+);
 
-class AuthViewModel extends StateNotifier<AuthState> {
-  final RegisterUseCase _registerUseCase;
-  final LoginUseCase _loginUseCase;
+class AuthViewModel extends Notifier<AuthState> {
+  late final RegisterUseCase _registerUseCase;
+  late final LoginUseCase _loginUseCase;
 
-  AuthViewModel(this._registerUseCase, this._loginUseCase)
-    : super(const AuthState());
+  @override
+  AuthState build() {
+    _registerUseCase = ref.read(registerUseCaseProvider);
+    _loginUseCase = ref.read(loginUseCaseProvider);
+    return const AuthState(); // initial state
+  }
 
-  // ✅ REGISTER
-  Future<void> register(AuthEntity entity) async {
+  // REGISTER
+  Future<void> register({
+    required String fullName,
+    required String email,
+    required String phoneNumber,
+    required String address,
+    required String password,
+    required String role,
+  }) async {
     state = state.copyWith(status: AuthStatus.loading);
 
-    final result = await _registerUseCase.call(entity);
+    final entity = AuthEntity(
+      authId: DateTime.now().millisecondsSinceEpoch.toString(),
+      fullName: fullName,
+      email: email,
+      phoneNumber: phoneNumber,
+      address: address,
+      password: password,
+      role: role,
+    );
+
+    final result = await _registerUseCase(entity);
 
     result.fold(
-      (failure) => state = state.copyWith(
-        status: AuthStatus.error,
-        errorMessage: failure.message,
-      ),
-      (_) => state = state.copyWith(status: AuthStatus.registered),
+      (failure) {
+        state = state.copyWith(
+          status: AuthStatus.error,
+          errorMessage: failure.message,
+        );
+      },
+      (_) {
+        state = state.copyWith(status: AuthStatus.registered);
+      },
     );
   }
 
-  // ✅ LOGIN
-  Future<void> login(String email, String password) async {
+  // LOGIN
+  Future<void> login({required String email, required String password}) async {
     state = state.copyWith(status: AuthStatus.loading);
 
-    final result = await _loginUseCase.call(email, password);
+    final result = await _loginUseCase(email, password);
 
     result.fold(
-      (failure) => state = state.copyWith(
-        status: AuthStatus.error,
-        errorMessage: failure.message,
-      ),
-      (entity) => state = state.copyWith(
-        status: AuthStatus.authenticated,
-        authEntity: entity,
-      ),
+      (failure) {
+        state = state.copyWith(
+          status: AuthStatus.error,
+          errorMessage: failure.message,
+        );
+      },
+      (authEntity) {
+        state = state.copyWith(
+          status: AuthStatus.authenticated,
+          authEntity: authEntity,
+        );
+      },
     );
   }
 }

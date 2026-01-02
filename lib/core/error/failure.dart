@@ -9,6 +9,11 @@ abstract class Failure extends Equatable {
 }
 
 class LocalDatabaseFailure extends Failure {
-  LocalDatabaseFailure({String message = "Local database failure"})
+  LocalDatabaseFailure({String message = "Local database operation failure"})
     : super(message);
+}
+
+class ApiFailure extends Failure {
+  final int? statusCode;
+  ApiFailure({this.statusCode, required String message}) : super(message);
 }

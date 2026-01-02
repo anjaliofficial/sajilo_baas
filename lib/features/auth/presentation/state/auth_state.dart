@@ -1,16 +1,10 @@
-import 'package:equatable/equatable.dart';
 import '../../domain/entities/auth_entity.dart';
 
-enum AuthStatus {
-  initial,
-  loading,
-  authenticated,
-  registered,
-  error,
-  unauthenticated,
-}
+/// Enum for Auth status
+enum AuthStatus { initial, loading, registered, authenticated, error }
 
-class AuthState extends Equatable {
+/// State class for Auth
+class AuthState {
   final AuthStatus status;
   final AuthEntity? authEntity;
   final String? errorMessage;
@@ -21,6 +15,7 @@ class AuthState extends Equatable {
     this.errorMessage,
   });
 
+  /// CopyWith method for updating state
   AuthState copyWith({
     AuthStatus? status,
     AuthEntity? authEntity,
@@ -34,5 +29,6 @@ class AuthState extends Equatable {
   }
 
   @override
-  List<Object?> get props => [status, authEntity, errorMessage];
+  String toString() =>
+      'AuthState(status: $status, authEntity: $authEntity, errorMessage: $errorMessage)';
 }
