@@ -3,7 +3,7 @@ import 'package:uuid/uuid.dart';
 import '../../../../core/constants/hive_table_constant.dart';
 import '../../domain/entities/auth_entity.dart';
 
-part 'auth_hive_model.g.dart';
+part 'user_hive_model.g.dart';
 
 @HiveType(typeId: HiveTableConstant.authTypeId)
 class AuthHiveModel extends HiveObject {
