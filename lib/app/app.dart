@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../screens/splash_screen.dart';
+import '../features/splash/presentation/pages/splash_screen.dart';
 import '../screens/obboarding_page.dart';
 import '../screens/login_page.dart';
 import '../screens/signup_page.dart';
