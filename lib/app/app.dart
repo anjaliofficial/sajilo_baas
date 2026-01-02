@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-import 'screens/splash_screen.dart';
-import 'screens/obboarding_page.dart';
-import 'screens/login_page.dart';
-import 'screens/signup_page.dart';
+import '../screens/splash_screen.dart';
+import '../screens/obboarding_page.dart';
+import '../screens/login_page.dart';
+import '../screens/signup_page.dart';
 
 // Navigation controllers
-import 'screens/guests/main_navigation.dart';
-import 'screens/hosts/host_main_navigation_screen.dart';
+import '../screens/guests/main_navigation.dart';
+import '../screens/hosts/host_main_navigation_screen.dart';
 
 class App extends StatelessWidget {
   const App({super.key});

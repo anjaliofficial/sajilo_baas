@@ -40,5 +40,3 @@ class _CustomerMainNavigationState extends State<CustomerMainNavigation> {
     );
   }
 }
-
-
