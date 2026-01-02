@@ -2,28 +2,13 @@ import 'package:equatable/equatable.dart';
 
 abstract class Failure extends Equatable {
   final String message;
-
-  const Failure({required this.message});
-
-  @override
-  List<Object?> get props => [message];
-}
-
-// For Hive/Database errors
-class LocalFailure extends Failure {
-  const LocalFailure({required super.message});
-}
-
-// For API/Network errors (if you add Dio later)
-class ApiFailure extends Failure {
-  final int? statusCode;
-  const ApiFailure({required super.message, this.statusCode});
+  const Failure(this.message);
 
   @override
-  List<Object?> get props => [message, statusCode];
+  List<Object> get props => [message];
 }
 
-// For General/Unexpected errors
-class SharedFailure extends Failure {
-  const SharedFailure({required super.message});
+class LocalDatabaseFailure extends Failure {
+  LocalDatabaseFailure({String message = "Local database failure"})
+    : super(message);
 }

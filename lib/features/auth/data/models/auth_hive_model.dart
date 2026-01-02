@@ -3,28 +3,22 @@ import 'package:uuid/uuid.dart';
 import '../../../../core/constants/hive_table_constant.dart';
 import '../../domain/entities/auth_entity.dart';
 
-part 'user_hive_model.g.dart';
+part 'auth_hive_model.g.dart';
 
 @HiveType(typeId: HiveTableConstant.authTypeId)
 class AuthHiveModel extends HiveObject {
   @HiveField(0)
   final String authId;
-
   @HiveField(1)
   final String fullName;
-
   @HiveField(2)
   final String email;
-
   @HiveField(3)
   final String phoneNumber;
-
   @HiveField(4)
   final String address;
-
   @HiveField(5)
   final String password;
-
   @HiveField(6)
   final String role;
 
@@ -38,27 +32,23 @@ class AuthHiveModel extends HiveObject {
     required this.role,
   }) : authId = authId ?? const Uuid().v4();
 
-  factory AuthHiveModel.fromEntity(AuthEntity entity) {
-    return AuthHiveModel(
-      authId: entity.authId,
-      fullName: entity.fullName,
-      email: entity.email,
-      phoneNumber: entity.phoneNumber,
-      address: entity.address,
-      password: entity.password,
-      role: entity.role,
-    );
-  }
+  factory AuthHiveModel.fromEntity(AuthEntity e) => AuthHiveModel(
+    authId: e.authId,
+    fullName: e.fullName,
+    email: e.email,
+    phoneNumber: e.phoneNumber,
+    address: e.address,
+    password: e.password,
+    role: e.role,
+  );
 
-  AuthEntity toEntity() {
-    return AuthEntity(
-      authId: authId,
-      fullName: fullName,
-      email: email,
-      phoneNumber: phoneNumber,
-      address: address,
-      password: password,
-      role: role,
-    );
-  }
+  AuthEntity toEntity() => AuthEntity(
+    authId: authId,
+    fullName: fullName,
+    email: email,
+    phoneNumber: phoneNumber,
+    address: address,
+    password: password,
+    role: role,
+  );
 }

@@ -1,40 +1,53 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dartz/dartz.dart';
-import 'package:sajilo_baas/features/auth/domain/repositories/auth_repository.dart';
+import 'package:sajilo_baas/features/auth/data/datasources/auth_datasource.dart';
 import '../../../../core/error/failure.dart';
 import '../../domain/entities/auth_entity.dart';
-// import '../../domain/repository/auth_repository.dart';
-import '../../../auth/data/repositories/auth_repository.dart';
-// import '../data_source/local_datasource/auth_local_data_source.dart';
+import '../../domain/repositories/auth_repository.dart';
 import '../datasources/local/auth_local_datasource.dart';
-// import '../models/auth_hive_model.dart';
-import '../models/user_hive_model.dart';
+import '../models/auth_hive_model.dart';
 
-class AuthLocalRepository implements IAuthRepository {
-  final IAuthLocalDataSource _authLocalDataSource;
+/// Repository provider
+final authRepositoryProvider = Provider<IAuthRepository>((ref) {
+  return AuthRepositoryImpl(ref.read(authLocalDatasourceProvider));
+});
 
-  AuthLocalRepository(this._authLocalDataSource);
+class AuthRepositoryImpl implements IAuthRepository {
+  final IAuthDatasource datasource;
+
+  AuthRepositoryImpl(this.datasource);
 
   @override
-  Future<Either<Failure, void>> registerUser(AuthEntity user) async {
+  Future<Either<Failure, bool>> register(AuthEntity entity) async {
     try {
-      final hiveModel = AuthHiveModel.fromEntity(user);
-      await _authLocalDataSource.registerUser(hiveModel);
-      return const Right(null);
+      await datasource.register(AuthHiveModel.fromEntity(entity));
+      return const Right(true);
     } catch (e) {
-      return Left(LocalFailure(message: e.toString()));
+      return Left(LocalDatabaseFailure(message: e.toString()));
     }
   }
 
   @override
-  Future<Either<Failure, AuthEntity>> loginUser(
+  Future<Either<Failure, AuthEntity>> login(
     String email,
     String password,
   ) async {
-    try {
-      final userModel = await _authLocalDataSource.loginUser(email, password);
-      return Right(userModel.toEntity());
-    } catch (e) {
-      return Left(LocalFailure(message: e.toString()));
+    final model = await datasource.login(email, password);
+    if (model == null) {
+      return Left(LocalDatabaseFailure(message: "Invalid credentials"));
     }
+    return Right(model.toEntity());
+  }
+
+  @override
+  Future<Either<Failure, AuthEntity?>> checkSession() async {
+    final model = await datasource.getCurrentUser();
+    return Right(model?.toEntity());
+  }
+
+  @override
+  Future<Either<Failure, bool>> logout() async {
+    await datasource.logout();
+    return const Right(true);
   }
 }

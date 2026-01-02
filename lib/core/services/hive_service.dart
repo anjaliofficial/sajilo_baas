@@ -1,58 +1,65 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import '../../features/auth/data/models/user_hive_model.dart';
+import 'package:path_provider/path_provider.dart';
 import '../constants/hive_table_constant.dart';
+import '../../features/auth/data/models/auth_hive_model.dart';
+
+/// Riverpod provider for HiveService
+final hiveServiceProvider = Provider<HiveService>((ref) {
+  return HiveService();
+});
 
 class HiveService {
-  static Future<void> init() async {
-    await Hive.initFlutter();
+  /// Initialize Hive
+  Future<void> init() async {
+    final directory = await getApplicationDocumentsDirectory();
+    await Hive.initFlutter(directory.path);
 
-    // Register adapter only if not already registered
+    // Register Hive adapters if not registered
     if (!Hive.isAdapterRegistered(HiveTableConstant.authTypeId)) {
       Hive.registerAdapter(AuthHiveModelAdapter());
     }
 
-    // Open auth box and keep it open for the app lifecycle
-    await Hive.openBox<AuthHiveModel>(HiveTableConstant.authBox);
+    // Open Auth Box
+    await Hive.openBox<AuthHiveModel>(HiveTableConstant.authTable);
   }
 
-  // Helper method to get the open box safely
-  Box<AuthHiveModel> _getAuthBox() {
-    return Hive.box<AuthHiveModel>(HiveTableConstant.authBox);
+  /// Auth Box getter
+  Box<AuthHiveModel> get _authBox =>
+      Hive.box<AuthHiveModel>(HiveTableConstant.authTable);
+
+  // ================================= Auth Queries ===================================
+
+  /// Register a new user
+  Future<AuthHiveModel> registerUser(AuthHiveModel model) async {
+    await _authBox.put(model.authId, model);
+    return model;
   }
 
-  // --- SIGNUP LOGIC ---
-  Future<void> createUser(AuthHiveModel authHiveModel) async {
-    var box = _getAuthBox();
-
-    // Check if user with same email already exists
-    bool exists = box.values.any((user) => user.email == authHiveModel.email);
-
-    if (exists) {
-      throw Exception("User already exists with this email");
+  /// Login user
+  Future<AuthHiveModel?> loginUser(String email, String password) async {
+    final users = _authBox.values.where(
+      (user) => user.email == email && user.password == password,
+    );
+    if (users.isNotEmpty) {
+      return users.first;
     }
-
-    // Use authId as the key for better retrieval
-    await box.put(authHiveModel.authId, authHiveModel);
+    return null;
   }
 
-  // --- LOGIN LOGIC ---
-  Future<AuthHiveModel?> login(String email, String password) async {
-    var box = _getAuthBox();
-
-    try {
-      // firstWhere throws a StateError if nothing is found
-      return box.values.firstWhere(
-        (user) => user.email == email && user.password == password,
-      );
-    } catch (e) {
-      // If no user matches, we return null
-      return null;
-    }
+  /// Check if email already exists
+  Future<bool> isEmailExists(String email) async {
+    final users = _authBox.values.where((user) => user.email == email);
+    return users.isNotEmpty;
   }
 
-  // --- DELETE ALL (Useful for testing) ---
-  Future<void> clearAll() async {
-    var box = _getAuthBox();
-    await box.clear();
+  /// Get the first/current user
+  Future<AuthHiveModel?> getCurrentUser() async {
+    return _authBox.values.isNotEmpty ? _authBox.values.first : null;
+  }
+
+  /// Logout user (clear all)
+  Future<void> logout() async {
+    await _authBox.clear();
   }
 }

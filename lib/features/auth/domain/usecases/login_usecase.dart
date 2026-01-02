@@ -11,13 +11,11 @@ class LoginParams {
   LoginParams({required this.email, required this.password});
 }
 
-class LoginUseCase implements UsecaseWithParams<AuthEntity, LoginParams> {
+class LoginUseCase {
   final IAuthRepository repository;
-
   LoginUseCase(this.repository);
 
-  @override
-  Future<Either<Failure, AuthEntity>> call(LoginParams params) {
-    return repository.loginUser(params.email, params.password);
+  Future<Either<Failure, AuthEntity>> call(String email, String password) {
+    return repository.login(email, password);
   }
 }

@@ -1,28 +1,41 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../core/services/hive_service.dart';
-import '../../models/user_hive_model.dart';
+import '../../models/auth_hive_model.dart';
+import '../auth_datasource.dart';
 
-abstract class IAuthLocalDataSource {
-  Future<void> registerUser(AuthHiveModel user);
-  Future<AuthHiveModel> loginUser(String email, String password);
-}
+/// Local datasource provider
+final authLocalDatasourceProvider = Provider<IAuthDatasource>((ref) {
+  return AuthLocalDatasource(ref.read(hiveServiceProvider));
+});
 
-class AuthLocalDataSource implements IAuthLocalDataSource {
-  final HiveService _hiveService;
+class AuthLocalDatasource implements IAuthDatasource {
+  final HiveService hiveService;
 
-  AuthLocalDataSource(this._hiveService);
+  AuthLocalDatasource(this.hiveService);
 
   @override
-  Future<AuthHiveModel> loginUser(String email, String password) async {
-    final user = await _hiveService.login(email, password);
-    if (user != null) {
-      return user;
-    } else {
-      throw Exception("Invalid email or password");
-    }
+  Future<bool> register(AuthHiveModel model) async {
+    await hiveService.registerUser(model);
+    return true;
   }
 
   @override
-  Future<void> registerUser(AuthHiveModel user) async {
-    return await _hiveService.createUser(user);
+  Future<AuthHiveModel?> login(String email, String password) async {
+    return hiveService.loginUser(email, password);
+  }
+
+  @override
+  Future<bool> isEmailExists(String email) async {
+    return hiveService.isEmailExists(email);
+  }
+
+  @override
+  Future<AuthHiveModel?> getCurrentUser() async {
+    return hiveService.getCurrentUser();
+  }
+
+  @override
+  Future<void> logout() async {
+    await hiveService.logout();
   }
 }
