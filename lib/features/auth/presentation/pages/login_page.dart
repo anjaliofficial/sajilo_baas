@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sajilo_baas/features/auth/presentation/pages/register_page.dart';
+import 'package:sajilo_baas/screens/guests/main_navigation.dart';
 import '../../presentation/view_model/auth_view_model.dart';
 import '../../presentation/state/auth_state.dart';
-import 'register_page.dart';
+// import '../register/register_page.dart';
+// import '../dashboard/customer_main_navigation.dart'; // Import your main dashboard
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -46,16 +49,18 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   Widget build(BuildContext context) {
     final authState = ref.watch(authViewModelProvider);
 
-    ref.listen<AuthState>(authViewModelProvider, (prev, next) {
+    // Listen for login state changes
+    ref.listen<AuthState>(authViewModelProvider, (previous, next) {
       if (next.status == AuthStatus.error) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(next.errorMessage ?? "Login failed")),
         );
       } else if (next.status == AuthStatus.authenticated) {
-        ScaffoldMessenger.of(
+        // On successful login, navigate to dashboard
+        Navigator.pushReplacement(
           context,
-        ).showSnackBar(const SnackBar(content: Text("Login Successful!")));
-        Navigator.pushReplacementNamed(context, '/home');
+          MaterialPageRoute(builder: (_) => const CustomerMainNavigation()),
+        );
       }
     });
 
@@ -76,6 +81,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   ),
                   const SizedBox(height: 40),
 
+                  // Email field
                   TextFormField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
@@ -95,6 +101,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   ),
                   const SizedBox(height: 16),
 
+                  // Password field
                   TextFormField(
                     controller: _passwordController,
                     obscureText: _obscurePassword,
@@ -122,6 +129,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   ),
                   const SizedBox(height: 24),
 
+                  // Login button
                   if (authState.status == AuthStatus.loading)
                     const CircularProgressIndicator()
                   else
@@ -135,6 +143,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     ),
                   const SizedBox(height: 16),
 
+                  // Google login placeholder
                   SizedBox(
                     width: double.infinity,
                     child: OutlinedButton.icon(
@@ -145,6 +154,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   ),
                   const SizedBox(height: 16),
 
+                  // Navigate to register
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [

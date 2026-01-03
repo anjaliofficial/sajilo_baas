@@ -41,7 +41,7 @@ class SplashScreen extends StatelessWidget {
                   const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 20.0),
                     child: Text(
-                      "Get the opportunity to claim their true dream of at an affordable price",
+                      "Get the opportunity to claim your dream property at an affordable price",
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 15,
@@ -52,16 +52,14 @@ class SplashScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 60),
 
-                  /// Button
+                  // BUTTON
                   SizedBox(
                     width: double.infinity,
                     height: 55,
                     child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.of(
-                          context,
-                        ).pushReplacementNamed('/onboarding');
-                      },
+                      onPressed: () => Navigator.of(
+                        context,
+                      ).pushReplacementNamed('/onboarding'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: buttonColor,
                         elevation: 5,
@@ -91,13 +89,13 @@ class SplashScreen extends StatelessWidget {
     );
   }
 
-  //LOGO
+  // LOGO
   Widget _buildLogo() {
     return Container(
       width: 70,
       height: 70,
       decoration: BoxDecoration(
-        color: Colors.white, // White background
+        color: Colors.white,
         borderRadius: BorderRadius.circular(15),
         border: Border.all(color: Colors.grey.shade200, width: 2),
         boxShadow: [
@@ -118,7 +116,7 @@ class SplashScreen extends StatelessWidget {
     );
   }
 
-  ///  IMAGE COLLAGE
+  // IMAGE COLLAGE
   Widget _buildImageCollagePlaceholder(Color primaryBlue) {
     return SizedBox(
       height: 300,
@@ -169,7 +167,6 @@ class SplashScreen extends StatelessWidget {
     );
   }
 
-  ///  CIRCLE ELEMENT
   Widget _buildImageCircle({
     required double size,
     required Color color,

@@ -1,9 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
-import '../screens/login_page.dart';
-import '../screens/signup_page.dart';
-import '../features/splash/presentation/pages/splash_screen.dart';
-import '../screens/obboarding_page.dart';
+import 'screens/login_page.dart';
+import 'screens/signup_page.dart';
+import 'screens/obboarding_page.dart';
+import 'features/splash/presentation/pages/splash_screen.dart';
+import 'bottom_screens/customer_main_navigation.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Hive.initFlutter();
+
+  // Open boxes for onboarding & auth
+  await Hive.openBox('onboardingBox');
+  await Hive.openBox('authBox');
+
+  runApp(const App());
+}
 
 class App extends StatelessWidget {
   const App({super.key});
@@ -11,35 +24,17 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Sajilo Baas App',
+      title: 'SmartBook App',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(useMaterial3: true, primarySwatch: Colors.blue),
-      initialRoute: '/signup', // or '/login' if you want login first
+      initialRoute: '/splash',
       routes: {
         '/splash': (context) => const SplashScreen(),
         '/onboarding': (context) => const OnboardingScreen(),
         '/login': (context) => const LoginPage(),
         '/signup': (context) => const SignUpPage(),
-        '/home': (context) => const HomePage(), // added home route
+        '/dashboard': (context) => const CustomerMainNavigation(),
       },
-    );
-  }
-}
-
-// Dummy HomePage
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Home")),
-      body: const Center(
-        child: Text(
-          "Welcome to Home!",
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-        ),
-      ),
     );
   }
 }
