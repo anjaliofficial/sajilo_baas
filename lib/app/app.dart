@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-
-import 'screens/login_page.dart';
-import 'screens/signup_page.dart';
-import 'screens/obboarding_page.dart';
-import 'features/splash/presentation/pages/splash_screen.dart';
-import 'bottom_screens/customer_main_navigation.dart';
+import 'package:sajilo_baas/features/auth/presentation/pages/login_page.dart';
+import 'package:sajilo_baas/features/onboarding/presentation/pages/onboarding_screen.dart';
+import 'package:sajilo_baas/features/splash/presentation/pages/splash_screen.dart';
+import 'package:sajilo_baas/screens/guests/main_navigation.dart';
+import 'package:sajilo_baas/screens/signup_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
