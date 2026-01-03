@@ -25,6 +25,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
 
+  final Color primaryBlue = const Color(0xFF1A82AD);
+
   @override
   void dispose() {
     _nameController.dispose();
@@ -65,7 +67,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     ref.listen<AuthState>(authViewModelProvider, (prev, next) {
       if (next.status == AuthStatus.error) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(next.errorMessage ?? "Registration failed")),
+          SnackBar(
+            content: Text(next.errorMessage ?? "Registration failed"),
+            backgroundColor: Colors.redAccent,
+          ),
         );
       } else if (next.status == AuthStatus.registered) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -78,151 +83,243 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     });
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Create Account")),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Form(
-          key: _formKey,
-          autovalidateMode: AutovalidateMode.onUserInteraction,
-          child: Column(
-            children: [
-              TextFormField(
-                controller: _nameController,
-                decoration: const InputDecoration(labelText: "Full Name"),
-                validator: (val) {
-                  if (val == null || val.isEmpty) return "Enter your name";
-                  if (val.length < 3)
-                    return "Name must be at least 3 characters";
-                  return null;
-                },
-              ),
-              const SizedBox(height: 12),
-
-              TextFormField(
-                controller: _emailController,
-                decoration: const InputDecoration(labelText: "Email"),
-                keyboardType: TextInputType.emailAddress,
-                validator: (val) {
-                  if (val == null || val.isEmpty) return "Enter email";
-                  final emailRegex = RegExp(
-                    r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-                  );
-                  if (!emailRegex.hasMatch(val)) return "Enter valid email";
-                  return null;
-                },
-              ),
-              const SizedBox(height: 12),
-
-              TextFormField(
-                controller: _phoneController,
-                decoration: const InputDecoration(labelText: "Phone Number"),
-                keyboardType: TextInputType.phone,
-                validator: (val) {
-                  if (val == null || val.isEmpty) return "Enter phone number";
-                  if (!RegExp(r'^[0-9]{10}$').hasMatch(val))
-                    return "Enter valid 10-digit phone";
-                  return null;
-                },
-              ),
-              const SizedBox(height: 12),
-
-              TextFormField(
-                controller: _addressController,
-                decoration: const InputDecoration(labelText: "Address"),
-              ),
-              const SizedBox(height: 12),
-
-              TextFormField(
-                controller: _passwordController,
-                obscureText: _obscurePassword,
-                decoration: InputDecoration(
-                  labelText: "Password",
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _obscurePassword
-                          ? Icons.visibility
-                          : Icons.visibility_off,
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          child: Form(
+            key: _formKey,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 30),
+                // Header
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          "Create Account 🚀",
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          "Join us and start your journey!",
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
                     ),
-                    onPressed: () =>
-                        setState(() => _obscurePassword = !_obscurePassword),
-                  ),
-                ),
-                validator: (val) {
-                  if (val == null || val.isEmpty) return "Enter password";
-                  if (val.length < 6)
-                    return "Password must be at least 6 characters";
-                  return null;
-                },
-              ),
-              const SizedBox(height: 12),
-
-              TextFormField(
-                controller: _confirmPasswordController,
-                obscureText: _obscureConfirmPassword,
-                decoration: InputDecoration(
-                  labelText: "Confirm Password",
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _obscureConfirmPassword
-                          ? Icons.visibility
-                          : Icons.visibility_off,
+                    Image.asset(
+                      'assets/images/logo.png',
+                      width: 45,
+                      height: 45,
+                      errorBuilder: (context, error, stackTrace) =>
+                          Icon(Icons.home_work, color: primaryBlue, size: 40),
                     ),
-                    onPressed: () => setState(
-                      () => _obscureConfirmPassword = !_obscureConfirmPassword,
+                  ],
+                ),
+                const SizedBox(height: 30),
+
+                // Full Name
+                _buildLabel("Full Name"),
+                TextFormField(
+                  controller: _nameController,
+                  decoration: _inputDecoration("Enter your full name"),
+                  validator: (val) => (val == null || val.length < 3)
+                      ? "Name must be at least 3 characters"
+                      : null,
+                ),
+                const SizedBox(height: 16),
+
+                // Email
+                _buildLabel("Email"),
+                TextFormField(
+                  controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: _inputDecoration("Enter your email"),
+                  validator: (val) {
+                    if (val == null || val.isEmpty) return "Email is required";
+                    if (!RegExp(
+                      r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                    ).hasMatch(val))
+                      return "Enter a valid email";
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+
+                // Phone Number
+                _buildLabel("Phone Number"),
+                TextFormField(
+                  controller: _phoneController,
+                  keyboardType: TextInputType.phone,
+                  decoration: _inputDecoration("Enter 10-digit number"),
+                  validator: (val) =>
+                      (val == null || !RegExp(r'^[0-9]{10}$').hasMatch(val))
+                      ? "Enter a valid 10-digit phone number"
+                      : null,
+                ),
+                const SizedBox(height: 16),
+
+                // Role Dropdown
+                _buildLabel("Register as"),
+                DropdownButtonFormField<String>(
+                  value: _selectedRole,
+                  decoration: _inputDecoration(""),
+                  items: const [
+                    DropdownMenuItem(
+                      value: 'customer',
+                      child: Text("Customer"),
+                    ),
+                    DropdownMenuItem(value: 'host', child: Text("Host")),
+                  ],
+                  onChanged: (val) => setState(() => _selectedRole = val!),
+                ),
+                const SizedBox(height: 16),
+
+                // Password
+                _buildLabel("Password"),
+                TextFormField(
+                  controller: _passwordController,
+                  obscureText: _obscurePassword,
+                  decoration: _inputDecoration("Create a password").copyWith(
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscurePassword
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
+                      ),
+                      onPressed: () =>
+                          setState(() => _obscurePassword = !_obscurePassword),
                     ),
                   ),
+                  validator: (val) => (val == null || val.length < 6)
+                      ? "Password must be at least 6 characters"
+                      : null,
                 ),
-                validator: (val) {
-                  if (val == null || val.isEmpty) return "Confirm password";
-                  if (val != _passwordController.text)
-                    return "Passwords do not match";
-                  return null;
-                },
-              ),
-              const SizedBox(height: 15),
+                const SizedBox(height: 16),
 
-              DropdownButtonFormField<String>(
-                value: _selectedRole,
-                decoration: const InputDecoration(labelText: "Register as"),
-                items: const [
-                  DropdownMenuItem(value: 'customer', child: Text("Customer")),
-                  DropdownMenuItem(value: 'host', child: Text("Host")),
-                ],
-                onChanged: (val) => setState(() => _selectedRole = val!),
-              ),
-              const SizedBox(height: 30),
-
-              if (authState.status == AuthStatus.loading)
-                const CircularProgressIndicator()
-              else
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: _onRegister,
-                    child: const Text("Sign Up"),
-                  ),
-                ),
-              const SizedBox(height: 16),
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text("Already have an account? "),
-                  GestureDetector(
-                    onTap: _navigateToLogin,
-                    child: const Text(
-                      "Login",
-                      style: TextStyle(
-                        color: Colors.blue,
-                        fontWeight: FontWeight.bold,
+                // Confirm Password
+                _buildLabel("Confirm Password"),
+                TextFormField(
+                  controller: _confirmPasswordController,
+                  obscureText: _obscureConfirmPassword,
+                  decoration: _inputDecoration("Repeat your password").copyWith(
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscureConfirmPassword
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
+                      ),
+                      onPressed: () => setState(
+                        () =>
+                            _obscureConfirmPassword = !_obscureConfirmPassword,
                       ),
                     ),
                   ),
-                ],
-              ),
-            ],
+                  validator: (val) => (val != _passwordController.text)
+                      ? "Passwords do not match"
+                      : null,
+                ),
+                const SizedBox(height: 30),
+
+                // Sign Up Button
+                SizedBox(
+                  width: double.infinity,
+                  height: 55,
+                  child: ElevatedButton(
+                    onPressed: _onRegister,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: primaryBlue,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: authState.status == AuthStatus.loading
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : const Text(
+                            "Sign Up",
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // Footer
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text("Already have an account? "),
+                    GestureDetector(
+                      onTap: _navigateToLogin,
+                      child: Text(
+                        "Login",
+                        style: TextStyle(
+                          color: primaryBlue,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 30),
+              ],
+            ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildLabel(String label) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Text(
+        label,
+        style: TextStyle(color: primaryBlue, fontWeight: FontWeight.w600),
+      ),
+    );
+  }
+
+  InputDecoration _inputDecoration(String hint) {
+    return InputDecoration(
+      hintText: hint,
+      hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      filled: true,
+      fillColor: Colors.white,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.grey.shade300),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.grey.shade300),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: primaryBlue, width: 2),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Colors.redAccent),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Colors.redAccent, width: 2),
       ),
     );
   }
