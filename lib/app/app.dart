@@ -1,27 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sajilo_baas/features/auth/presentation/pages/login_page.dart';
 import 'package:sajilo_baas/features/onboarding/presentation/pages/onboarding_screen.dart';
 import 'package:sajilo_baas/features/splash/presentation/pages/splash_screen.dart';
 import 'package:sajilo_baas/screens/guests/main_navigation.dart';
 import 'package:sajilo_baas/screens/signup_page.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Hive.initFlutter();
-
-  // Open boxes for onboarding & auth
-  await Hive.openBox('onboardingBox');
-  await Hive.openBox('authBox');
-
-  runApp(const App());
-}
-
-class App extends StatelessWidget {
+class App extends ConsumerWidget {
   const App({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp(
       title: 'SmartBook App',
       debugShowCheckedModeBanner: false,
@@ -33,6 +22,10 @@ class App extends StatelessWidget {
         '/login': (context) => const LoginPage(),
         '/signup': (context) => const SignUpPage(),
         '/dashboard': (context) => const CustomerMainNavigation(),
+      },
+      builder: (context, child) {
+        // You can do global widgets here if needed
+        return child!;
       },
     );
   }

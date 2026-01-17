@@ -21,6 +21,12 @@ dependencies:
   equatable: ^2.0.7
   dartz: ^0.10.1 # Very useful for handling Failures vs Success in Login
   flutter_riverpod: ^3.1.0
+  pretty_dio_logger: ^1.4.0
+  shared_preferences: ^2.5.4
+  connectivity_plus: ^7.0.0
+  flutter_secure_storage: ^10.0.0
+  dio_smart_retry: ^7.0.1
+  dio: ^5.9.0
 
 dev_dependencies:
   flutter_test:

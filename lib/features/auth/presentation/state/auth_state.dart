@@ -1,9 +1,7 @@
 import '../../domain/entities/auth_entity.dart';
 
-/// Enum for Auth status
 enum AuthStatus { initial, loading, registered, authenticated, error }
 
-/// State class for Auth
 class AuthState {
   final AuthStatus status;
   final AuthEntity? authEntity;
@@ -15,7 +13,19 @@ class AuthState {
     this.errorMessage,
   });
 
-  /// CopyWith method for updating state
+  // ✨ Named constructors for easy state changes
+  const AuthState.initial() : this(status: AuthStatus.initial);
+
+  const AuthState.loading() : this(status: AuthStatus.loading);
+
+  const AuthState.registered() : this(status: AuthStatus.registered);
+
+  const AuthState.authenticated(AuthEntity entity)
+    : this(status: AuthStatus.authenticated, authEntity: entity);
+
+  const AuthState.error(String message)
+    : this(status: AuthStatus.error, errorMessage: message);
+
   AuthState copyWith({
     AuthStatus? status,
     AuthEntity? authEntity,
