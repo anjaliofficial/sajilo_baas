@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import '../providers/profile_provider.dart';
 import '../state/profile_state.dart';
 import 'edit_profile_page.dart';
@@ -12,12 +13,37 @@ class ProfileScreen extends ConsumerStatefulWidget {
 }
 
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
+  final ImagePicker _picker = ImagePicker();
+
   @override
   void initState() {
     super.initState();
     Future.microtask(() {
       ref.read(profileViewModelProvider.notifier).fetchProfile();
     });
+  }
+
+  Future<void> _changeProfilePicture() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      final state = ref.read(profileViewModelProvider);
+      if (state.profile != null) {
+        final updated = state.profile!.copyWith(
+          profilePicture: pickedFile.path, // temporary local path
+        );
+
+        // TODO: Upload file to backend first, get URL
+        // Example: call your upload API, then set profilePicture = uploadedUrl
+
+        await ref
+            .read(profileViewModelProvider.notifier)
+            .updateProfile(updated);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Profile picture updated")),
+        );
+      }
+    }
   }
 
   @override
@@ -60,14 +86,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   children: [
-                    CircleAvatar(
-                      radius: 50,
-                      backgroundImage:
-                          profile.profilePicture != null &&
-                              profile.profilePicture!.isNotEmpty
-                          ? NetworkImage(profile.profilePicture!)
-                          : const AssetImage('assets/images/default_avatar.png')
-                                as ImageProvider,
+                    GestureDetector(
+                      onTap: _changeProfilePicture,
+                      child: CircleAvatar(
+                        radius: 50,
+                        backgroundImage:
+                            profile.profilePicture != null &&
+                                profile.profilePicture!.isNotEmpty
+                            ? NetworkImage(profile.profilePicture!)
+                            : const AssetImage(
+                                    'assets/images/default_avatar.png',
+                                  )
+                                  as ImageProvider,
+                      ),
                     ),
                     const SizedBox(height: 16),
                     Text(

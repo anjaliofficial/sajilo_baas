@@ -29,8 +29,10 @@ class ApiClient {
       ),
     );
 
+    // Attach JWT interceptor
     _dio.interceptors.add(_AuthInterceptor(_secureStorage));
 
+    // Retry failed requests
     _dio.interceptors.add(
       RetryInterceptor(
         dio: _dio,
@@ -43,6 +45,7 @@ class ApiClient {
       ),
     );
 
+    // Log requests in debug mode
     if (kDebugMode) {
       _dio.interceptors.add(
         PrettyDioLogger(
@@ -55,6 +58,7 @@ class ApiClient {
     }
   }
 
+  // Basic HTTP methods
   Future<Response> get(String path, {Options? options}) =>
       _dio.get(path, options: options);
 
@@ -67,6 +71,7 @@ class ApiClient {
   Future<Response> delete(String path, {dynamic data}) =>
       _dio.delete(path, data: data);
 
+  // Token helpers
   Future<void> saveToken(String token) async {
     await _secureStorage.write(key: _tokenKey, value: token);
   }
@@ -78,9 +83,17 @@ class ApiClient {
   Future<String?> readToken() async {
     return _secureStorage.read(key: _tokenKey);
   }
+
+  // ✅ File upload helper
+  Future<Response> uploadFile(String path, String filePath) async {
+    final formData = FormData.fromMap({
+      'image': await MultipartFile.fromFile(filePath),
+    });
+    return _dio.post(path, data: formData);
+  }
 }
 
-// ✅ Add this interceptor
+// ✅ JWT Interceptor
 class _AuthInterceptor extends Interceptor {
   final FlutterSecureStorage secureStorage;
   static const _tokenKey = 'auth_token';

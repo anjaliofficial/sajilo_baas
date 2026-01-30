@@ -20,4 +20,5 @@ class ApiEndpoints {
 
   // ✅ Profile endpoint (update)
   static const String updateProfile = '/auth/update';
+  static const String uploadFile = '/files/upload';
 }
