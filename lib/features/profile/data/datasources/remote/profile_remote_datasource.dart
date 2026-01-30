@@ -27,7 +27,7 @@ class ProfileRemoteDatasource {
   Future<ProfileApiModel> updateProfile(ProfileEntity entity) async {
     try {
       final response = await apiClient.put(
-        ApiEndpoints.updateProfile, // ✅ should be '/auth/update'
+        ApiEndpoints.updateProfile,
         data: {
           "fullName": entity.fullName,
           "email": entity.email,
@@ -45,6 +45,26 @@ class ProfileRemoteDatasource {
     } on DioException catch (e) {
       throw Exception(
         e.response?.data['message'] ?? e.message ?? "Update failed",
+      );
+    }
+  }
+
+  /// Upload profile picture
+  Future<String> uploadProfilePicture(String filePath) async {
+    try {
+      final response = await apiClient.uploadFile(
+        ApiEndpoints.uploadFile,
+        filePath,
+      );
+      if (response.statusCode == 200 && response.data['success'] == true) {
+        // Backend returns something like `/uploads/filename.jpg`
+        return "${ApiEndpoints.baseUrl}${response.data['path']}";
+      } else {
+        throw Exception(response.data['message'] ?? "Upload failed");
+      }
+    } on DioException catch (e) {
+      throw Exception(
+        e.response?.data['message'] ?? e.message ?? "Upload failed",
       );
     }
   }

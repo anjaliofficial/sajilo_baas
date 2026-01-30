@@ -1,7 +1,3 @@
-// lib/core/api/api_endpoints.dart
-
-// lib/core/api/api_endpoints.dart
-
 class ApiEndpoints {
   ApiEndpoints._();
 
@@ -18,7 +14,9 @@ class ApiEndpoints {
   static const String currentUser = '/auth/me';
   static const String logout = '/auth/logout';
 
-  // ✅ Profile endpoint (update)
+  // Profile endpoints
   static const String updateProfile = '/auth/update';
+
+  // File upload
   static const String uploadFile = '/files/upload';
 }
