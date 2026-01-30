@@ -1,8 +1,8 @@
-// features/profile/presentation/pages/edit_profile_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/profile_entity.dart';
 import '../providers/profile_provider.dart';
+import '../state/profile_state.dart';
 
 class EditProfilePage extends ConsumerStatefulWidget {
   final ProfileEntity profile;
@@ -17,6 +17,8 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
   late TextEditingController emailController;
   late TextEditingController phoneController;
   late TextEditingController addressController;
+
+  bool _isSaving = false;
 
   @override
   void initState() {
@@ -36,7 +38,9 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
     super.dispose();
   }
 
-  void _saveProfile() {
+  Future<void> _saveProfile() async {
+    setState(() => _isSaving = true);
+
     final updated = ProfileEntity(
       id: widget.profile.id,
       fullName: nameController.text,
@@ -47,12 +51,24 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
       profilePicture: widget.profile.profilePicture,
     );
 
-    ref.read(profileViewModelProvider.notifier).updateProfile(updated);
+    try {
+      await ref.read(profileViewModelProvider.notifier).updateProfile(updated);
 
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text("Profile updated")));
-    Navigator.pop(context);
+      // Watch the state after update
+      final state = ref.read(profileViewModelProvider);
+      if (state.status == ProfileStatus.loaded) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Profile updated successfully")),
+        );
+        Navigator.pop(context);
+      } else if (state.status == ProfileStatus.error) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Error: ${state.errorMessage}")));
+      }
+    } finally {
+      setState(() => _isSaving = false);
+    }
   }
 
   @override
@@ -65,7 +81,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
           children: [
             TextField(
               controller: nameController,
-              decoration: const InputDecoration(labelText: "Name"),
+              decoration: const InputDecoration(labelText: "Full Name"),
             ),
             TextField(
               controller: emailController,
@@ -79,8 +95,13 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
               controller: addressController,
               decoration: const InputDecoration(labelText: "Address"),
             ),
-            const SizedBox(height: 20),
-            ElevatedButton(onPressed: _saveProfile, child: const Text("Save")),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: _isSaving ? null : _saveProfile,
+              child: _isSaving
+                  ? const CircularProgressIndicator(color: Colors.white)
+                  : const Text("Save"),
+            ),
           ],
         ),
       ),

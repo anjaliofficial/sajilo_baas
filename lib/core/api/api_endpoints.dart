@@ -1,5 +1,7 @@
 // lib/core/api/api_endpoints.dart
 
+// lib/core/api/api_endpoints.dart
+
 class ApiEndpoints {
   ApiEndpoints._();
 
@@ -13,8 +15,9 @@ class ApiEndpoints {
   // Auth endpoints
   static const String register = '/auth/register';
   static const String login = '/auth/login';
+  static const String currentUser = '/auth/me';
+  static const String logout = '/auth/logout';
 
-  // ✅ Add these missing ones
-  static const String currentUser = '/auth/me'; // adjust to your backend route
-  static const String logout = '/auth/logout'; // adjust to your backend route
+  // ✅ Profile endpoint (update)
+  static const String updateProfile = '/auth/update';
 }

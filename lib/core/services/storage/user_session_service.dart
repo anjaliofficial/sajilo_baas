@@ -41,6 +41,7 @@ class UserSessionService {
       address: json['address'],
       password: '',
       role: json['role'],
+      token: '',
     );
   }
 

@@ -55,30 +55,32 @@ class ApiClient {
     }
   }
 
-  // GET request
   Future<Response> get(String path, {Options? options}) =>
       _dio.get(path, options: options);
 
-  // POST request
   Future<Response> post(String path, {dynamic data}) =>
       _dio.post(path, data: data);
 
-  // Save token to secure storage
+  Future<Response> put(String path, {dynamic data}) =>
+      _dio.put(path, data: data);
+
+  Future<Response> delete(String path, {dynamic data}) =>
+      _dio.delete(path, data: data);
+
   Future<void> saveToken(String token) async {
     await _secureStorage.write(key: _tokenKey, value: token);
   }
 
-  // Remove token
   Future<void> removeToken() async {
     await _secureStorage.delete(key: _tokenKey);
   }
 
-  // Read token
   Future<String?> readToken() async {
     return _secureStorage.read(key: _tokenKey);
   }
 }
 
+// ✅ Add this interceptor
 class _AuthInterceptor extends Interceptor {
   final FlutterSecureStorage secureStorage;
   static const _tokenKey = 'auth_token';
