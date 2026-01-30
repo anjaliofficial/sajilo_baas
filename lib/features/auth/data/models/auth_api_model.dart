@@ -6,9 +6,11 @@ class AuthApiModel {
   final String email;
   final String phoneNumber;
   final String address;
+  final String role;
+  final String? profilePicture;
   final String? password;
   final String? confirmPassword; // only for API requests
-  final String role;
+  final String? token; // JWT token from login
 
   AuthApiModel({
     this.id,
@@ -16,12 +18,14 @@ class AuthApiModel {
     required this.email,
     required this.phoneNumber,
     required this.address,
-    this.password,
-    this.confirmPassword, // optional
     required this.role,
+    this.profilePicture,
+    this.password,
+    this.confirmPassword,
+    this.token,
   });
 
-  /// Convert to JSON
+  /// Convert to JSON (for register)
   Map<String, dynamic> toJson() {
     final data = {
       "fullName": fullName,
@@ -39,15 +43,18 @@ class AuthApiModel {
     return data;
   }
 
+  /// Parse from backend response
   factory AuthApiModel.fromJson(Map<String, dynamic> json) {
     return AuthApiModel(
-      id: json['_id'] as String?,
+      id: json['id'] as String?, // backend uses "id"
       fullName: json['fullName'] as String,
       email: json['email'] as String,
       phoneNumber: json['phoneNumber'] as String,
       address: json['address'] ?? '',
-      password: json['password'] as String?,
       role: json['role'] as String,
+      profilePicture: json['profilePicture'] as String?,
+      token:
+          json['token'] as String?, // optional, only present in login response
     );
   }
 
@@ -77,16 +84,18 @@ class AuthApiModel {
     );
   }
 
-  /// copyWith to set confirmPassword dynamically
+  /// copyWith
   AuthApiModel copyWith({
     String? id,
     String? fullName,
     String? email,
     String? phoneNumber,
     String? address,
+    String? role,
+    String? profilePicture,
     String? password,
     String? confirmPassword,
-    String? role,
+    String? token,
   }) {
     return AuthApiModel(
       id: id ?? this.id,
@@ -94,9 +103,11 @@ class AuthApiModel {
       email: email ?? this.email,
       phoneNumber: phoneNumber ?? this.phoneNumber,
       address: address ?? this.address,
+      role: role ?? this.role,
+      profilePicture: profilePicture ?? this.profilePicture,
       password: password ?? this.password,
       confirmPassword: confirmPassword ?? this.confirmPassword,
-      role: role ?? this.role,
+      token: token ?? this.token,
     );
   }
 }

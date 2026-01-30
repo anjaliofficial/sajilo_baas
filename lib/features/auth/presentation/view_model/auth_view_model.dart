@@ -31,7 +31,6 @@ class AuthViewModel extends Notifier<AuthState> {
       role: role,
     );
 
-    // Pass entity + confirmPassword to repository
     final result = await repo.register(
       authEntity,
       confirmPassword: confirmPassword,
@@ -54,6 +53,39 @@ class AuthViewModel extends Notifier<AuthState> {
     result.fold(
       (failure) => state = AuthState.error(failure.message),
       (entity) => state = AuthState.authenticated(entity),
+    );
+  }
+
+  // CHECK SESSION
+  Future<void> checkSession() async {
+    state = const AuthState.loading();
+
+    final repo = ref.read(authRepositoryProvider);
+
+    final result = await repo.checkSession();
+
+    result.fold((failure) => state = AuthState.error(failure.message), (
+      entity,
+    ) {
+      if (entity != null) {
+        state = AuthState.authenticated(entity);
+      } else {
+        state = const AuthState.initial();
+      }
+    });
+  }
+
+  // LOGOUT
+  Future<void> logout() async {
+    state = const AuthState.loading();
+
+    final repo = ref.read(authRepositoryProvider);
+
+    final result = await repo.logout();
+
+    result.fold(
+      (failure) => state = AuthState.error(failure.message),
+      (_) => state = const AuthState.loggedOut(),
     );
   }
 }

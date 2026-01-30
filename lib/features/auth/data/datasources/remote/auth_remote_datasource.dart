@@ -23,7 +23,6 @@ class AuthRemoteDatasource {
       print("REGISTER STATUS: ${response.statusCode}");
       print("REGISTER DATA: ${response.data}");
 
-      // ✅ SUCCESS if backend returns 200 or 201
       if (response.statusCode == 200 || response.statusCode == 201) {
         return true;
       }
@@ -46,7 +45,9 @@ class AuthRemoteDatasource {
       print("LOGIN DATA: ${response.data}");
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        return AuthApiModel.fromJson(response.data['data']);
+        final userJson = response.data['user'] as Map<String, dynamic>;
+        final token = response.data['token'] as String?;
+        return AuthApiModel.fromJson(userJson).copyWith(token: token);
       }
       return null;
     } catch (e) {
@@ -64,7 +65,8 @@ class AuthRemoteDatasource {
       print("SESSION DATA: ${response.data}");
 
       if (response.statusCode == 200) {
-        return AuthApiModel.fromJson(response.data['data']);
+        final userJson = response.data['user'] as Map<String, dynamic>;
+        return AuthApiModel.fromJson(userJson);
       }
       return null;
     } catch (e) {

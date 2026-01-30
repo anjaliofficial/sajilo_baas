@@ -1,6 +1,13 @@
 import '../../domain/entities/auth_entity.dart';
 
-enum AuthStatus { initial, loading, registered, authenticated, error }
+enum AuthStatus {
+  initial,
+  loading,
+  registered,
+  authenticated,
+  error,
+  loggedOut,
+}
 
 class AuthState {
   final AuthStatus status;
@@ -26,6 +33,9 @@ class AuthState {
   const AuthState.error(String message)
     : this(status: AuthStatus.error, errorMessage: message);
 
+  // ✅ Add this
+  const AuthState.loggedOut() : this(status: AuthStatus.loggedOut);
+
   AuthState copyWith({
     AuthStatus? status,
     AuthEntity? authEntity,
@@ -37,8 +47,4 @@ class AuthState {
       errorMessage: errorMessage ?? this.errorMessage,
     );
   }
-
-  @override
-  String toString() =>
-      'AuthState(status: $status, authEntity: $authEntity, errorMessage: $errorMessage)';
 }
