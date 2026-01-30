@@ -14,6 +14,7 @@ class ProfileScreen extends ConsumerStatefulWidget {
 
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   final ImagePicker _picker = ImagePicker();
+  bool _isUploading = false;
 
   @override
   void initState() {
@@ -26,22 +27,35 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Future<void> _changeProfilePicture() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
-      final state = ref.read(profileViewModelProvider);
-      if (state.profile != null) {
-        final updated = state.profile!.copyWith(
-          profilePicture: pickedFile.path, // temporary local path
-        );
+      setState(() => _isUploading = true);
 
-        // TODO: Upload file to backend first, get URL
-        // Example: call your upload API, then set profilePicture = uploadedUrl
+      try {
+        // ✅ Upload file to backend first
+        final uploadedUrl = await ref
+            .read(profileRemoteDatasourceProvider)
+            .uploadProfilePicture(pickedFile.path);
 
-        await ref
-            .read(profileViewModelProvider.notifier)
-            .updateProfile(updated);
+        // ✅ Update profile with new picture URL
+        final state = ref.read(profileViewModelProvider);
+        if (state.profile != null) {
+          final updated = state.profile!.copyWith(profilePicture: uploadedUrl);
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Profile picture updated")),
-        );
+          await ref
+              .read(profileViewModelProvider.notifier)
+              .updateProfile(updated);
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Profile picture updated successfully"),
+            ),
+          );
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Upload failed: $e")));
+      } finally {
+        setState(() => _isUploading = false);
       }
     }
   }
@@ -87,17 +101,26 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 child: Column(
                   children: [
                     GestureDetector(
-                      onTap: _changeProfilePicture,
-                      child: CircleAvatar(
-                        radius: 50,
-                        backgroundImage:
-                            profile.profilePicture != null &&
-                                profile.profilePicture!.isNotEmpty
-                            ? NetworkImage(profile.profilePicture!)
-                            : const AssetImage(
-                                    'assets/images/default_avatar.png',
-                                  )
-                                  as ImageProvider,
+                      onTap: _isUploading ? null : _changeProfilePicture,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          CircleAvatar(
+                            radius: 50,
+                            backgroundImage:
+                                profile.profilePicture != null &&
+                                    profile.profilePicture!.isNotEmpty
+                                ? NetworkImage(profile.profilePicture!)
+                                : const AssetImage(
+                                        'assets/images/default_avatar.png',
+                                      )
+                                      as ImageProvider,
+                          ),
+                          if (_isUploading)
+                            const CircularProgressIndicator(
+                              color: Colors.white,
+                            ),
+                        ],
                       ),
                     ),
                     const SizedBox(height: 16),
