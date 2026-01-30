@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sajilo_baas/features/auth/presentation/providers/auth_provider.dart';
 import '../../presentation/view_model/auth_view_model.dart';
 import '../../presentation/state/auth_state.dart';
 import 'login_page.dart';
@@ -94,6 +95,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 30),
+
                 // Header
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -126,6 +128,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                     ),
                   ],
                 ),
+
                 const SizedBox(height: 30),
 
                 // Full Name
@@ -137,6 +140,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                       ? "Name must be at least 3 characters"
                       : null,
                 ),
+
                 const SizedBox(height: 16),
 
                 // Email
@@ -154,6 +158,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                     return null;
                   },
                 ),
+
                 const SizedBox(height: 16),
 
                 // Phone Number
@@ -167,6 +172,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                       ? "Enter a valid 10-digit phone number"
                       : null,
                 ),
+
                 const SizedBox(height: 16),
 
                 // Role Dropdown
@@ -183,6 +189,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   ],
                   onChanged: (val) => setState(() => _selectedRole = val!),
                 ),
+
                 const SizedBox(height: 16),
 
                 // Password
@@ -205,6 +212,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                       ? "Password must be at least 6 characters"
                       : null,
                 ),
+
                 const SizedBox(height: 16),
 
                 // Confirm Password
@@ -229,6 +237,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                       ? "Passwords do not match"
                       : null,
                 ),
+
                 const SizedBox(height: 30),
 
                 // Sign Up Button
@@ -256,6 +265,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                           ),
                   ),
                 ),
+
                 const SizedBox(height: 20),
 
                 // Footer
@@ -275,6 +285,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                     ),
                   ],
                 ),
+
                 const SizedBox(height: 30),
               ],
             ),

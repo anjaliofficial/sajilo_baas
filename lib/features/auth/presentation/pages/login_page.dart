@@ -1,6 +1,9 @@
+// LoginPage (FULL)
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sajilo_baas/features/auth/presentation/pages/register_page.dart';
+import 'package:sajilo_baas/features/auth/presentation/providers/auth_provider.dart';
 import 'package:sajilo_baas/screens/guests/main_navigation.dart';
 import '../../presentation/view_model/auth_view_model.dart';
 import '../../presentation/state/auth_state.dart';
@@ -29,7 +32,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   }
 
   void _onLogin() {
-    // This triggers the red error messages if validation fails
     if (_formKey.currentState?.validate() ?? false) {
       ref
           .read(authViewModelProvider.notifier)
@@ -67,13 +69,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
           child: Form(
             key: _formKey,
-            // autovalidateMode allows validation to happen as the user types after the first attempt
             autovalidateMode: AutovalidateMode.onUserInteraction,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 40),
-                // Header
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -107,7 +107,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 ),
                 const SizedBox(height: 40),
 
-                // Email Label & Field
                 Text(
                   "Email",
                   style: TextStyle(
@@ -121,21 +120,18 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   keyboardType: TextInputType.emailAddress,
                   decoration: _inputDecoration("Please Enter Your Email"),
                   validator: (value) {
-                    if (value == null || value.isEmpty) {
+                    if (value == null || value.isEmpty)
                       return 'Email is required';
-                    }
                     final emailRegExp = RegExp(
                       r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
                     );
-                    if (!emailRegExp.hasMatch(value)) {
+                    if (!emailRegExp.hasMatch(value))
                       return 'Please enter a valid email address';
-                    }
                     return null;
                   },
                 ),
                 const SizedBox(height: 20),
 
-                // Password Label & Field
                 Text(
                   "Password",
                   style: TextStyle(
@@ -162,17 +158,14 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         ),
                       ),
                   validator: (value) {
-                    if (value == null || value.isEmpty) {
+                    if (value == null || value.isEmpty)
                       return 'Password is required';
-                    }
-                    if (value.length < 6) {
+                    if (value.length < 6)
                       return 'Password must be at least 6 characters';
-                    }
                     return null;
                   },
                 ),
 
-                // Remember Me & Forgot Password
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -203,12 +196,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 ),
                 const SizedBox(height: 30),
 
-                // Sign In Button
                 SizedBox(
                   width: double.infinity,
                   height: 55,
                   child: ElevatedButton(
-                    onPressed: _onLogin,
+                    onPressed: authState.status == AuthStatus.loading
+                        ? null
+                        : _onLogin,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: primaryBlue,
                       elevation: 0,
@@ -219,7 +213,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     child: authState.status == AuthStatus.loading
                         ? const CircularProgressIndicator(color: Colors.white)
                         : const Text(
-                            "Sign In", // Changed from Sign Up
+                            "Sign In",
                             style: TextStyle(
                               fontSize: 16,
                               color: Colors.white,
@@ -230,7 +224,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 ),
 
                 const SizedBox(height: 30),
-                // "Or With" Divider
                 Row(
                   children: [
                     Expanded(child: Divider(color: Colors.grey[300])),
@@ -246,7 +239,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 ),
                 const SizedBox(height: 30),
 
-                // Gmail Button
                 SizedBox(
                   width: double.infinity,
                   height: 55,
@@ -260,10 +252,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.mail, color: Colors.red),
-                        const SizedBox(width: 12),
-                        const Text(
+                      children: const [
+                        Icon(Icons.mail, color: Colors.red),
+                        SizedBox(width: 12),
+                        Text(
                           "Gmail",
                           style: TextStyle(color: Colors.black87, fontSize: 16),
                         ),
@@ -273,8 +265,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 ),
 
                 const SizedBox(height: 50),
-
-                // Registration Link
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -307,8 +297,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       hintText: hint,
       hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-
-      // Standard Border
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(color: Colors.grey.shade300),
@@ -317,14 +305,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(color: Colors.grey.shade300),
       ),
-
-      // Blue Border on Click
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(color: primaryBlue, width: 2),
       ),
-
-      // Red Border on Error
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: Colors.redAccent, width: 1),
