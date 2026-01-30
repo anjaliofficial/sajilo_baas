@@ -1,13 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../data/models/auth_api_model.dart';
 import '../state/auth_state.dart';
 import '../../domain/entities/auth_entity.dart';
 import '../../data/repositories/auth_repository.dart';
 
 class AuthViewModel extends Notifier<AuthState> {
   @override
-  AuthState build() {
-    return const AuthState.initial();
-  }
+  AuthState build() => const AuthState.initial();
 
   // REGISTER
   Future<void> register({
@@ -33,7 +32,15 @@ class AuthViewModel extends Notifier<AuthState> {
       role: role,
     );
 
-    final result = await repo.register(authEntity);
+    // Convert to API model with confirmPassword
+    final apiModel = AuthApiModel.fromEntity(
+      authEntity,
+      confirmPassword: confirmPassword,
+    );
+
+    final result = await repo.register(
+      authEntity,
+    ); // Pass entity; repo will use API model internally
 
     result.fold(
       (failure) => state = AuthState.error(failure.message),

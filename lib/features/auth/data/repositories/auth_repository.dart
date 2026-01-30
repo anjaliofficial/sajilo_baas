@@ -1,14 +1,14 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dartz/dartz.dart';
-import 'package:sajilo_baas/features/auth/data/datasources/remote/auth_remote_datasource.dart';
-import '../../../../core/error/failure.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/auth_entity.dart';
 import '../../domain/repositories/auth_repository.dart';
+import '../datasources/remote/auth_remote_datasource.dart';
 import '../models/auth_api_model.dart';
+import '../../../../core/error/failure.dart';
 
 final authRepositoryProvider = Provider<IAuthRepository>((ref) {
-  final remoteDatasource = ref.read(authRemoteDatasourceProvider);
-  return AuthRepositoryImpl(remoteDatasource);
+  final datasource = ref.read(authRemoteDatasourceProvider);
+  return AuthRepositoryImpl(datasource);
 });
 
 class AuthRepositoryImpl implements IAuthRepository {
@@ -16,11 +16,16 @@ class AuthRepositoryImpl implements IAuthRepository {
 
   AuthRepositoryImpl(this.datasource);
 
+  /// REGISTER
   @override
   Future<Either<Failure, bool>> register(AuthEntity entity) async {
     try {
-      final model = AuthApiModel.fromEntity(entity);
-      final success = await datasource.register(model);
+      // Convert to API model
+      final apiModel = AuthApiModel.fromEntity(entity);
+      // If you have confirmPassword, you can pass it here from the ViewModel
+      // Example: final apiModelWithConfirm = apiModel.copyWith(confirmPassword: ...);
+
+      final success = await datasource.register(apiModel);
 
       if (!success) {
         return Left(
@@ -34,6 +39,7 @@ class AuthRepositoryImpl implements IAuthRepository {
     }
   }
 
+  /// LOGIN
   @override
   Future<Either<Failure, AuthEntity>> login(
     String email,
@@ -52,11 +58,13 @@ class AuthRepositoryImpl implements IAuthRepository {
     }
   }
 
+  /// SESSION CHECK
   @override
   Future<Either<Failure, AuthEntity?>> checkSession() async {
     return Right(null);
   }
 
+  /// LOGOUT
   @override
   Future<Either<Failure, bool>> logout() async {
     return Right(true);

@@ -1,4 +1,4 @@
-import 'package:sajilo_baas/features/auth/domain/entities/auth_entity.dart';
+import '../../domain/entities/auth_entity.dart';
 
 class AuthApiModel {
   final String? id;
@@ -17,11 +17,11 @@ class AuthApiModel {
     required this.phoneNumber,
     required this.address,
     this.password,
-    this.confirmPassword, // keep it optional
+    this.confirmPassword,
     required this.role,
   });
 
-  /// Convert to JSON (for API POST/PUT)
+  /// Convert to JSON (for POST/PUT API)
   Map<String, dynamic> toJson() {
     final data = {
       "fullName": fullName,
@@ -32,7 +32,6 @@ class AuthApiModel {
       "role": role,
     };
 
-    // Only add confirmPassword if it exists
     if (confirmPassword != null) {
       data['confirmPassword'] = confirmPassword;
     }
@@ -48,8 +47,24 @@ class AuthApiModel {
       phoneNumber: json['phoneNumber'] as String,
       address: json['address'] ?? '',
       password: json['password'] as String?,
-      // confirmPassword should never come from API response
       role: json['role'] as String,
+    );
+  }
+
+  /// Domain → API
+  factory AuthApiModel.fromEntity(
+    AuthEntity entity, {
+    String? confirmPassword,
+  }) {
+    return AuthApiModel(
+      id: entity.authId,
+      fullName: entity.fullName,
+      email: entity.email,
+      phoneNumber: entity.phoneNumber,
+      address: entity.address,
+      password: entity.password,
+      confirmPassword: confirmPassword,
+      role: entity.role,
     );
   }
 
@@ -62,20 +77,7 @@ class AuthApiModel {
       phoneNumber: phoneNumber,
       address: address,
       password: password ?? '',
-      role: role, // ✅ confirmPassword is NOT stored
-    );
-  }
-
-  /// Domain → API
-  factory AuthApiModel.fromEntity(AuthEntity entity) {
-    return AuthApiModel(
-      id: entity.authId,
-      fullName: entity.fullName,
-      email: entity.email,
-      phoneNumber: entity.phoneNumber,
-      address: entity.address,
-      password: entity.password,
-      role: entity.role,
+      role: role,
     );
   }
 }
