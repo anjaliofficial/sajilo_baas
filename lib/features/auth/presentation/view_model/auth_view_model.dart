@@ -9,12 +9,14 @@ class AuthViewModel extends Notifier<AuthState> {
     return const AuthState.initial();
   }
 
+  // REGISTER
   Future<void> register({
     required String fullName,
     required String email,
     required String phoneNumber,
     required String address,
     required String password,
+    required String confirmPassword,
     required String role,
   }) async {
     state = const AuthState.loading();
@@ -35,10 +37,11 @@ class AuthViewModel extends Notifier<AuthState> {
 
     result.fold(
       (failure) => state = AuthState.error(failure.message),
-      (success) => state = const AuthState.registered(),
+      (_) => state = const AuthState.registered(),
     );
   }
 
+  // LOGIN
   Future<void> login({required String email, required String password}) async {
     state = const AuthState.loading();
 

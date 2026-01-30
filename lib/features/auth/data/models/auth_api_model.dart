@@ -7,6 +7,7 @@ class AuthApiModel {
   final String phoneNumber;
   final String address;
   final String? password;
+  final String? confirmPassword; // only for API requests
   final String role;
 
   AuthApiModel({
@@ -16,12 +17,13 @@ class AuthApiModel {
     required this.phoneNumber,
     required this.address,
     this.password,
+    this.confirmPassword, // keep it optional
     required this.role,
   });
 
-  /// To JSON (for POST / PUT)
+  /// Convert to JSON (for API POST/PUT)
   Map<String, dynamic> toJson() {
-    return {
+    final data = {
       "fullName": fullName,
       "email": email,
       "phoneNumber": phoneNumber,
@@ -29,6 +31,13 @@ class AuthApiModel {
       "password": password,
       "role": role,
     };
+
+    // Only add confirmPassword if it exists
+    if (confirmPassword != null) {
+      data['confirmPassword'] = confirmPassword;
+    }
+
+    return data;
   }
 
   factory AuthApiModel.fromJson(Map<String, dynamic> json) {
@@ -39,6 +48,7 @@ class AuthApiModel {
       phoneNumber: json['phoneNumber'] as String,
       address: json['address'] ?? '',
       password: json['password'] as String?,
+      // confirmPassword should never come from API response
       role: json['role'] as String,
     );
   }
@@ -52,7 +62,7 @@ class AuthApiModel {
       phoneNumber: phoneNumber,
       address: address,
       password: password ?? '',
-      role: role,
+      role: role, // ✅ confirmPassword is NOT stored
     );
   }
 
@@ -67,10 +77,5 @@ class AuthApiModel {
       password: entity.password,
       role: entity.role,
     );
-  }
-
-  /// List Conversion
-  static List<AuthEntity> toEntityList(List<AuthApiModel> models) {
-    return models.map((model) => model.toEntity()).toList();
   }
 }

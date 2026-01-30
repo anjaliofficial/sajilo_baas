@@ -49,6 +49,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
             phoneNumber: _phoneController.text.trim(),
             address: _addressController.text.trim(),
             password: _passwordController.text.trim(),
+            confirmPassword: _confirmPasswordController.text.trim(),
             role: _selectedRole,
           );
     }
