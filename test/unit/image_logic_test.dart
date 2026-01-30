@@ -1,27 +1,26 @@
 import 'package:flutter_test/flutter_test.dart';
-
-bool isValidImage(String fileName) {
-  return fileName.endsWith('.jpg') || fileName.endsWith('.png');
-}
+import 'package:sajilo_baas/services/image_service.dart';
 
 void main() {
+  final imageService = ImageService();
+
   test('Accepts JPG image', () {
-    expect(isValidImage('photo.jpg'), true);
+    expect(imageService.isValidImage('photo.jpg'), true);
   });
 
   test('Accepts PNG image', () {
-    expect(isValidImage('image.png'), true);
+    expect(imageService.isValidImage('image.png'), true);
   });
 
   test('Rejects non-image file', () {
-    expect(isValidImage('file.txt'), false);
+    expect(imageService.isValidImage('file.txt'), false);
   });
 
   test('Rejects empty filename', () {
-    expect(isValidImage(''), false);
+    expect(imageService.isValidImage(''), false);
   });
 
   test('Rejects unsupported image format', () {
-    expect(isValidImage('image.gif'), false);
+    expect(imageService.isValidImage('image.gif'), false);
   });
 }
