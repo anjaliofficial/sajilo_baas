@@ -21,4 +21,16 @@ class ProfileRepositoryImpl implements IProfileRepository {
       return Left(ApiFailure(message: e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, ProfileEntity>> updateProfile(
+    ProfileEntity entity,
+  ) async {
+    try {
+      final model = await datasource.updateProfile(entity);
+      return Right(model.toEntity());
+    } catch (e) {
+      return Left(ApiFailure(message: e.toString()));
+    }
+  }
 }

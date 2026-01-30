@@ -24,7 +24,26 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final state = ref.watch(profileViewModelProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Profile')),
+      appBar: AppBar(
+        title: const Text('My Profile'),
+        centerTitle: true,
+        elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.edit),
+            onPressed: () {
+              if (state.profile != null) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => EditProfilePage(profile: state.profile!),
+                  ),
+                );
+              }
+            },
+          ),
+        ],
+      ),
       body: Builder(
         builder: (_) {
           switch (state.status) {
@@ -36,36 +55,59 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               return Center(child: Text("Error: ${state.errorMessage}"));
             case ProfileStatus.loaded:
               final profile = state.profile!;
-              return Padding(
+              return SingleChildScrollView(
                 padding: const EdgeInsets.all(16),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      "Name: ${profile.fullName}",
-                      style: const TextStyle(fontSize: 18),
+                    CircleAvatar(
+                      radius: 50,
+                      backgroundImage:
+                          profile.profilePicture != null &&
+                              profile.profilePicture!.isNotEmpty
+                          ? NetworkImage(profile.profilePicture!)
+                          : const AssetImage('assets/images/default_avatar.png')
+                                as ImageProvider,
                     ),
+                    const SizedBox(height: 16),
                     Text(
-                      "Email: ${profile.email}",
-                      style: const TextStyle(fontSize: 18),
+                      profile.fullName,
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
+                    const SizedBox(height: 8),
                     Text(
-                      "Phone: ${profile.phoneNumber}",
-                      style: const TextStyle(fontSize: 18),
+                      profile.email,
+                      style: const TextStyle(fontSize: 16, color: Colors.grey),
                     ),
-                    Text(
-                      "Address: ${profile.address}",
-                      style: const TextStyle(fontSize: 18),
+                    const SizedBox(height: 24),
+                    Card(
+                      child: ListTile(
+                        leading: const Icon(Icons.phone),
+                        title: const Text("Phone"),
+                        subtitle: Text(profile.phoneNumber),
+                      ),
                     ),
-                    Text(
-                      "Role: ${profile.role}",
-                      style: const TextStyle(fontSize: 18),
+                    Card(
+                      child: ListTile(
+                        leading: const Icon(Icons.home),
+                        title: const Text("Address"),
+                        subtitle: Text(profile.address),
+                      ),
+                    ),
+                    Card(
+                      child: ListTile(
+                        leading: const Icon(Icons.person),
+                        title: const Text("Role"),
+                        subtitle: Text(profile.role),
+                      ),
                     ),
                   ],
                 ),
               );
           }
-          return const SizedBox.shrink(); // ✅ fallback
+          return const SizedBox.shrink();
         },
       ),
     );

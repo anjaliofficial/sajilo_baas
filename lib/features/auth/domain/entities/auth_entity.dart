@@ -8,6 +8,7 @@ class AuthEntity extends Equatable {
   final String address;
   final String password;
   final String role;
+  final String token; // ✅ non-nullable
 
   AuthEntity({
     this.authId,
@@ -17,6 +18,7 @@ class AuthEntity extends Equatable {
     required this.address,
     required this.password,
     required this.role,
+    required this.token, // ✅ required everywhere
   });
 
   @override
@@ -26,7 +28,7 @@ class AuthEntity extends Equatable {
     email,
     phoneNumber,
     address,
-    password,
     role,
+    token,
   ];
 }

@@ -3,12 +3,12 @@ import '../../../../core/error/failure.dart';
 import '../entities/profile_entity.dart';
 import '../repositories/i_profile_repository.dart';
 
-class GetProfileUseCase {
+class UpdateProfileUseCase {
   final IProfileRepository repository;
 
-  GetProfileUseCase(this.repository);
+  UpdateProfileUseCase(this.repository);
 
-  Future<Either<Failure, ProfileEntity>> call() {
-    return repository.getCurrentUser();
+  Future<Either<Failure, ProfileEntity>> call(ProfileEntity entity) {
+    return repository.updateProfile(entity);
   }
 }

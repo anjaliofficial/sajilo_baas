@@ -21,7 +21,6 @@ class AuthViewModel extends Notifier<AuthState> {
     state = const AuthState.loading();
 
     final repo = ref.read(authRepositoryProvider);
-
     final authEntity = AuthEntity(
       authId: null,
       fullName: fullName,
@@ -30,6 +29,7 @@ class AuthViewModel extends Notifier<AuthState> {
       address: address,
       password: password,
       role: role,
+      token: '', // ✅ registration doesn’t return token yet
     );
 
     final result = await repo.register(
@@ -51,8 +51,13 @@ class AuthViewModel extends Notifier<AuthState> {
 
     result.fold((failure) => state = AuthState.error(failure.message), (
       entity,
-    ) {
+    ) async {
       state = AuthState.authenticated(entity);
+
+      // ✅ Save token securely
+      final apiClient = ref.read(apiClientProvider);
+      await apiClient.saveToken(entity.token);
+
       // ✅ Trigger profile fetch after login
       ref.read(profileViewModelProvider.notifier).fetchProfile();
     });

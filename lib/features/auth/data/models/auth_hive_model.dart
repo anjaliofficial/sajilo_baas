@@ -50,5 +50,6 @@ class AuthHiveModel extends HiveObject {
     address: address,
     password: password,
     role: role,
+    token: '', // ✅ required, but empty for Hive
   );
 }

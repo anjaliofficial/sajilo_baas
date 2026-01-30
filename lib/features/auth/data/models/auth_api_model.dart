@@ -68,6 +68,7 @@ class AuthApiModel {
       address: address,
       password: password ?? '',
       role: role,
+      token: token ?? '', // ✅ fallback empty string if backend didn’t send
     );
   }
 
