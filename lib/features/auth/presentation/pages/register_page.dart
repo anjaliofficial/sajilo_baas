@@ -177,10 +177,23 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
                 const SizedBox(height: 16),
 
+                // Address
+                _buildLabel("Address"),
+                TextFormField(
+                  controller: _addressController,
+                  keyboardType: TextInputType.streetAddress,
+                  decoration: _inputDecoration("Enter your address"),
+                  validator: (val) => (val == null || val.isEmpty)
+                      ? "Address is required"
+                      : null,
+                ),
+
+                const SizedBox(height: 16),
+
                 // Role Dropdown
                 _buildLabel("Register as"),
                 DropdownButtonFormField<String>(
-                  initialValue: _selectedRole,
+                  value: _selectedRole,
                   decoration: _inputDecoration(""),
                   items: const [
                     DropdownMenuItem(

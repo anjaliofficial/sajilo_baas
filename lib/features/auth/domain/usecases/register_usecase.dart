@@ -7,7 +7,11 @@ class RegisterUseCase {
   final IAuthRepository repository;
   RegisterUseCase(this.repository);
 
-  Future<Either<Failure, bool>> call(AuthEntity entity) {
-    return repository.register(entity);
+  /// Call use case with entity + confirmPassword
+  Future<Either<Failure, bool>> call(
+    AuthEntity entity, {
+    required String confirmPassword,
+  }) {
+    return repository.register(entity, confirmPassword: confirmPassword);
   }
 }

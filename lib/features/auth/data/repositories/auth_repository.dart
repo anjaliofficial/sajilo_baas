@@ -1,29 +1,34 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../domain/entities/auth_entity.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/remote/auth_remote_datasource.dart';
 import '../models/auth_api_model.dart';
 import '../../../../core/error/failure.dart';
 
+/// Riverpod provider for dependency injection
 final authRepositoryProvider = Provider<IAuthRepository>((ref) {
-  final datasource = ref.read(authRemoteDatasourceProvider);
-  return AuthRepositoryImpl(datasource);
+  final remoteDatasource = ref.read(authRemoteDatasourceProvider);
+  return AuthRepositoryImpl(remoteDatasource);
 });
 
+/// Implementation of IAuthRepository
 class AuthRepositoryImpl implements IAuthRepository {
   final AuthRemoteDatasource datasource;
 
   AuthRepositoryImpl(this.datasource);
 
-  /// REGISTER
   @override
-  Future<Either<Failure, bool>> register(AuthEntity entity) async {
+  Future<Either<Failure, bool>> register(
+    AuthEntity entity, {
+    required String confirmPassword,
+  }) async {
     try {
-      // Convert to API model
-      final apiModel = AuthApiModel.fromEntity(entity);
-      // If you have confirmPassword, you can pass it here from the ViewModel
-      // Example: final apiModelWithConfirm = apiModel.copyWith(confirmPassword: ...);
+      // Convert domain entity → API model and add confirmPassword
+      final apiModel = AuthApiModel.fromEntity(
+        entity,
+      ).copyWith(confirmPassword: confirmPassword);
 
       final success = await datasource.register(apiModel);
 
@@ -33,13 +38,12 @@ class AuthRepositoryImpl implements IAuthRepository {
         );
       }
 
-      return Right(true);
+      return const Right(true);
     } catch (e) {
       return Left(LocalDatabaseFailure(message: e.toString()));
     }
   }
 
-  /// LOGIN
   @override
   Future<Either<Failure, AuthEntity>> login(
     String email,
@@ -54,19 +58,27 @@ class AuthRepositoryImpl implements IAuthRepository {
 
       return Right(model.toEntity());
     } catch (e) {
+      return Left(ApiFailure(message: "Login failed: ${e.toString()}"));
+    }
+  }
+
+  @override
+  Future<Either<Failure, AuthEntity?>> checkSession() async {
+    try {
+      final model = await datasource.getCurrentUser();
+      return Right(model?.toEntity());
+    } catch (e) {
       return Left(LocalDatabaseFailure(message: e.toString()));
     }
   }
 
-  /// SESSION CHECK
-  @override
-  Future<Either<Failure, AuthEntity?>> checkSession() async {
-    return Right(null);
-  }
-
-  /// LOGOUT
   @override
   Future<Either<Failure, bool>> logout() async {
-    return Right(true);
+    try {
+      await datasource.logout();
+      return const Right(true);
+    } catch (e) {
+      return Left(ApiFailure(message: "Logout failed: ${e.toString()}"));
+    }
   }
 }

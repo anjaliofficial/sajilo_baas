@@ -1,4 +1,4 @@
-import '../../domain/entities/auth_entity.dart';
+import 'package:sajilo_baas/features/auth/domain/entities/auth_entity.dart';
 
 class AuthApiModel {
   final String? id;
@@ -17,11 +17,11 @@ class AuthApiModel {
     required this.phoneNumber,
     required this.address,
     this.password,
-    this.confirmPassword,
+    this.confirmPassword, // optional
     required this.role,
   });
 
-  /// Convert to JSON (for POST/PUT API)
+  /// Convert to JSON
   Map<String, dynamic> toJson() {
     final data = {
       "fullName": fullName,
@@ -51,23 +51,6 @@ class AuthApiModel {
     );
   }
 
-  /// Domain → API
-  factory AuthApiModel.fromEntity(
-    AuthEntity entity, {
-    String? confirmPassword,
-  }) {
-    return AuthApiModel(
-      id: entity.authId,
-      fullName: entity.fullName,
-      email: entity.email,
-      phoneNumber: entity.phoneNumber,
-      address: entity.address,
-      password: entity.password,
-      confirmPassword: confirmPassword,
-      role: entity.role,
-    );
-  }
-
   /// API → Domain
   AuthEntity toEntity() {
     return AuthEntity(
@@ -78,6 +61,42 @@ class AuthApiModel {
       address: address,
       password: password ?? '',
       role: role,
+    );
+  }
+
+  /// Domain → API
+  factory AuthApiModel.fromEntity(AuthEntity entity) {
+    return AuthApiModel(
+      id: entity.authId,
+      fullName: entity.fullName,
+      email: entity.email,
+      phoneNumber: entity.phoneNumber,
+      address: entity.address,
+      password: entity.password,
+      role: entity.role,
+    );
+  }
+
+  /// copyWith to set confirmPassword dynamically
+  AuthApiModel copyWith({
+    String? id,
+    String? fullName,
+    String? email,
+    String? phoneNumber,
+    String? address,
+    String? password,
+    String? confirmPassword,
+    String? role,
+  }) {
+    return AuthApiModel(
+      id: id ?? this.id,
+      fullName: fullName ?? this.fullName,
+      email: email ?? this.email,
+      phoneNumber: phoneNumber ?? this.phoneNumber,
+      address: address ?? this.address,
+      password: password ?? this.password,
+      confirmPassword: confirmPassword ?? this.confirmPassword,
+      role: role ?? this.role,
     );
   }
 }

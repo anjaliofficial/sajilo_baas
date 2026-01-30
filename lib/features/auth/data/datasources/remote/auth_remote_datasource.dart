@@ -12,6 +12,7 @@ class AuthRemoteDatasource {
 
   AuthRemoteDatasource({required ApiClient apiClient}) : _apiClient = apiClient;
 
+  /// REGISTER
   Future<bool> register(AuthApiModel model) async {
     try {
       final response = await _apiClient.post(
@@ -26,7 +27,6 @@ class AuthRemoteDatasource {
       if (response.statusCode == 200 || response.statusCode == 201) {
         return true;
       }
-
       return false;
     } catch (e) {
       print("REGISTER ERROR: $e");
@@ -34,6 +34,7 @@ class AuthRemoteDatasource {
     }
   }
 
+  /// LOGIN
   Future<AuthApiModel?> login(String email, String password) async {
     try {
       final response = await _apiClient.post(
@@ -47,11 +48,40 @@ class AuthRemoteDatasource {
       if (response.statusCode == 200 || response.statusCode == 201) {
         return AuthApiModel.fromJson(response.data['data']);
       }
-
       return null;
     } catch (e) {
       print("LOGIN ERROR: $e");
       return null;
+    }
+  }
+
+  /// CHECK SESSION (get current user)
+  Future<AuthApiModel?> getCurrentUser() async {
+    try {
+      final response = await _apiClient.get(ApiEndpoints.currentUser);
+
+      print("SESSION STATUS: ${response.statusCode}");
+      print("SESSION DATA: ${response.data}");
+
+      if (response.statusCode == 200) {
+        return AuthApiModel.fromJson(response.data['data']);
+      }
+      return null;
+    } catch (e) {
+      print("SESSION ERROR: $e");
+      return null;
+    }
+  }
+
+  /// LOGOUT
+  Future<void> logout() async {
+    try {
+      final response = await _apiClient.post(ApiEndpoints.logout);
+
+      print("LOGOUT STATUS: ${response.statusCode}");
+      print("LOGOUT DATA: ${response.data}");
+    } catch (e) {
+      print("LOGOUT ERROR: $e");
     }
   }
 }
