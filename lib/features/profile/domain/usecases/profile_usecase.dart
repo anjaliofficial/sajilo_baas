@@ -1,4 +1,3 @@
-// profile/domain/usecases/get_profile_usecase.dart
 import 'package:dartz/dartz.dart';
 import '../../../../core/error/failure.dart';
 import '../entities/profile_entity.dart';

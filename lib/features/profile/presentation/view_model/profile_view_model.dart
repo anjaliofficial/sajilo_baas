@@ -1,18 +1,15 @@
-// features/profile/presentation/view_model/profile_view_model.dart
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import '../state/profile_state.dart';
 import '../../domain/usecases/profile_usecase.dart';
 
-class ProfileViewModel extends Notifier<ProfileState> {
+class ProfileViewModel extends StateNotifier<ProfileState> {
   final GetProfileUseCase getProfileUseCase;
 
-  ProfileViewModel(this.getProfileUseCase);
-
-  @override
-  ProfileState build() => const ProfileState.initial();
+  ProfileViewModel(this.getProfileUseCase) : super(ProfileState.initial());
 
   Future<void> fetchProfile() async {
-    state = const ProfileState.loading();
+    state = ProfileState.loading();
 
     final result = await getProfileUseCase();
 

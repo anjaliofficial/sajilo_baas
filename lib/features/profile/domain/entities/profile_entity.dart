@@ -1,4 +1,3 @@
-// profile/domain/entities/profile_entity.dart
 class ProfileEntity {
   final String id;
   final String fullName;

@@ -1,45 +1,51 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sajilo_baas/features/dashboard/presentation/widgets/app_bottom_navbar.dart';
+import 'package:sajilo_baas/features/profile/presentation/pages/profile_page.dart';
+import 'package:sajilo_baas/features/profile/presentation/providers/profile_provider.dart';
 
-class AppBottomNavBar extends StatelessWidget {
-  final int currentIndex;
-  final ValueChanged<int> onTap;
+import '../dashboard_screen.dart';
+import '../message_screen.dart';
+import '../favroites_screen.dart';
+import '../booking_screen.dart';
 
-  const AppBottomNavBar({
-    super.key,
-    required this.currentIndex,
-    required this.onTap,
-  });
-  //  check
+class CustomerMainNavigation extends ConsumerStatefulWidget {
+  const CustomerMainNavigation({super.key});
+
+  @override
+  ConsumerState<CustomerMainNavigation> createState() =>
+      _CustomerMainNavigationState();
+}
+
+class _CustomerMainNavigationState
+    extends ConsumerState<CustomerMainNavigation> {
+  int _currentIndex = 0;
+
+  final List<Widget> _pages = const [
+    DashboardScreen(),
+    MessagesScreen(),
+    FavoritesScreen(),
+    BookingsScreen(),
+    ProfileScreen(), // ✅ Profile tab
+  ];
 
   @override
   Widget build(BuildContext context) {
-    return BottomNavigationBar(
-      type: BottomNavigationBarType.fixed,
-      currentIndex: currentIndex,
-      onTap: onTap,
-      selectedItemColor: const Color(0xFF007BFF),
-      unselectedItemColor: Colors.grey,
-      showSelectedLabels: false,
-      showUnselectedLabels: false,
-      items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.home_filled), label: 'Home'),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.chat_bubble_outline),
-          label: 'Messages',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.favorite_border),
-          label: 'Favorites',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.shopping_bag_outlined),
-          label: 'Bookings',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.person_outline),
-          label: 'Profile',
-        ),
-      ],
+    return Scaffold(
+      body: IndexedStack(index: _currentIndex, children: _pages),
+      bottomNavigationBar: AppBottomNavBar(
+        currentIndex: _currentIndex,
+        onTap: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+
+          // ✅ Trigger profile fetch when Profile tab is selected
+          if (index == 4) {
+            ref.read(profileViewModelProvider.notifier).fetchProfile();
+          }
+        },
+      ),
     );
   }
 }

@@ -1,20 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sajilo_baas/features/dashboard/presentation/widgets/app_bottom_navbar.dart';
+import 'package:sajilo_baas/features/profile/presentation/pages/profile_page.dart';
+import 'package:sajilo_baas/features/profile/presentation/providers/profile_provider.dart';
 
-import '../bottom_screens/guests_nav_bar.dart';
 import '../dashboard_screen.dart';
 import '../message_screen.dart';
 import '../favroites_screen.dart';
 import '../booking_screen.dart';
-import '../profile_screen.dart';
 
-class CustomerMainNavigation extends StatefulWidget {
+class CustomerMainNavigation extends ConsumerStatefulWidget {
   const CustomerMainNavigation({super.key});
 
   @override
-  State<CustomerMainNavigation> createState() => _CustomerMainNavigationState();
+  ConsumerState<CustomerMainNavigation> createState() =>
+      _CustomerMainNavigationState();
 }
 
-class _CustomerMainNavigationState extends State<CustomerMainNavigation> {
+class _CustomerMainNavigationState
+    extends ConsumerState<CustomerMainNavigation> {
   int _currentIndex = 0;
 
   final List<Widget> _pages = const [
@@ -22,19 +26,24 @@ class _CustomerMainNavigationState extends State<CustomerMainNavigation> {
     MessagesScreen(),
     FavoritesScreen(),
     BookingsScreen(),
-    ProfileScreen(),
+    ProfileScreen(), // ✅ Riverpod-powered ProfileScreen
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _pages[_currentIndex],
+      body: IndexedStack(index: _currentIndex, children: _pages),
       bottomNavigationBar: AppBottomNavBar(
         currentIndex: _currentIndex,
         onTap: (index) {
           setState(() {
             _currentIndex = index;
           });
+
+          // ✅ Trigger profile fetch when Profile tab is selected
+          if (index == 4) {
+            ref.read(profileViewModelProvider.notifier).fetchProfile();
+          }
         },
       ),
     );

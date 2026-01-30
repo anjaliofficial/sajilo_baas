@@ -1,4 +1,3 @@
-// features/profile/presentation/state/profile_state.dart
 import '../../domain/entities/profile_entity.dart';
 
 enum ProfileStatus { initial, loading, loaded, error }
@@ -14,10 +13,12 @@ class ProfileState {
     this.errorMessage,
   });
 
-  const ProfileState.initial() : this(status: ProfileStatus.initial);
-  const ProfileState.loading() : this(status: ProfileStatus.loading);
-  const ProfileState.loaded(ProfileEntity profile)
-    : this(status: ProfileStatus.loaded, profile: profile);
-  const ProfileState.error(String message)
-    : this(status: ProfileStatus.error, errorMessage: message);
+  factory ProfileState.initial() =>
+      const ProfileState(status: ProfileStatus.initial);
+  factory ProfileState.loading() =>
+      const ProfileState(status: ProfileStatus.loading);
+  factory ProfileState.loaded(ProfileEntity profile) =>
+      ProfileState(status: ProfileStatus.loaded, profile: profile);
+  factory ProfileState.error(String message) =>
+      ProfileState(status: ProfileStatus.error, errorMessage: message);
 }

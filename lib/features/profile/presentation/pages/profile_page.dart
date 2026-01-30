@@ -1,28 +1,30 @@
-// features/profile/presentation/pages/profile_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sajilo_baas/features/profile/presentation/providers/profile_provider.dart';
+import '../providers/profile_provider.dart';
 import '../state/profile_state.dart';
 
-class ProfileScreen extends ConsumerWidget {
+class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      ref.read(profileViewModelProvider.notifier).fetchProfile();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final state = ref.watch(profileViewModelProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Profile'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () {
-              ref.read(profileViewModelProvider.notifier).fetchProfile();
-            },
-          ),
-        ],
-      ),
+      appBar: AppBar(title: const Text('Profile')),
       body: Builder(
         builder: (_) {
           switch (state.status) {
@@ -63,6 +65,7 @@ class ProfileScreen extends ConsumerWidget {
                 ),
               );
           }
+          return const SizedBox.shrink(); // ✅ fallback
         },
       ),
     );

@@ -1,6 +1,5 @@
-// profile/domain/repositories/i_profile_repository.dart
 import 'package:dartz/dartz.dart';
-import '../../../../core/error/failure.dart';
+import 'package:sajilo_baas/core/error/failure.dart';
 import '../entities/profile_entity.dart';
 
 abstract class IProfileRepository {
