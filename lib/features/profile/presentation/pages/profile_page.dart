@@ -1,8 +1,7 @@
-// profile/presentation/pages/profile_screen.dart
+// features/profile/presentation/pages/profile_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sajilo_baas/features/profile/presentation/providers/profile_provider.dart';
-import '../view_model/profile_view_model.dart';
 import '../state/profile_state.dart';
 
 class ProfileScreen extends ConsumerWidget {
@@ -13,7 +12,17 @@ class ProfileScreen extends ConsumerWidget {
     final state = ref.watch(profileViewModelProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Profile')),
+      appBar: AppBar(
+        title: const Text('Profile'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () {
+              ref.read(profileViewModelProvider.notifier).fetchProfile();
+            },
+          ),
+        ],
+      ),
       body: Builder(
         builder: (_) {
           switch (state.status) {

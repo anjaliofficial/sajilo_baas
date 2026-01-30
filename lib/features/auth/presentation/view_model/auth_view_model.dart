@@ -1,13 +1,14 @@
+// features/auth/presentation/view_model/auth_view_model.dart
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/repositories/auth_repository.dart';
 import '../../domain/entities/auth_entity.dart';
 import '../state/auth_state.dart';
+import '../../../profile/presentation/providers/profile_provider.dart';
 
 class AuthViewModel extends Notifier<AuthState> {
   @override
   AuthState build() => const AuthState.initial();
 
-  // REGISTER
   Future<void> register({
     required String fullName,
     required String email,
@@ -42,26 +43,25 @@ class AuthViewModel extends Notifier<AuthState> {
     );
   }
 
-  // LOGIN
   Future<void> login({required String email, required String password}) async {
     state = const AuthState.loading();
 
     final repo = ref.read(authRepositoryProvider);
-
     final result = await repo.login(email, password);
 
-    result.fold(
-      (failure) => state = AuthState.error(failure.message),
-      (entity) => state = AuthState.authenticated(entity),
-    );
+    result.fold((failure) => state = AuthState.error(failure.message), (
+      entity,
+    ) {
+      state = AuthState.authenticated(entity);
+      // ✅ Trigger profile fetch after login
+      ref.read(profileViewModelProvider.notifier).fetchProfile();
+    });
   }
 
-  // CHECK SESSION
   Future<void> checkSession() async {
     state = const AuthState.loading();
 
     final repo = ref.read(authRepositoryProvider);
-
     final result = await repo.checkSession();
 
     result.fold((failure) => state = AuthState.error(failure.message), (
@@ -69,18 +69,17 @@ class AuthViewModel extends Notifier<AuthState> {
     ) {
       if (entity != null) {
         state = AuthState.authenticated(entity);
+        ref.read(profileViewModelProvider.notifier).fetchProfile();
       } else {
         state = const AuthState.initial();
       }
     });
   }
 
-  // LOGOUT
   Future<void> logout() async {
     state = const AuthState.loading();
 
     final repo = ref.read(authRepositoryProvider);
-
     final result = await repo.logout();
 
     result.fold(

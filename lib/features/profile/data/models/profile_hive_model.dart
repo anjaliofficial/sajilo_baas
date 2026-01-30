@@ -1,9 +1,10 @@
-// profile/data/models/profile_hive_model.dart
+// features/profile/data/models/profile_hive_model.dart
 import 'package:hive/hive.dart';
+import '../../domain/entities/profile_entity.dart';
 
 part 'profile_hive_model.g.dart';
 
-@HiveType(typeId: 1) // make sure typeId is unique across your app
+@HiveType(typeId: 2) // make sure typeId is unique across your app
 class ProfileHiveModel {
   @HiveField(0)
   final String id;
@@ -35,4 +36,26 @@ class ProfileHiveModel {
     required this.role,
     this.profilePicture,
   });
+
+  ProfileEntity toEntity() => ProfileEntity(
+    id: id,
+    fullName: fullName,
+    email: email,
+    phoneNumber: phoneNumber,
+    address: address,
+    role: role,
+    profilePicture: profilePicture,
+  );
+
+  factory ProfileHiveModel.fromEntity(ProfileEntity entity) {
+    return ProfileHiveModel(
+      id: entity.id,
+      fullName: entity.fullName,
+      email: entity.email,
+      phoneNumber: entity.phoneNumber,
+      address: entity.address,
+      role: entity.role,
+      profilePicture: entity.profilePicture,
+    );
+  }
 }

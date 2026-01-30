@@ -1,4 +1,4 @@
-// profile/presentation/view_model/profile_view_model.dart
+// features/profile/presentation/view_model/profile_view_model.dart
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../state/profile_state.dart';
 import '../../domain/usecases/profile_usecase.dart';
