@@ -50,6 +50,7 @@ class ProfileRemoteDatasource {
   }
 
   /// Upload profile picture
+  /// Upload profile picture
   Future<String> uploadProfilePicture(String filePath) async {
     try {
       final response = await apiClient.uploadFile(
@@ -58,7 +59,8 @@ class ProfileRemoteDatasource {
       );
       if (response.statusCode == 200 && response.data['success'] == true) {
         // Backend returns something like `/uploads/filename.jpg`
-        return "${ApiEndpoints.baseUrl}${response.data['path']}";
+        // ✅ Use staticBaseUrl (no /api prefix) for serving files
+        return "${ApiEndpoints.staticBaseUrl}${response.data['path']}";
       } else {
         throw Exception(response.data['message'] ?? "Upload failed");
       }

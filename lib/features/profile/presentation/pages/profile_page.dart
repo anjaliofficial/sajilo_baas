@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../providers/profile_provider.dart';
 import '../state/profile_state.dart';
 import 'edit_profile_page.dart';
@@ -24,13 +25,32 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     });
   }
 
-  Future<void> _changeProfilePicture() async {
-    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+  Future<void> _pickImage(ImageSource source) async {
+    // ✅ Request permissions
+    if (source == ImageSource.gallery) {
+      final galleryStatus = await Permission.photos.request();
+      if (!galleryStatus.isGranted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Gallery permission denied")),
+        );
+        return;
+      }
+    } else if (source == ImageSource.camera) {
+      final cameraStatus = await Permission.camera.request();
+      if (!cameraStatus.isGranted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Camera permission denied")),
+        );
+        return;
+      }
+    }
+
+    final pickedFile = await _picker.pickImage(source: source);
     if (pickedFile != null) {
       setState(() => _isUploading = true);
 
       try {
-        // ✅ Upload file to backend first
+        // ✅ Upload file to backend
         final uploadedUrl = await ref
             .read(profileRemoteDatasourceProvider)
             .uploadProfilePicture(pickedFile.path);
@@ -39,7 +59,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         final state = ref.read(profileViewModelProvider);
         if (state.profile != null) {
           final updated = state.profile!.copyWith(profilePicture: uploadedUrl);
-
           await ref
               .read(profileViewModelProvider.notifier)
               .updateProfile(updated);
@@ -58,6 +77,36 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         setState(() => _isUploading = false);
       }
     }
+  }
+
+  void _showImageSourceDialog() {
+    showModalBottomSheet(
+      context: context,
+      builder: (_) {
+        return SafeArea(
+          child: Wrap(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text("Choose from Gallery"),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickImage(ImageSource.gallery);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.camera_alt),
+                title: const Text("Take a Photo"),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickImage(ImageSource.camera);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -101,7 +150,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 child: Column(
                   children: [
                     GestureDetector(
-                      onTap: _isUploading ? null : _changeProfilePicture,
+                      onTap: _isUploading ? null : _showImageSourceDialog,
                       child: Stack(
                         alignment: Alignment.center,
                         children: [
@@ -112,7 +161,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                     profile.profilePicture!.isNotEmpty
                                 ? NetworkImage(profile.profilePicture!)
                                 : const AssetImage(
-                                        'assets/images/default_avatar.png',
+                                        'assets/images/default_avatar.jpg',
                                       )
                                       as ImageProvider,
                           ),

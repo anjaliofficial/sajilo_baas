@@ -1,8 +1,14 @@
+import 'package:flutter/foundation.dart';
+import 'package:sajilo_baas/core/api/api_client.dart';
+
 class ApiEndpoints {
   ApiEndpoints._();
 
-  // Base URL pointing to your backend
+  // Base URL for API routes
   static const String baseUrl = 'http://10.0.2.2:5050/api';
+
+  // Base URL for static file serving
+  static const String staticBaseUrl = 'http://10.0.2.2:5050';
 
   // Timeouts
   static const Duration connectionTimeout = Duration(seconds: 30);
