@@ -288,7 +288,7 @@ class DashboardScreen extends StatelessWidget {
               image: item['image']!,
             ),
           );
-        }).toList(),
+        }),
         TextButton(
           onPressed: () {
             Navigator.push(

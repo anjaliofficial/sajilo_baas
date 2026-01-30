@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class DashboardPage extends StatelessWidget {
-  DashboardPage({super.key});
+  const DashboardPage({super.key});
 
   final Color primaryBlue = const Color(0xFF007BFF);
 

@@ -153,8 +153,9 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                     if (val == null || val.isEmpty) return "Email is required";
                     if (!RegExp(
                       r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-                    ).hasMatch(val))
+                    ).hasMatch(val)) {
                       return "Enter a valid email";
+                    }
                     return null;
                   },
                 ),
@@ -178,7 +179,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 // Role Dropdown
                 _buildLabel("Register as"),
                 DropdownButtonFormField<String>(
-                  value: _selectedRole,
+                  initialValue: _selectedRole,
                   decoration: _inputDecoration(""),
                   items: const [
                     DropdownMenuItem(
