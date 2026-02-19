@@ -10,7 +10,7 @@ class AuthEntity extends Equatable {
   final String role;
   final String token; // ✅ non-nullable
 
-  AuthEntity({
+  const AuthEntity({
     this.authId,
     required this.fullName,
     required this.email,

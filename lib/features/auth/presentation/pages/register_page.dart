@@ -193,7 +193,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 // Role Dropdown
                 _buildLabel("Register as"),
                 DropdownButtonFormField<String>(
-                  value: _selectedRole,
+                  initialValue: _selectedRole,
                   decoration: _inputDecoration(""),
                   items: const [
                     DropdownMenuItem(
