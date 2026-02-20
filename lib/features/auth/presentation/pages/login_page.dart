@@ -24,6 +24,14 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   final Color primaryBlue = const Color(0xFF1A82AD);
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(authViewModelProvider.notifier).reset();
+    });
+  }
+
+  @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();

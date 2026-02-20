@@ -11,15 +11,32 @@ class ProfileRemoteDatasource {
   /// Fetch current user profile
   Future<ProfileApiModel?> getCurrentUser() async {
     try {
+      print(
+        "📡 Fetching profile from: ${ApiEndpoints.baseUrl}${ApiEndpoints.currentUser}",
+      );
       final response = await apiClient.get(ApiEndpoints.currentUser);
+
+      print("✅ Profile Response Status: ${response.statusCode}");
+      print("📦 Profile Response Data: ${response.data}");
+
       if (response.statusCode == 200 && response.data['success'] == true) {
         return ProfileApiModel.fromJson(response.data['user']);
       }
+
+      print(
+        "❌ Profile fetch failed: ${response.statusCode} - ${response.data}",
+      );
       return null;
     } on DioException catch (e) {
-      throw Exception(
-        e.response?.data['message'] ?? e.message ?? "Failed to fetch profile",
-      );
+      final errorMsg =
+          e.response?.data['message'] ?? e.message ?? "Failed to fetch profile";
+      print("🔴 Profile DioException: $errorMsg");
+      print("   Status Code: ${e.response?.statusCode}");
+      print("   Error: $e");
+      throw Exception(errorMsg);
+    } catch (e) {
+      print("🔴 Profile Exception: $e");
+      throw Exception("Failed to fetch profile: $e");
     }
   }
 

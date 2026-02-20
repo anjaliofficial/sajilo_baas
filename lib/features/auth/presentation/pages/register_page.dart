@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sajilo_baas/features/auth/presentation/providers/auth_provider.dart';
-import '../../presentation/view_model/auth_view_model.dart';
 import '../../presentation/state/auth_state.dart';
 import 'login_page.dart';
 
@@ -27,6 +26,14 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   bool _obscureConfirmPassword = true;
 
   final Color primaryBlue = const Color(0xFF1A82AD);
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(authViewModelProvider.notifier).reset();
+    });
+  }
 
   @override
   void dispose() {

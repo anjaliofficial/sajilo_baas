@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:sajilo_baas/features/auth/presentation/providers/auth_provider.dart';
+import 'package:sajilo_baas/features/auth/presentation/state/auth_state.dart';
 import '../providers/profile_provider.dart';
 import '../state/profile_state.dart';
 import 'edit_profile_page.dart';
@@ -21,7 +23,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   void initState() {
     super.initState();
     Future.microtask(() {
-      ref.read(profileViewModelProvider.notifier).fetchProfile();
+      // ✅ Only fetch profile if user is authenticated
+      final authState = ref.read(authViewModelProvider);
+      if (authState.status == AuthStatus.authenticated) {
+        ref.read(profileViewModelProvider.notifier).fetchProfile();
+      } else {
+        print('⚠️ User not authenticated. Skipping profile fetch.');
+      }
     });
   }
 
@@ -211,7 +219,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ),
               );
           }
-          return const SizedBox.shrink();
         },
       ),
     );
