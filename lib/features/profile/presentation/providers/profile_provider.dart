@@ -9,7 +9,9 @@ import '../state/profile_state.dart';
 import '../view_model/profile_view_model.dart';
 
 // ApiClient provider
-final apiClientProvider = Provider<ApiClient>((ref) => ApiClient());
+final apiClientProvider = Provider<ApiClient>(
+  (ref) => ApiClient(baseUrl: 'http://10.33.46.20:5050/api'),
+);
 
 // Remote datasource provider
 final profileRemoteDatasourceProvider = Provider<ProfileRemoteDatasource>(

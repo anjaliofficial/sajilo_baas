@@ -10,7 +10,7 @@ class ApiEndpoints {
   // Set to true to use a physical device on a local network
   // Set to false to use emulator/simulator defaults
   static const bool isPhysicalDevice =
-      false; // ← CHANGE TO TRUE for physical device
+      true; // ← CHANGE TO TRUE for physical device
 
   // Your development machine IP address (for physical device testing)
   static const String compIpAddress = "10.33.46.20";

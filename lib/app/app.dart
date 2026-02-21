@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sajilo_baas/features/auth/presentation/pages/login_page.dart';
 import 'package:sajilo_baas/features/onboarding/presentation/pages/onboarding_screen.dart';
 import 'package:sajilo_baas/features/splash/presentation/pages/splash_screen.dart';
-import 'package:sajilo_baas/screens/guests/main_navigation.dart';
-import 'package:sajilo_baas/screens/signup_page.dart';
+import 'package:sajilo_baas/features/auth/presentation/pages/register_page.dart';
+import 'package:sajilo_baas/features/dashboard/presentation/widgets/customer_main_navigation.dart';
 
 class App extends ConsumerWidget {
   const App({super.key});
@@ -20,7 +20,7 @@ class App extends ConsumerWidget {
         '/splash': (context) => const SplashScreen(),
         '/onboarding': (context) => const OnboardingScreen(),
         '/login': (context) => const LoginPage(),
-        '/signup': (context) => const SignUpPage(),
+        '/signup': (context) => const RegisterPage(),
         '/dashboard': (context) => const CustomerMainNavigation(),
       },
       builder: (context, child) {

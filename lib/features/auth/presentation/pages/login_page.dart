@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sajilo_baas/features/auth/presentation/pages/register_page.dart';
 import 'package:sajilo_baas/features/auth/presentation/providers/auth_provider.dart';
-import 'package:sajilo_baas/screens/guests/main_navigation.dart';
+import 'package:sajilo_baas/features/dashboard/presentation/widgets/customer_main_navigation.dart';
 import '../../presentation/state/auth_state.dart';
 
 class LoginPage extends ConsumerStatefulWidget {

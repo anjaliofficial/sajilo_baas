@@ -1,15 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:sajilo_baas/screens/booking_screen.dart';
-import 'package:sajilo_baas/screens/dashboard_screen.dart';
-import 'package:sajilo_baas/screens/favroites_screen.dart';
-import 'package:sajilo_baas/screens/message_screen.dart';
-import 'package:sajilo_baas/screens/profile_screen.dart';
-// import '../dashboard/dashboard_screen.dart';
-// import '../messages/message_screen.dart';
-// import '../favorites/favorites_screen.dart';
-// import '../bookings/booking_screen.dart';
-// import '../profile/profile_screen.dart';
+// import 'package:sajilo_baas/screens/booking_screen.dart';
+// import 'package:sajilo_baas/screens/favroites_screen.dart';
+// import 'package:sajilo_baas/screens/hosts/hosts_dashboard_screen.dart';
+// import 'package:sajilo_baas/screens/message_screen.dart';
+// import 'package:sajilo_baas/screens/profile_screen.dart';
 import 'app_bottom_navbar.dart';
+import '../pages/dashboard_page.dart';
 
 class CustomerMainNavigation extends StatefulWidget {
   const CustomerMainNavigation({super.key});
@@ -21,20 +17,22 @@ class CustomerMainNavigation extends StatefulWidget {
 class _CustomerMainNavigationState extends State<CustomerMainNavigation> {
   int _currentIndex = 0;
 
-  final List<Widget> _pages = const [
+  // Remove 'const' because some screens might use providers or runtime data
+  final List<Widget> _pages = [
     DashboardScreen(),
-    MessagesScreen(),
-    FavoritesScreen(),
-    BookingsScreen(),
-    ProfileScreen(),
+    // MessagesScreen(),
+    // FavoritesScreen(),
+    // BookingsScreen(),
+    // ProfileScreen(),
   ];
 
   @override
   Widget build(BuildContext context) {
+    final safeIndex = (_currentIndex < _pages.length) ? _currentIndex : 0;
     return Scaffold(
-      body: _pages[_currentIndex],
+      body: _pages[safeIndex],
       bottomNavigationBar: AppBottomNavBar(
-        currentIndex: _currentIndex,
+        currentIndex: safeIndex,
         onTap: (index) => setState(() => _currentIndex = index),
       ),
     );

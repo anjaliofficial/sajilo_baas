@@ -6,18 +6,21 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'api_endpoints.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
-/// Riverpod provider
-final apiClientProvider = Provider<ApiClient>((ref) => ApiClient());
+/// Riverpod provider for ApiClient
+final apiClientProvider = Provider<ApiClient>(
+  (ref) => ApiClient(baseUrl: ApiEndpoints.baseUrl),
+);
 
 class ApiClient {
   late final Dio _dio;
   final _secureStorage = const FlutterSecureStorage();
   static const _tokenKey = 'auth_token';
 
-  ApiClient() {
+  /// Constructor
+  ApiClient({required String baseUrl}) {
     _dio = Dio(
       BaseOptions(
-        baseUrl: ApiEndpoints.baseUrl,
+        baseUrl: baseUrl,
         connectTimeout: ApiEndpoints.connectionTimeout,
         receiveTimeout: ApiEndpoints.receiveTimeout,
         headers: {
@@ -27,13 +30,6 @@ class ApiClient {
         validateStatus: (status) => status != null && status < 500,
       ),
     );
-
-    // Log the base URL for debugging (especially helpful for network issues)
-    if (kDebugMode) {
-      print('🌐 API Base URL: ${ApiEndpoints.baseUrl}');
-      print('📱 Is Physical Device: ${ApiEndpoints.isPhysicalDevice}');
-      // print('🧪 Using Mock Data: ${ApiEndpoints.useMockData}');
-    }
 
     // JWT Interceptor
     _dio.interceptors.add(_AuthInterceptor(_secureStorage));
@@ -50,7 +46,6 @@ class ApiClient {
         ],
         retryEvaluator: (error, _) {
           final path = error.requestOptions.path;
-          // Don't retry auth endpoints
           if (path.contains('/auth/login') || path.contains('/auth/register')) {
             return false;
           }
@@ -76,10 +71,12 @@ class ApiClient {
     }
   }
 
+  /// ✅ Getter for Dio instance
+  Dio get dio => _dio;
+
   // --------------------------
   // HTTP METHODS
   // --------------------------
-
   Future<Response> get(
     String path, {
     Options? options,
@@ -98,7 +95,6 @@ class ApiClient {
   // --------------------------
   // TOKEN HELPERS
   // --------------------------
-
   Future<void> saveToken(String token) async {
     try {
       await _secureStorage.write(key: _tokenKey, value: token);
@@ -106,22 +102,16 @@ class ApiClient {
         print('✅ Token saved successfully: ${token.substring(0, 20)}...');
       }
     } catch (e) {
-      if (kDebugMode) {
-        print('❌ Error saving token: $e');
-      }
+      if (kDebugMode) print('❌ Error saving token: $e');
     }
   }
 
   Future<void> removeToken() async {
     try {
       await _secureStorage.delete(key: _tokenKey);
-      if (kDebugMode) {
-        print('🗑️ Token removed');
-      }
+      if (kDebugMode) print('🗑️ Token removed');
     } catch (e) {
-      if (kDebugMode) {
-        print('❌ Error removing token: $e');
-      }
+      if (kDebugMode) print('❌ Error removing token: $e');
     }
   }
 
@@ -137,9 +127,7 @@ class ApiClient {
       }
       return token;
     } catch (e) {
-      if (kDebugMode) {
-        print('❌ Error reading token: $e');
-      }
+      if (kDebugMode) print('❌ Error reading token: $e');
       return null;
     }
   }
@@ -147,8 +135,6 @@ class ApiClient {
   // --------------------------
   // FILE UPLOAD
   // --------------------------
-
-  /// Upload a file with optional custom field name
   Future<Response> uploadFile(
     String path,
     String filePath, {
@@ -176,34 +162,19 @@ class _AuthInterceptor extends Interceptor {
     RequestInterceptorHandler handler,
   ) async {
     try {
-      // Remove token for login/register
+      // Skip token for login/register
       if (options.path.contains('/auth/login') ||
           options.path.contains('/auth/register')) {
         options.headers.remove('Authorization');
-        if (kDebugMode) {
-          print('🔓 Making ${options.method} ${options.path} without auth');
-        }
       } else {
         final token = await secureStorage.read(key: _tokenKey);
         if (token != null && token.isNotEmpty) {
           options.headers['Authorization'] = 'Bearer $token';
-          if (kDebugMode) {
-            print('✅ Added token to ${options.method} ${options.path}');
-          }
-        } else {
-          if (kDebugMode) {
-            print(
-              '⚠️ Warning: No token found for ${options.method} ${options.path}',
-            );
-            print('   This is normal if you haven\'t logged in yet.');
-          }
         }
       }
       handler.next(options);
     } catch (e) {
-      if (kDebugMode) {
-        print('❌ Auth interceptor error: $e');
-      }
+      if (kDebugMode) print('❌ Auth interceptor error: $e');
       handler.next(options);
     }
   }
