@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:sajilo_baas/features/dashboard/domain/repositories/i_listing_repository.dart';
 import '../../domain/entities/listing_entity.dart';
@@ -30,5 +29,4 @@ class ListingRepositoryImpl implements IListingRepository {
       return [];
     }
   }
-
 }
