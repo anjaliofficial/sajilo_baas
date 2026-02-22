@@ -59,7 +59,8 @@ class ApiEndpoints {
   static const String currentUser = '/auth/me';
   static const String logout = '/auth/logout';
   static const String updateProfile = '/auth/update';
-
+  static const String myBookings = '/bookings/my';
+  static const String cancelBooking = '/bookings/cancel';
   // File upload
   static const String uploadFile = '/files/upload';
 }
