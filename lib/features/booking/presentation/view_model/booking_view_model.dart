@@ -1,28 +1,73 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import '../../domain/entities/booking_entity.dart';
+import '../../domain/entities/booking_filter.dart';
 import '../../domain/usecases/get_my_bookings.dart';
 import '../../domain/usecases/cancel_booking.dart';
 
 class BookingViewModel extends StateNotifier<AsyncValue<List<BookingEntity>>> {
-  final GetMyBookings getMyBookings;
-  final CancelBooking cancelBooking;
+  final GetMyBookings _getMyBookings;
+  final CancelBooking _cancelBooking;
 
-  BookingViewModel(this.getMyBookings, this.cancelBooking)
+  List<BookingEntity> _allBookings = [];
+
+  BookingViewModel(this._getMyBookings, this._cancelBooking)
     : super(const AsyncLoading());
 
+  // -------------------
+  // Load bookings
+  // -------------------
   Future<void> loadBookings() async {
-    state = const AsyncLoading();
     try {
-      final bookings = await getMyBookings();
-      state = AsyncData(bookings);
+      state = const AsyncLoading();
+      _allBookings = await _getMyBookings();
+      state = AsyncData(_allBookings);
     } catch (e, st) {
       state = AsyncError(e, st);
     }
   }
 
+  // -------------------
+  // Apply filters
+  // -------------------
+  void applyFilter(BookingFilter filter) {
+    final filtered = _allBookings.where((booking) {
+      // Status
+      if (filter.status != null && booking.status != filter.status) {
+        return false;
+      }
+
+      // From date
+      if (filter.fromDate != null &&
+          booking.checkInDate.isBefore(filter.fromDate!)) {
+        return false;
+      }
+
+      // To date
+      if (filter.toDate != null &&
+          booking.checkOutDate.isAfter(filter.toDate!)) {
+        return false;
+      }
+
+      // Search query
+      if (filter.query != null &&
+          !booking.listingTitle.toLowerCase().contains(
+            filter.query!.toLowerCase(),
+          )) {
+        return false;
+      }
+
+      return true;
+    }).toList();
+
+    state = AsyncData(filtered);
+  }
+
+  // -------------------
+  // Cancel booking
+  // -------------------
   Future<void> cancel(String bookingId) async {
-    await cancelBooking(bookingId);
+    await _cancelBooking(bookingId);
     await loadBookings();
   }
 }

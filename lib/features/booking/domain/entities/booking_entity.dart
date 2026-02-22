@@ -22,4 +22,6 @@ class BookingEntity {
     required this.status,
     required this.paymentStatus,
   });
+
+  get listingTitle => null;
 }
