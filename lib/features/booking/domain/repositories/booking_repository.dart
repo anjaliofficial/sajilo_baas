@@ -1,10 +1,10 @@
 import '../entities/booking_entity.dart';
 
 abstract class BookingRepository {
-  Future<void> createBooking({
+  Future<BookingEntity> createBooking({
     required String listingId,
-    required DateTime checkInDate,
-    required DateTime checkOutDate,
+    required DateTime checkIn,
+    required DateTime checkOut,
     required int totalNights,
     required double pricePerNight,
     required double totalPrice,
@@ -13,4 +13,6 @@ abstract class BookingRepository {
   Future<List<BookingEntity>> getMyBookings();
 
   Future<void> cancelBooking(String bookingId);
+
+  Future<List<DateTime>> getBookedDates(String listingId);
 }

@@ -1,6 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'booking_repository_impl.dart';
-import 'booking_remote_datasource.dart';
+import 'package:flutter_riverpod/legacy.dart';
+// import 'package:flutter_riverpod/legacy.dart';
+
+import 'package:sajilo_baas/core/network/dio_provider.dart';
+import 'package:sajilo_baas/features/booking/data/datasources/remote/booking_remote_datasource.dart';
+import 'package:sajilo_baas/features/booking/data/repositories/booking_repository_impl.dart';
+import 'package:sajilo_baas/features/booking/domain/entities/booking_entity.dart';
 import '../../domain/usecases/get_my_bookings.dart';
 import '../../domain/usecases/cancel_booking.dart';
 import '../../domain/usecases/get_booked_dates.dart';
@@ -42,5 +47,7 @@ final bookingViewModelProvider =
       (ref) => BookingViewModel(
         ref.read(getMyBookingsProvider),
         ref.read(cancelBookingProvider),
+        ref.read(createBookingProvider),
+        ref.read(getBookedDatesProvider),
       ),
     );

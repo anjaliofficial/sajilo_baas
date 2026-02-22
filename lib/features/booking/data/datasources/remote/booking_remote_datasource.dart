@@ -1,10 +1,19 @@
 import 'package:dio/dio.dart';
+import 'package:sajilo_baas/features/booking/domain/entities/booking_entity.dart';
 import '../../models/booking_model.dart';
 
 abstract class BookingRemoteDataSource {
-  Future<void> createBooking(Map<String, dynamic> body);
+  Future<BookingEntity> createBooking({
+    required String listingId,
+    required DateTime checkIn,
+    required DateTime checkOut,
+    required int totalNights,
+    required double pricePerNight,
+    required double totalPrice,
+  });
   Future<List<BookingModel>> getMyBookings();
   Future<void> cancelBooking(String bookingId);
+  Future<List<DateTime>> getBookedDates(String listingId);
 }
 
 class BookingRemoteDataSourceImpl implements BookingRemoteDataSource {
@@ -13,8 +22,26 @@ class BookingRemoteDataSourceImpl implements BookingRemoteDataSource {
   BookingRemoteDataSourceImpl(this.dio);
 
   @override
-  Future<void> createBooking(Map<String, dynamic> body) async {
-    await dio.post('/bookings', data: body);
+  Future<BookingEntity> createBooking({
+    required String listingId,
+    required DateTime checkIn,
+    required DateTime checkOut,
+    required int totalNights,
+    required double pricePerNight,
+    required double totalPrice,
+  }) async {
+    final res = await dio.post(
+      '/bookings',
+      data: {
+        'listingId': listingId,
+        'checkIn': checkIn.toIso8601String(),
+        'checkOut': checkOut.toIso8601String(),
+        'totalNights': totalNights,
+        'pricePerNight': pricePerNight,
+        'totalPrice': totalPrice,
+      },
+    );
+    return BookingModel.fromJson(res.data['booking']);
   }
 
   @override
@@ -28,5 +55,13 @@ class BookingRemoteDataSourceImpl implements BookingRemoteDataSource {
   @override
   Future<void> cancelBooking(String bookingId) async {
     await dio.put('/bookings/customer/$bookingId/cancel');
+  }
+
+  @override
+  Future<List<DateTime>> getBookedDates(String listingId) async {
+    final res = await dio.get('/bookings/$listingId/booked-dates');
+    return (res.data['dates'] as List)
+        .map((e) => DateTime.parse(e as String))
+        .toList();
   }
 }

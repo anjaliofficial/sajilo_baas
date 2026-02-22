@@ -8,22 +8,22 @@ class BookingRepositoryImpl implements BookingRepository {
   BookingRepositoryImpl(this.remote);
 
   @override
-  Future<void> createBooking({
+  Future<BookingEntity> createBooking({
     required String listingId,
-    required DateTime checkInDate,
-    required DateTime checkOutDate,
+    required DateTime checkIn,
+    required DateTime checkOut,
     required int totalNights,
     required double pricePerNight,
     required double totalPrice,
-  }) {
-    return remote.createBooking({
-      'listingId': listingId,
-      'checkInDate': checkInDate.toIso8601String(),
-      'checkOutDate': checkOutDate.toIso8601String(),
-      'totalNights': totalNights,
-      'pricePerNight': pricePerNight,
-      'totalPrice': totalPrice,
-    });
+  }) async {
+    return await remote.createBooking(
+      listingId: listingId,
+      checkIn: checkIn,
+      checkOut: checkOut,
+      totalNights: totalNights,
+      pricePerNight: pricePerNight,
+      totalPrice: totalPrice,
+    );
   }
 
   @override
@@ -34,5 +34,10 @@ class BookingRepositoryImpl implements BookingRepository {
   @override
   Future<void> cancelBooking(String bookingId) {
     return remote.cancelBooking(bookingId);
+  }
+
+  @override
+  Future<List<DateTime>> getBookedDates(String listingId) async {
+    return await remote.getBookedDates(listingId);
   }
 }
