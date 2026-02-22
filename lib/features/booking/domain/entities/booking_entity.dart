@@ -8,7 +8,7 @@ class BookingEntity {
   final double pricePerNight;
   final double totalPrice;
   final String status;
-  final String paymentStatus;
+  // final String paymentStatus;
 
   BookingEntity({
     required this.id,
@@ -20,7 +20,7 @@ class BookingEntity {
     required this.pricePerNight,
     required this.totalPrice,
     required this.status,
-    required this.paymentStatus,
+    // required this.paymentStatus,
   });
 
   get listingTitle => null;

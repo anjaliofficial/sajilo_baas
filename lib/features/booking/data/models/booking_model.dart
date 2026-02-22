@@ -11,7 +11,7 @@ class BookingModel extends BookingEntity {
     required super.pricePerNight,
     required super.totalPrice,
     required super.status,
-    required super.paymentStatus,
+    // required super.paymentStatus,
   });
 
   factory BookingModel.fromJson(Map<String, dynamic> json) {
@@ -27,7 +27,7 @@ class BookingModel extends BookingEntity {
       pricePerNight: (json['pricePerNight'] as num).toDouble(),
       totalPrice: (json['totalPrice'] as num).toDouble(),
       status: json['status'],
-      paymentStatus: json['paymentStatus'],
+      // paymentStatus: json['paymentStatus'],
     );
   }
 }
