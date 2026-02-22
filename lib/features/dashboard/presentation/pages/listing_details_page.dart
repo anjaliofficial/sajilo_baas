@@ -14,39 +14,49 @@ String getFullImageUrl(String path) {
   return '${ApiEndpoints.staticBaseUrl}$normalized';
 }
 
-class ListingDetailsPage extends StatelessWidget {
+class ListingDetailsPage extends StatefulWidget {
   final ListingEntity listing;
   const ListingDetailsPage({super.key, required this.listing});
 
   @override
+  State<ListingDetailsPage> createState() => _ListingDetailsPageState();
+}
+
+class _ListingDetailsPageState extends State<ListingDetailsPage> {
+  @override
   Widget build(BuildContext context) {
+    final pageCount = 5;
+    final pageTitles = [
+      'About',
+      'Amenities',
+      'House Rules',
+      'Host Details',
+      'Availability',
+    ];
+    final pageWidgets = [
+      _buildAboutPage(widget.listing),
+      _buildAmenitiesPage(widget.listing),
+      _buildHouseRulesPage(widget.listing),
+      _buildHostDetailsPage(widget.listing),
+      _buildAvailabilityPage(context, widget.listing),
+    ];
     return Scaffold(
       appBar: AppBar(
-        title: Text(listing.title),
+        title: Text(widget.listing.title),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 0,
       ),
-      body: Column(
-        children: [
-          _buildImagesCarousel(),
-          Expanded(
-            child: PageView(
-              children: [
-                _buildAboutPage(),
-                _buildAmenitiesPage(),
-                _buildHouseRulesPage(),
-                _buildHostDetailsPage(),
-                _buildAvailabilityPage(context),
-              ],
-            ),
-          ),
-        ],
+      body: _ListingDetailsPager(
+        pageCount: pageCount,
+        pageTitles: pageTitles,
+        pageWidgets: pageWidgets,
+        imagesCarousel: _buildImagesCarousel(widget.listing),
       ),
     );
   }
 
-  Widget _buildAboutPage() {
+  Widget _buildAboutPage(ListingEntity listing) {
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -83,7 +93,7 @@ class ListingDetailsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildAmenitiesPage() {
+  Widget _buildAmenitiesPage(ListingEntity listing) {
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -106,7 +116,7 @@ class ListingDetailsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildHouseRulesPage() {
+  Widget _buildHouseRulesPage(ListingEntity listing) {
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -123,7 +133,7 @@ class ListingDetailsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildHostDetailsPage() {
+  Widget _buildHostDetailsPage(ListingEntity listing) {
     final host = listing.host;
     if (host == null) {
       return const Center(child: Text('No host details available'));
@@ -165,7 +175,7 @@ class ListingDetailsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildAvailabilityPage(BuildContext context) {
+  Widget _buildAvailabilityPage(BuildContext context, ListingEntity listing) {
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -210,7 +220,7 @@ class ListingDetailsPage extends StatelessWidget {
     return '${date.day.toString().padLeft(2, '0')}-${date.month.toString().padLeft(2, '0')}-${date.year}';
   }
 
-  Widget _buildImagesCarousel() {
+  Widget _buildImagesCarousel(ListingEntity listing) {
     if (listing.images.isEmpty) {
       return Container(
         height: 200,
@@ -235,3 +245,81 @@ class ListingDetailsPage extends StatelessWidget {
     );
   }
 }
+
+class _ListingDetailsPager extends StatefulWidget {
+  final int pageCount;
+  final List<String> pageTitles;
+  final List<Widget> pageWidgets;
+  final Widget imagesCarousel;
+  const _ListingDetailsPager({
+    required this.pageCount,
+    required this.pageTitles,
+    required this.pageWidgets,
+    required this.imagesCarousel,
+  });
+
+  @override
+  State<_ListingDetailsPager> createState() => _ListingDetailsPagerState();
+}
+
+class _ListingDetailsPagerState extends State<_ListingDetailsPager> {
+  void _goToPage(int page) {
+    _pageController.animateToPage(
+      page,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.ease,
+    );
+    setState(() {
+      _currentPage = page;
+    });
+  }
+
+  final PageController _pageController = PageController();
+  int _currentPage = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        widget.imagesCarousel,
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              ElevatedButton(
+                onPressed: _currentPage > 0
+                    ? () => _goToPage(_currentPage - 1)
+                    : null,
+                child: const Text('Previous'),
+              ),
+              Text(
+                widget.pageTitles[_currentPage],
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              ElevatedButton(
+                onPressed: _currentPage < widget.pageCount - 1
+                    ? () => _goToPage(_currentPage + 1)
+                    : null,
+                child: const Text('Next'),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: PageView(
+            controller: _pageController,
+            onPageChanged: (index) {
+              setState(() {
+                _currentPage = index;
+              });
+            },
+            children: widget.pageWidgets,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ...existing code.
