@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../domain/entities/listing_entity.dart';
 import 'package:sajilo_baas/core/api/api_endpoints.dart';
+import '../../../booking/presentation/pages/bookingPage.dart';
 
 String getFullImageUrl(String path) {
   if (path.startsWith('http')) return path;
@@ -86,7 +87,17 @@ class ListingDetailsPage extends StatelessWidget {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => BookingPage(
+                              listingId: listing.id,
+                              pricePerNight: listing.pricePerNight.toDouble(),
+                            ),
+                          ),
+                        );
+                      },
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
                       ),
