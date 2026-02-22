@@ -10,7 +10,7 @@ class ListingRepositoryImpl implements IListingRepository {
   @override
   Future<List<ListingEntity>> getListings() async {
     try {
-      final response = await _dio.get('http://10.33.46.20:5050/api/listings');
+      final response = await _dio.get('http://10.205.75.20:5050/api/listings');
 
       if (response.statusCode == 200) {
         final data = response.data;

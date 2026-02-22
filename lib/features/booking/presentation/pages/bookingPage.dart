@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../domain/entities/booking_entity.dart';
-import '../../domain/usecases/get_my_bookings.dart';
-import '../../domain/usecases/create_booking.dart';
 import '../providers/booking_providers.dart';
 
 // Provider for booked dates

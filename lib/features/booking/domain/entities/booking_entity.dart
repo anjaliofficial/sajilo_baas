@@ -23,5 +23,5 @@ class BookingEntity {
     // required this.paymentStatus,
   });
 
-  get listingTitle => null;
+  Null get listingTitle => null;
 }

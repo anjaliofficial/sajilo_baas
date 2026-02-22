@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:sajilo_baas/core/api/api_client.dart';
+import 'package:sajilo_baas/core/api/api_endpoints.dart';
 import '../../data/datasources/remote/profile_remote_datasource.dart';
 import '../../data/repositories/profile_repository_impl.dart';
 import '../../domain/usecases/profile_usecase.dart';
@@ -10,7 +11,7 @@ import '../view_model/profile_view_model.dart';
 
 // ApiClient provider
 final apiClientProvider = Provider<ApiClient>(
-  (ref) => ApiClient(baseUrl: 'http://10.33.46.20:5050/api'),
+  (ref) => ApiClient(baseUrl: ApiEndpoints.baseUrl),
 );
 
 // Remote datasource provider

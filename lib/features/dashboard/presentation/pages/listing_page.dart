@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../domain/entities/listing_entity.dart';
 import '../providers/dashboard_provider.dart';
 import 'listing_details_page.dart';
+import 'package:sajilo_baas/core/api/api_endpoints.dart';
 
 String getFullImageUrl(String path) {
   if (path.startsWith('http')) return path;
@@ -15,7 +15,7 @@ String getFullImageUrl(String path) {
     normalized = '/$normalized';
   }
 
-  return 'http://10.33.46.20:5050$normalized';
+  return '${ApiEndpoints.staticBaseUrl}$normalized';
 }
 
 class ListingPage extends ConsumerWidget {

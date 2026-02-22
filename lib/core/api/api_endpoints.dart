@@ -13,7 +13,7 @@ class ApiEndpoints {
       true; // ← CHANGE TO TRUE for physical device
 
   // Your development machine IP address (for physical device testing)
-  static const String compIpAddress = "10.33.46.20";
+  static const String compIpAddress = "10.205.75.20";
   static const int apiPort = 5050; // ← Change this to your backend port
 
   /// Dynamic base URL depending on platform and configuration

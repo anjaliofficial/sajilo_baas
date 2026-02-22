@@ -58,11 +58,12 @@ class BookingViewModel extends StateNotifier<AsyncValue<List<BookingEntity>>> {
       }
 
       // Search query
-      if (filter.query != null &&
-          !booking.listingTitle.toLowerCase().contains(
-            filter.query!.toLowerCase(),
-          )) {
-        return false;
+      if (filter.query != null) {
+        final title = booking.listingTitle;
+        if (title == null ||
+            !title.toLowerCase().contains(filter.query!.toLowerCase())) {
+          return false;
+        }
       }
 
       return true;

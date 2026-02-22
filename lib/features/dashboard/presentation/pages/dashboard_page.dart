@@ -14,7 +14,7 @@ String getFullImageUrl(String path) {
   if (!normalized.startsWith('/')) {
     normalized = '/$normalized';
   }
-  return 'http://10.33.46.20:5050$normalized';
+  return 'http://10.205.75.20:5050$normalized';
 }
 
 class DashboardScreen extends ConsumerWidget {

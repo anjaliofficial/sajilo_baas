@@ -7,7 +7,7 @@ import '../view_model/dashboard_view_model.dart';
 final dashboardViewModelProvider = ChangeNotifierProvider<DashboardViewModel>((
   ref,
 ) {
-  final apiClient = ApiClient(baseUrl: 'http://10.33.46.20:5050/api');
+  final apiClient = ApiClient(baseUrl: 'http://10.205.75.20:5050/api');
   final repository = ListingRepositoryImpl(dio: apiClient.dio);
   final usecase = GetListingsUsecase(repository);
   return DashboardViewModel(usecase);
