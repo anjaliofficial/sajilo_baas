@@ -10,6 +10,17 @@ class BookingEntity {
   final String status;
   // final String paymentStatus;
 
+  // New fields for hotel/listing details
+  final String? listingTitle;
+  final List<String>? listingImages;
+  final String? listingLocation;
+  final String? listingDescription;
+  final String? listingPropertyType;
+  final int? listingMaxGuests;
+  final int? listingMinStay;
+  final String? listingCancellationPolicy;
+  final String? listingHouseRules;
+
   BookingEntity({
     required this.id,
     required this.listingId,
@@ -21,7 +32,14 @@ class BookingEntity {
     required this.totalPrice,
     required this.status,
     // required this.paymentStatus,
+    this.listingTitle,
+    this.listingImages,
+    this.listingLocation,
+    this.listingDescription,
+    this.listingPropertyType,
+    this.listingMaxGuests,
+    this.listingMinStay,
+    this.listingCancellationPolicy,
+    this.listingHouseRules,
   });
-
-  Null get listingTitle => null;
 }
