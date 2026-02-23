@@ -38,6 +38,11 @@ class BookingRepositoryImpl implements BookingRepository {
 
   @override
   Future<List<DateTime>> getBookedDates(String listingId) async {
-    return await remote.getBookedDates(listingId);
+    try {
+      return await remote.getBookedDates(listingId);
+    } catch (e, stack) {
+      print('Repository: Error in getBookedDates: $e\n$stack');
+      return [];
+    }
   }
 }

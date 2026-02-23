@@ -30,17 +30,22 @@ class BookingRemoteDataSourceImpl implements BookingRemoteDataSource {
     required double pricePerNight,
     required double totalPrice,
   }) async {
+    // Debug print: show headers before making the request
+    print('🟢 Booking API call headers: ${dio.options.headers}');
     final res = await dio.post(
-      '/bookings',
+      '/bookings/customer',
       data: {
         'listingId': listingId,
-        'checkIn': checkIn.toIso8601String(),
-        'checkOut': checkOut.toIso8601String(),
+        'checkInDate': checkIn.toIso8601String(),
+        'checkOutDate': checkOut.toIso8601String(),
         'totalNights': totalNights,
         'pricePerNight': pricePerNight,
         'totalPrice': totalPrice,
       },
     );
+    if (res.data == null || res.data['booking'] == null) {
+      throw Exception(res.data?['message'] ?? 'Unknown booking error');
+    }
     return BookingModel.fromJson(res.data['booking']);
   }
 
@@ -59,9 +64,22 @@ class BookingRemoteDataSourceImpl implements BookingRemoteDataSource {
 
   @override
   Future<List<DateTime>> getBookedDates(String listingId) async {
-    final res = await dio.get('/bookings/$listingId/booked-dates');
-    return (res.data['dates'] as List)
-        .map((e) => DateTime.parse(e as String))
-        .toList();
+    try {
+      final res = await dio.get('/bookings/$listingId/booked-dates');
+      if (res.statusCode == 200 &&
+          res.data is Map &&
+          (res.data['dates'] is List)) {
+        return (res.data['dates'] as List)
+            .map((e) => DateTime.tryParse(e as String))
+            .whereType<DateTime>()
+            .toList();
+      } else {
+        print('Booked dates endpoint missing or invalid response: ${res.data}');
+        return [];
+      }
+    } catch (e) {
+      print('Error fetching booked dates: $e');
+      return [];
+    }
   }
 }

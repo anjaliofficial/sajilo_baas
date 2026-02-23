@@ -26,6 +26,7 @@ class BookingPage extends ConsumerStatefulWidget {
 }
 
 class _BookingPageState extends ConsumerState<BookingPage> {
+  String? _selectedPayment;
   DateTime? checkIn;
   DateTime? checkOut;
 
@@ -40,10 +41,22 @@ class _BookingPageState extends ConsumerState<BookingPage> {
   }
 
   Future<void> _fetchBookedDates() async {
-    final dates = await ref.read(bookedDatesProvider(widget.listingId).future);
-    setState(() {
-      bookedDates = dates;
-    });
+    try {
+      final dates = await ref.read(
+        bookedDatesProvider(widget.listingId).future,
+      );
+      setState(() {
+        bookedDates = dates;
+      });
+    } catch (e, stack) {
+      print('UI: Error fetching booked dates: $e\n$stack');
+      setState(() {
+        bookedDates = [];
+      });
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Could not load booked dates.')));
+    }
   }
 
   Future<void> _selectCheckIn(BuildContext context) async {
@@ -139,6 +152,7 @@ class _BookingPageState extends ConsumerState<BookingPage> {
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             ListTile(
               title: const Text('Check-in'),
@@ -165,12 +179,52 @@ class _BookingPageState extends ConsumerState<BookingPage> {
               'Total Price: NPR $totalPrice',
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
-            const Spacer(),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _bookNow,
-                child: const Text('Book Now', style: TextStyle(fontSize: 18)),
+            const SizedBox(height: 30),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Select Payment Method:',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+              ),
+            ),
+            RadioListTile<String>(
+              title: const Text('Cash'),
+              value: 'cash',
+              groupValue: _selectedPayment,
+              onChanged: (value) {
+                setState(() {
+                  _selectedPayment = value;
+                });
+              },
+            ),
+            RadioListTile<String>(
+              title: const Text('eSewa'),
+              value: 'esewa',
+              groupValue: _selectedPayment,
+              onChanged: (value) {
+                setState(() {
+                  _selectedPayment = value;
+                });
+              },
+            ),
+            RadioListTile<String>(
+              title: const Text('Other'),
+              value: 'other',
+              groupValue: _selectedPayment,
+              onChanged: (value) {
+                setState(() {
+                  _selectedPayment = value;
+                });
+              },
+            ),
+            const SizedBox(height: 30),
+            Center(
+              child: SizedBox(
+                width: 220,
+                child: ElevatedButton(
+                  onPressed: _bookNow,
+                  child: const Text('Book Now', style: TextStyle(fontSize: 18)),
+                ),
               ),
             ),
           ],

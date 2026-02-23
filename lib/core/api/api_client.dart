@@ -170,6 +170,15 @@ class _AuthInterceptor extends Interceptor {
         final token = await secureStorage.read(key: _tokenKey);
         if (token != null && token.isNotEmpty) {
           options.headers['Authorization'] = 'Bearer $token';
+          if (kDebugMode) {
+            print(
+              '🔑 Sending Authorization header: Bearer ${token.substring(0, 20)}...',
+            );
+          }
+        } else {
+          if (kDebugMode) {
+            print('⚠️ No token found for Authorization header');
+          }
         }
       }
       handler.next(options);

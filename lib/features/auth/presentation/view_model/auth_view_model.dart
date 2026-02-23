@@ -57,7 +57,9 @@ class AuthViewModel extends Notifier<AuthState> {
 
     if (result.isRight()) {
       final entity = result.getOrElse(() => throw Exception('Login failed'));
-
+      // Add debug print for role and token
+      print('🔑 Logged in user role: \\${entity.role}');
+      print('🔑 Logged in user token: \\${entity.token.substring(0, 20)}...');
       // ✅ Save token securely BEFORE any API calls
       final apiClient = ref.read(apiClientProvider);
       await apiClient.saveToken(entity.token);
