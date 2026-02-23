@@ -61,10 +61,6 @@ class _BookingsScreenState extends ConsumerState<BookingsScreen> {
 
   Future<void> _cancelBooking(String bookingId) async {
     final bookingVM = ref.read(bookingViewModelProvider.notifier);
-    // Optimistic UI: remove booking immediately
-    setState(() {
-      bookings.removeWhere((b) => b.id == bookingId);
-    });
     await bookingVM.cancel(bookingId);
     _loadBookings(refresh: true);
   }
@@ -173,12 +169,18 @@ class _BookingsScreenState extends ConsumerState<BookingsScreen> {
                         const SizedBox(height: 8),
                         Row(
                           children: [
-                            Text(
-                              'Check-in: ${b.checkInDate.toLocal().toString().split(' ')[0]}',
+                            Expanded(
+                              child: Text(
+                                'Check-in: ${b.checkInDate.toLocal().toString().split(' ')[0]}',
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
                             const SizedBox(width: 16),
-                            Text(
-                              'Check-out: ${b.checkOutDate.toLocal().toString().split(' ')[0]}',
+                            Expanded(
+                              child: Text(
+                                'Check-out: ${b.checkOutDate.toLocal().toString().split(' ')[0]}',
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
                           ],
                         ),
@@ -279,17 +281,18 @@ class _BookingsScreenState extends ConsumerState<BookingsScreen> {
       },
     );
   }
+}
 
-  String _getFullImageUrl(String path) {
-    if (path.startsWith('http')) return path;
-    String normalized = path
-        .replaceAll('\\', '/')
-        .replaceAll('uploads/', '/uploads/');
-    if (!normalized.startsWith('/')) {
-      normalized = '/$normalized';
-    }
-    return 'http://10.205.75.20:5050$normalized';
+String _getFullImageUrl(String path) {
+  if (path.startsWith('http')) return path;
+  String normalized = path.replaceAll('\\', '/');
+  // Remove any leading slashes
+  normalized = normalized.replaceFirst(RegExp(r'^/+'), '');
+  // Ensure 'uploads/' is present at the start
+  if (!normalized.startsWith('uploads/')) {
+    normalized = 'uploads/$normalized';
   }
+  return 'http://10.205.75.20:5050/$normalized';
 }
 
 // Booking Details Page
@@ -301,7 +304,7 @@ class BookingDetailsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Booking Details')),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -309,6 +312,8 @@ class BookingDetailsPage extends StatelessWidget {
             Text(
               booking.listingTitle ?? 'Listing: ${booking.listingId}',
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              softWrap: true,
+              overflow: TextOverflow.ellipsis,
             ),
             const SizedBox(height: 8),
             if (booking.listingImages != null &&
@@ -318,16 +323,28 @@ class BookingDetailsPage extends StatelessWidget {
                 child: Image.network(
                   _getFullImageUrl(booking.listingImages!.first),
                   height: 180,
+                  width: double.infinity,
                   fit: BoxFit.cover,
                 ),
               ),
             const SizedBox(height: 8),
             if (booking.listingLocation != null)
-              Text('Location: ${booking.listingLocation}'),
+              Text('Location: ${booking.listingLocation}', softWrap: true),
             if (booking.listingPropertyType != null)
-              Text('Type: ${booking.listingPropertyType}'),
+              Text('Type: ${booking.listingPropertyType}', softWrap: true),
             if (booking.listingDescription != null)
-              Text('Description: ${booking.listingDescription}'),
+              Text(
+                'Description: ${booking.listingDescription}',
+                softWrap: true,
+              ),
+            if (booking.listingMaxGuests != null)
+              Text('Max Guests: ${booking.listingMaxGuests}'),
+            if (booking.listingMinStay != null)
+              Text('Min Stay: ${booking.listingMinStay} nights'),
+            if (booking.listingCancellationPolicy != null)
+              Text('Cancellation: ${booking.listingCancellationPolicy}'),
+            if (booking.listingHouseRules != null)
+              Text('House Rules: ${booking.listingHouseRules}', softWrap: true),
             const SizedBox(height: 8),
             Text(
               'Check-in: ${booking.checkInDate.toLocal().toString().split(' ')[0]}',
@@ -368,9 +385,7 @@ class BookingDetailsPage extends StatelessWidget {
                   itemCount: 5,
                   itemBuilder: (context, _) =>
                       const Icon(Icons.star, color: Colors.amber),
-                  onRatingUpdate: (rating) {
-                    // TODO: submit rating
-                  },
+                  onRatingUpdate: (rating) {},
                 ),
               ),
           ],
