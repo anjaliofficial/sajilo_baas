@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/booking_providers.dart';
@@ -137,7 +138,25 @@ class _BookingPageState extends ConsumerState<BookingPage> {
         SnackBar(content: Text('Booking created! Status: ${booking.status}')),
       );
 
-      Navigator.pop(context); // Back to listing
+      Navigator.pop(context);
+    } on DioError catch (e) {
+      final response = e.response;
+      if (response != null &&
+          response.statusCode == 409 &&
+          response.data is Map &&
+          response.data['message'] == 'Selected dates are not available') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Selected dates are not available. Please choose different dates.',
+            ),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to create booking: ${e.message}')),
+        );
+      }
     } catch (e) {
       ScaffoldMessenger.of(
         context,
