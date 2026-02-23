@@ -141,7 +141,7 @@ class _BookingPageState extends ConsumerState<BookingPage> {
     } catch (e) {
       String errorMsg = 'Failed to create booking';
 
-      if (e is DioError) {
+      if (e is DioException) {
         if (e.response?.data is Map && e.response?.data['message'] != null) {
           errorMsg = e.response!.data['message'].toString();
         } else if (e.message != null) {
