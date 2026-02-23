@@ -32,8 +32,12 @@ class _BookingPageState extends ConsumerState<BookingPage> {
   DateTime? checkOut;
 
   double totalPrice = 0;
-
   List<DateTime> bookedDates = [];
+
+  // Inline toast state
+  String? _toastMessage;
+  bool _toastIsError = false;
+  bool _showToast = false;
 
   @override
   void initState() {
@@ -49,14 +53,8 @@ class _BookingPageState extends ConsumerState<BookingPage> {
       setState(() {
         bookedDates = dates;
       });
-    } catch (e, stack) {
-      print('UI: Error fetching booked dates: $e\n$stack');
-      setState(() {
-        bookedDates = [];
-      });
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Could not load booked dates.')));
+    } catch (e) {
+      _showInlineToast('Could not load booked dates.', isError: true);
     }
   }
 
@@ -68,18 +66,21 @@ class _BookingPageState extends ConsumerState<BookingPage> {
       lastDate: DateTime.now().add(const Duration(days: 365)),
       selectableDayPredicate: (date) => !_isDateBooked(date),
     );
+
     if (picked != null) {
       setState(() {
         checkIn = picked;
-        // Reset check-out if it's before check-in
-        if (checkOut != null && checkOut!.isBefore(checkIn!)) checkOut = null;
+        if (checkOut != null && checkOut!.isBefore(checkIn!)) {
+          checkOut = null;
+        }
         _calculatePrice();
       });
     }
   }
 
   Future<void> _selectCheckOut(BuildContext context) async {
-    if (checkIn == null) return; // Must select check-in first
+    if (checkIn == null) return;
+
     final picked = await showDatePicker(
       context: context,
       initialDate: checkIn!.add(const Duration(days: 1)),
@@ -87,6 +88,7 @@ class _BookingPageState extends ConsumerState<BookingPage> {
       lastDate: DateTime.now().add(const Duration(days: 366)),
       selectableDayPredicate: (date) => !_isDateBooked(date),
     );
+
     if (picked != null) {
       setState(() {
         checkOut = picked;
@@ -104,22 +106,17 @@ class _BookingPageState extends ConsumerState<BookingPage> {
   void _calculatePrice() {
     if (checkIn != null && checkOut != null) {
       final nights = checkOut!.difference(checkIn!).inDays;
-      setState(() {
-        totalPrice = nights * widget.pricePerNight;
-      });
+      totalPrice = nights * widget.pricePerNight;
     } else {
-      setState(() {
-        totalPrice = 0;
-      });
+      totalPrice = 0;
     }
   }
 
   Future<void> _bookNow() async {
     if (checkIn == null || checkOut == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select check-in and check-out dates'),
-        ),
+      _showInlineToast(
+        'Please select check-in and check-out dates',
+        isError: true,
       );
       return;
     }
@@ -127,41 +124,49 @@ class _BookingPageState extends ConsumerState<BookingPage> {
     final createBooking = ref.read(createBookingProvider);
 
     try {
-      final booking = await createBooking(
+      await createBooking(
         listingId: widget.listingId,
         checkIn: checkIn!,
         checkOut: checkOut!,
         pricePerNight: widget.pricePerNight,
       );
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Booking created! Status: ${booking.status}')),
-      );
+      _showInlineToast('Booking successful!', isError: false);
 
-      Navigator.pop(context);
-    } on DioError catch (e) {
-      final response = e.response;
-      if (response != null &&
-          response.statusCode == 409 &&
-          response.data is Map &&
-          response.data['message'] == 'Selected dates are not available') {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Selected dates are not available. Please choose different dates.',
-            ),
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to create booking: ${e.message}')),
-        );
+      await Future.delayed(const Duration(seconds: 1));
+
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, '/my-bookings');
       }
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Failed to create booking: $e')));
+      String errorMsg = 'Failed to create booking';
+
+      if (e is DioError) {
+        if (e.response?.data is Map && e.response?.data['message'] != null) {
+          errorMsg = e.response!.data['message'].toString();
+        } else if (e.message != null) {
+          errorMsg = e.message!;
+        }
+      }
+
+      _showInlineToast(errorMsg, isError: true);
     }
+  }
+
+  void _showInlineToast(String message, {required bool isError}) {
+    setState(() {
+      _toastMessage = message;
+      _toastIsError = isError;
+      _showToast = true;
+    });
+
+    Future.delayed(const Duration(seconds: 2), () {
+      if (mounted) {
+        setState(() {
+          _showToast = false;
+        });
+      }
+    });
   }
 
   @override
@@ -203,51 +208,85 @@ class _BookingPageState extends ConsumerState<BookingPage> {
               alignment: Alignment.centerLeft,
               child: Text(
                 'Select Payment Method:',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ),
             RadioListTile<String>(
               title: const Text('Cash'),
               value: 'cash',
               groupValue: _selectedPayment,
-              onChanged: (value) {
-                setState(() {
-                  _selectedPayment = value;
-                });
-              },
+              onChanged: (v) => setState(() => _selectedPayment = v),
             ),
             RadioListTile<String>(
               title: const Text('eSewa'),
               value: 'esewa',
               groupValue: _selectedPayment,
-              onChanged: (value) {
-                setState(() {
-                  _selectedPayment = value;
-                });
-              },
+              onChanged: (v) => setState(() => _selectedPayment = v),
             ),
             RadioListTile<String>(
               title: const Text('Other'),
               value: 'other',
               groupValue: _selectedPayment,
-              onChanged: (value) {
-                setState(() {
-                  _selectedPayment = value;
-                });
-              },
+              onChanged: (v) => setState(() => _selectedPayment = v),
             ),
             const SizedBox(height: 30),
-            Center(
-              child: SizedBox(
-                width: 220,
-                child: ElevatedButton(
-                  onPressed: _bookNow,
-                  child: const Text('Book Now', style: TextStyle(fontSize: 18)),
+            Column(
+              children: [
+                SizedBox(
+                  width: 220,
+                  child: ElevatedButton(
+                    onPressed: _bookNow,
+                    child: const Text(
+                      'Book Now',
+                      style: TextStyle(fontSize: 18),
+                    ),
+                  ),
                 ),
-              ),
+                const SizedBox(height: 12),
+                if (_showToast && _toastMessage != null)
+                  _InlineToast(message: _toastMessage!, isError: _toastIsError),
+              ],
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// Inline toast widget
+class _InlineToast extends StatelessWidget {
+  final String message;
+  final bool isError;
+
+  const _InlineToast({required this.message, required this.isError});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      decoration: BoxDecoration(
+        color: isError ? Colors.red[400] : Colors.green[400],
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            isError ? Icons.error_outline : Icons.check_circle_outline,
+            color: Colors.white,
+          ),
+          const SizedBox(width: 8),
+          Flexible(
+            child: Text(
+              message,
+              style: const TextStyle(color: Colors.white, fontSize: 15),
+            ),
+          ),
+        ],
       ),
     );
   }
