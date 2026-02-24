@@ -9,13 +9,14 @@ class BookingDetailsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String _getFullImageUrl(String path) {
+    String getFullImageUrl(String path) {
       if (path.startsWith('http')) return path;
       String normalized = path
           .replaceAll('\\', '/')
           .replaceFirst(RegExp(r'^/+'), '');
-      if (!normalized.startsWith('uploads/'))
+      if (!normalized.startsWith('uploads/')) {
         normalized = 'uploads/$normalized';
+      }
       return 'http://10.205.75.20:5050/$normalized';
     }
 
@@ -36,7 +37,7 @@ class BookingDetailsPage extends StatelessWidget {
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: Image.network(
-                  _getFullImageUrl(booking.listingImages!.first),
+                  getFullImageUrl(booking.listingImages!.first),
                   height: 180,
                   width: double.infinity,
                   fit: BoxFit.cover,
@@ -70,17 +71,18 @@ class BookingDetailsPageFull extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    String _getFullImageUrl(String path) {
+    String getFullImageUrl(String path) {
       if (path.startsWith('http')) return path;
       String normalized = path
           .replaceAll('\\', '/')
           .replaceFirst(RegExp(r'^/+'), '');
-      if (!normalized.startsWith('uploads/'))
+      if (!normalized.startsWith('uploads/')) {
         normalized = 'uploads/$normalized';
+      }
       return 'http://10.205.75.20:5050/$normalized';
     }
 
-    Future<void> _cancelBooking(BuildContext context) async {
+    Future<void> cancelBooking(BuildContext context) async {
       try {
         final bookingVM = ref.read(bookingViewModelProvider.notifier);
         await bookingVM.cancel(booking.id);
@@ -119,7 +121,7 @@ class BookingDetailsPageFull extends ConsumerWidget {
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
                 child: Image.network(
-                  _getFullImageUrl(booking.listingImages!.first),
+                  getFullImageUrl(booking.listingImages!.first),
                   height: 200,
                   width: double.infinity,
                   fit: BoxFit.cover,
@@ -180,7 +182,7 @@ class BookingDetailsPageFull extends ConsumerWidget {
                 ElevatedButton(
                   onPressed: booking.status.toLowerCase() == 'cancelled'
                       ? null
-                      : () => _cancelBooking(context),
+                      : () => cancelBooking(context),
                   style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
                   child: const Text('Cancel Booking'),
                 ),
