@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sajilo_baas/features/booking/presentation/providers/booking_providers.dart';
+import 'package:sajilo_baas/features/dashboard/presentation/pages/messages_screen.dart';
 
 import 'app_bottom_navbar.dart';
 import '../pages/dashboard_page.dart';
 import '../pages/favorites_page.dart';
 import '../pages/bookings_page.dart';
+// import '../../message/presentation/pages/Threads page.dart';
+import '../pages/profile_screen.dart';
 
 class CustomerMainNavigation extends ConsumerStatefulWidget {
   const CustomerMainNavigation({super.key});
@@ -23,18 +26,10 @@ class _CustomerMainNavigationState
   Widget build(BuildContext context) {
     final List<Widget> pages = [
       DashboardScreen(),
-      // Placeholder for MessagesScreen
-      Scaffold(
-        appBar: AppBar(title: const Text('Messages')),
-        body: const Center(child: Text('Messages will appear here')),
-      ),
+      MessagesScreen(), // from Threads page.dart
       FavoritesScreen(),
       BookingsScreen(),
-      // Placeholder for ProfileScreen
-      Scaffold(
-        appBar: AppBar(title: const Text('Profile')),
-        body: const Center(child: Text('Profile details will appear here')),
-      ),
+      ProfileScreen(),
     ];
 
     final safeIndex = (_currentIndex < pages.length) ? _currentIndex : 0;

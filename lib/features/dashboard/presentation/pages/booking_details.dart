@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import '../../../booking/presentation/providers/booking_providers.dart';
+import 'package:sajilo_baas/core/api/api_endpoints.dart';
 
 class BookingDetailsPage extends StatelessWidget {
   final dynamic booking;
@@ -17,7 +18,7 @@ class BookingDetailsPage extends StatelessWidget {
       if (!normalized.startsWith('uploads/')) {
         normalized = 'uploads/$normalized';
       }
-      return 'http://10.205.75.20:5050/$normalized';
+      return '${ApiEndpoints.staticBaseUrl}/$normalized';
     }
 
     return Scaffold(
@@ -79,7 +80,7 @@ class BookingDetailsPageFull extends ConsumerWidget {
       if (!normalized.startsWith('uploads/')) {
         normalized = 'uploads/$normalized';
       }
-      return 'http://10.205.75.20:5050/$normalized';
+      return '${ApiEndpoints.staticBaseUrl}/$normalized';
     }
 
     Future<void> cancelBooking(BuildContext context) async {
@@ -188,11 +189,16 @@ class BookingDetailsPageFull extends ConsumerWidget {
                 ),
                 const SizedBox(width: 12),
                 ElevatedButton(
-                  onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Chat feature not implemented yet'),
-                    ),
-                  ),
+                  onPressed: () {
+                    Navigator.pushNamed(
+                      context,
+                      '/chat',
+                      arguments: {
+                        'hostId': booking.hostId,
+                        'listingId': booking.listingId,
+                      },
+                    );
+                  },
                   child: const Text('Chat Host'),
                 ),
               ],

@@ -23,29 +23,22 @@ class MessageEntity {
     this.media,
   });
 
-  // Add copyWith for immutability
   MessageEntity copyWith({
-    String? id,
-    String? senderId,
-    String? receiverId,
-    String? listingId,
     String? content,
-    String? type,
     bool? read,
     String? status,
-    DateTime? createdAt,
     List<MessageMedia>? media,
   }) {
     return MessageEntity(
-      id: id ?? this.id,
-      senderId: senderId ?? this.senderId,
-      receiverId: receiverId ?? this.receiverId,
-      listingId: listingId ?? this.listingId,
+      id: id,
+      senderId: senderId,
+      receiverId: receiverId,
+      listingId: listingId,
       content: content ?? this.content,
-      type: type ?? this.type,
+      type: type,
       read: read ?? this.read,
       status: status ?? this.status,
-      createdAt: createdAt ?? this.createdAt,
+      createdAt: createdAt,
       media: media ?? this.media,
     );
   }
@@ -53,7 +46,7 @@ class MessageEntity {
 
 class MessageMedia {
   final String url;
-  final String type;
+  final String type; // 'image' | 'video'
   final String? fileName;
 
   MessageMedia({required this.url, required this.type, this.fileName});

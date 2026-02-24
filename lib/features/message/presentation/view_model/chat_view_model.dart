@@ -1,3 +1,4 @@
+// import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import '../../domain/entities/message_entity.dart';
 import '../../domain/usecases/get_conversation.dart';
@@ -12,11 +13,16 @@ class ChatViewModel extends StateNotifier<ChatState> {
     : super(ChatState(messages: [], loading: true));
 
   Future<void> load(String otherUserId, String listingId) async {
-    final msgs = await getConversation(otherUserId, listingId);
-    state = state.copyWith(messages: msgs, loading: false);
+    try {
+      final msgs = await getConversation(otherUserId, listingId);
+      state = state.copyWith(messages: msgs, loading: false);
+    } catch (_) {
+      state = state.copyWith(messages: [], loading: false);
+    }
   }
 
   Future<void> send(String receiverId, String listingId, String text) async {
+    if (text.isEmpty) return;
     await sendMessage(
       receiverId: receiverId,
       listingId: listingId,

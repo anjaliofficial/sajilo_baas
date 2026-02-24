@@ -63,4 +63,14 @@ class ApiEndpoints {
   static const String cancelBooking = '/bookings/cancel';
   // File upload
   static const String uploadFile = '/files/upload';
+  // Message endpoints
+  // Message endpoints
+  static const String getThreads = '/messages/threads';
+  static const String getConversation =
+      '/messages'; // Use /messages/{otherUserId}/{listingId}
+  static const String sendMessage = '/messages'; // POST to /messages
+  static const String markConversationRead = '/messages/read';
+  static const String editMessage = '/messages'; // PUT to /messages/{messageId}
+  static const String deleteMessage =
+      '/messages'; // DELETE to /messages/{messageId}
 }

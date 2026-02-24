@@ -14,7 +14,6 @@ class MessageModel extends MessageEntity {
     super.media,
   });
 
-  // Factory constructor for JSON
   factory MessageModel.fromJson(Map<String, dynamic> json) {
     return MessageModel(
       id: json['_id'],
@@ -40,19 +39,5 @@ class MessageModel extends MessageEntity {
     );
   }
 
-  // Convert model to entity
-  MessageEntity toEntity() {
-    return MessageEntity(
-      id: id,
-      senderId: senderId,
-      receiverId: receiverId,
-      listingId: listingId,
-      content: content,
-      type: type,
-      read: read,
-      status: status,
-      createdAt: createdAt,
-      media: media,
-    );
-  }
+  MessageEntity toEntity() => this;
 }

@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sajilo_baas/features/message/presentation/pages/chat_page.dart';
 import '../providers/threads_provider.dart';
-import '../../domain/entities/thread_entity.dart';
 
-class MessagesScreen extends ConsumerWidget {
-  const MessagesScreen({super.key});
+class ThreadsPage extends ConsumerWidget {
+  const ThreadsPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

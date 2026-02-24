@@ -12,4 +12,13 @@ class ThreadEntity {
     required this.lastMessage,
     required this.unreadCount,
   });
+
+  ThreadEntity copyWith({MessageEntity? lastMessage, int? unreadCount}) {
+    return ThreadEntity(
+      otherUserId: otherUserId,
+      listingId: listingId,
+      lastMessage: lastMessage ?? this.lastMessage,
+      unreadCount: unreadCount ?? this.unreadCount,
+    );
+  }
 }

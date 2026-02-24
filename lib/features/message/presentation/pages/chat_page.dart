@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sajilo_baas/features/message/domain/entities/message_entity.dart';
 import 'package:sajilo_baas/features/message/presentation/providers/message_providers.dart';
 import '../widgets/message_bubble.dart';
 
