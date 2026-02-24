@@ -1,70 +1,48 @@
 import 'package:dio/dio.dart';
+import 'package:sajilo_baas/core/api/api_client.dart';
+import 'package:sajilo_baas/core/api/api_endpoints.dart';
 import '../../model/message_model.dart';
 
 class MessageApiDatasource {
-  final Dio dio;
+  final ApiClient apiClient;
 
-  MessageApiDatasource(this.dio);
+  MessageApiDatasource(this.apiClient);
 
-  // ------------------------
-  // GET conversation
-  // ------------------------
-  Future<List<MessageModel>> getConversation(
-    String otherUserId,
-    String listingId, {
+  Future<List<MessageModel>> getConversation({
+    required String otherUserId,
+    required String listingId,
     int limit = 20,
     String? cursor,
   }) async {
-    final url = '/api/messages/$otherUserId/$listingId';
-    final params = {'limit': limit, 'cursor': cursor};
-    print('🔗 GET Conversation URL: $url');
-    print('🔗 GET Conversation Params: $params');
-    final res = await dio.get(
-      url,
-      queryParameters: params,
+    final response = await apiClient.dio.get(
+      '${ApiEndpoints.getConversation}/$otherUserId/$listingId',
+      queryParameters: {'limit': limit, 'cursor': cursor},
     );
 
-    final List<dynamic> data = res.data['data'] ?? [];
+    final data = response.data['messages'] as List<dynamic>;
     return data.map((e) => MessageModel.fromJson(e)).toList();
   }
 
-  // ------------------------
-  // SEND message
-  // ------------------------
-  Future<MessageModel> sendMessage(Map<String, dynamic> body) async {
-    print('🔗 SEND Message URL: /api/messages/');
-    print('🔗 SEND Message Body: $body');
-    final res = await dio.post('/api/messages/', data: body);
-    return MessageModel.fromJson(res.data['data']);
+  Future<MessageModel> sendMessage({
+    required String receiverId,
+    required String listingId,
+    required String content,
+  }) async {
+    final response = await apiClient.dio.post(
+      ApiEndpoints.sendMessage,
+      data: {
+        'receiverId': receiverId,
+        'listingId': listingId,
+        'content': content,
+      },
+    );
+    return MessageModel.fromJson(response.data);
   }
 
-  // ------------------------
-  // MARK conversation read
-  // ------------------------
-  Future<void> markRead(Map<String, dynamic> body) async {
-    print('🔗 MARK Read URL: /api/messages/read');
-    print('🔗 MARK Read Body: $body');
-    await dio.patch('/api/messages/read', data: body);
-  }
-
-  // ------------------------
-  // DELETE message
-  // ------------------------
-  Future<void> deleteMessage(
-    String messageId,
-    Map<String, dynamic> body,
-  ) async {
-    print('🔗 DELETE Message URL: /api/messages/$messageId');
-    print('🔗 DELETE Message Body: $body');
-    await dio.delete('/api/messages/$messageId', data: body);
-  }
-
-  // ------------------------
-  // GET threads
-  // ------------------------
-  Future<List<Map<String, dynamic>>> getThreads() async {
-    print('🔗 GET Threads URL: /api/messages/threads');
-    final res = await dio.get('/api/messages/threads');
-    return List<Map<String, dynamic>>.from(res.data['data'] ?? []);
+  Future<void> markRead(String conversationId) async {
+    await apiClient.dio.post(
+      ApiEndpoints.markConversationRead,
+      data: {'conversationId': conversationId},
+    );
   }
 }

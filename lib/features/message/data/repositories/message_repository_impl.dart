@@ -1,47 +1,25 @@
-import 'dart:async';
 import 'package:sajilo_baas/features/message/data/model/message_model.dart';
-import 'package:sajilo_baas/features/message/domain/entities/thread_entity.dart';
+import 'package:sajilo_baas/features/message/data/datasources/remote/message_api_datasource.dart';
 
-import '../../domain/entities/message_entity.dart';
+import 'package:sajilo_baas/features/message/domain/entities/message_entity.dart';
+import '../../domain/entities/thread_entity.dart';
 import '../../domain/repositories/message_repository.dart';
-import '../datasources/remote/message_api_datasource.dart';
-import '../datasources/remote/message_socket_datasource.dart';
 
 class MessageRepositoryImpl implements MessageRepository {
-  final MessageApiDatasource api;
-  final StreamController<MessageEntity> _liveController =
-      StreamController.broadcast();
+  final MessageApiDatasource datasource;
 
-  MessageRepositoryImpl(this.api);
+  MessageRepositoryImpl({required this.datasource});
 
-  // Socket.io
-  late MessageSocketDatasource socket;
-
-  void initSocket(String token) {
-    socket = MessageSocketDatasource();
-    socket.connect(token);
-    socket.onReceiveMessage(emitLiveMessage);
-  }
-
-  void emitLiveMessage(MessageEntity message) {
-    _liveController.add(message);
-  }
-
-  @override
-  Stream<MessageEntity> liveMessages() => _liveController.stream;
-
-  // ------------------------
-  // Conversations
-  // ------------------------
   @override
   Future<List<MessageEntity>> getConversation(
     String otherUserId,
     String listingId,
   ) async {
-    final msgs = await api.getConversation(otherUserId, listingId);
-    return msgs
-        .map((m) => m.toEntity())
-        .toList(); // convert MessageModel -> MessageEntity
+    final models = await datasource.getConversation(
+      otherUserId: otherUserId,
+      listingId: listingId,
+    );
+    return models.map((m) => m.toEntity()).toList();
   }
 
   @override
@@ -51,38 +29,37 @@ class MessageRepositoryImpl implements MessageRepository {
     String? content,
     List<Map<String, dynamic>>? media,
   }) async {
-    final body = {
-      'receiverId': receiverId,
-      'listingId': listingId,
-      'content': content ?? '',
-      if (media != null) 'media': media,
-    };
-    await api.sendMessage(body);
+    await datasource.sendMessage(
+      receiverId: receiverId,
+      listingId: listingId,
+      content: content ?? '',
+      // Add media support if needed in datasource
+    );
   }
 
   @override
-  Future<void> markConversationRead(String otherUserId, String listingId) {
-    final body = {'otherUserId': otherUserId, 'listingId': listingId};
-    return api.markRead(body);
+  Future<void> markConversationRead(
+    String otherUserId,
+    String listingId,
+  ) async {
+    // Implement this in datasource if needed
+    // await datasource.markConversationRead(otherUserId, listingId);
   }
 
-  @override
-  Future<void> deleteMessage(String messageId, String deleteType) {
-    final body = {'deleteType': deleteType};
-    return api.deleteMessage(messageId, body);
+  Future<void> deleteMessage(String messageId, String deleteType) async {
+    // Implement this in datasource if needed
+    // await datasource.deleteMessage(messageId, deleteType);
   }
 
-  @override
   Future<List<ThreadEntity>> getThreads() async {
-    final raw = await api
-        .getThreads(); // API should return List<Map<String,dynamic>>
-    return raw.map((e) {
-      return ThreadEntity(
-        otherUserId: e['otherUser']['_id'],
-        listingId: e['listing'],
-        unreadCount: e['unreadCount'],
-        lastMessage: MessageModel.fromJson(e['lastMessage']).toEntity(),
-      );
-    }).toList();
+    // Implement this in datasource if needed
+    // final threads = await datasource.getThreads();
+    // return threads.map((t) => t.toEntity()).toList();
+    return [];
+  }
+
+  Stream<MessageEntity> liveMessages() {
+    // Implement this if you have a stream source
+    return const Stream.empty();
   }
 }

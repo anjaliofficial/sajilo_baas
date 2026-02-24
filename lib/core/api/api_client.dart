@@ -1,14 +1,16 @@
+import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:dio_smart_retry/dio_smart_retry.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'api_endpoints.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 /// Riverpod provider for ApiClient
 final apiClientProvider = Provider<ApiClient>(
-  (ref) => ApiClient(baseUrl: ApiEndpoints.baseUrl),
+  (ref) => ApiClient(Dio(), baseUrl: ApiEndpoints.baseUrl),
 );
 
 class ApiClient {
@@ -16,8 +18,7 @@ class ApiClient {
   final _secureStorage = const FlutterSecureStorage();
   static const _tokenKey = 'auth_token';
 
-  /// Constructor
-  ApiClient({required String baseUrl}) {
+  ApiClient(Dio dio, {required String baseUrl}) {
     _dio = Dio(
       BaseOptions(
         baseUrl: baseUrl,
@@ -49,9 +50,7 @@ class ApiClient {
           if (path.contains('/auth/login') || path.contains('/auth/register')) {
             return false;
           }
-          if (kDebugMode) {
-            print('Retrying request: $path');
-          }
+          if (kDebugMode) print('Retrying request: $path');
           return true;
         },
       ),
@@ -98,9 +97,7 @@ class ApiClient {
   Future<void> saveToken(String token) async {
     try {
       await _secureStorage.write(key: _tokenKey, value: token);
-      if (kDebugMode) {
-        print('✅ Token saved successfully: ${token.substring(0, 20)}...');
-      }
+      if (kDebugMode) print('✅ Token saved: ${token.substring(0, 20)}...');
     } catch (e) {
       if (kDebugMode) print('❌ Error saving token: $e');
     }
@@ -120,9 +117,9 @@ class ApiClient {
       final token = await _secureStorage.read(key: _tokenKey);
       if (kDebugMode) {
         if (token != null && token.isNotEmpty) {
-          print('✅ Token read successfully: ${token.substring(0, 20)}...');
+          print('✅ Token read: ${token.substring(0, 20)}...');
         } else {
-          print('⚠️ No token found in secure storage');
+          print('⚠️ No token found');
         }
       }
       return token;
@@ -171,13 +168,7 @@ class _AuthInterceptor extends Interceptor {
         if (token != null && token.isNotEmpty) {
           options.headers['Authorization'] = 'Bearer $token';
           if (kDebugMode) {
-            print(
-              '🔑 Sending Authorization header: Bearer ${token.substring(0, 20)}...',
-            );
-          }
-        } else {
-          if (kDebugMode) {
-            print('⚠️ No token found for Authorization header');
+            print('🔑 Sending Authorization: ${token.substring(0, 20)}...');
           }
         }
       }

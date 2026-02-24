@@ -10,8 +10,10 @@ import '../state/profile_state.dart';
 import '../view_model/profile_view_model.dart';
 
 // ApiClient provider
+import 'package:dio/dio.dart';
+
 final apiClientProvider = Provider<ApiClient>(
-  (ref) => ApiClient(baseUrl: ApiEndpoints.baseUrl),
+  (ref) => ApiClient(Dio(), baseUrl: ApiEndpoints.baseUrl),
 );
 
 // Remote datasource provider
