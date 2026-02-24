@@ -3,16 +3,26 @@ import 'package:sajilo_baas/core/api/api_endpoints.dart';
 import '../../model/message_model.dart';
 
 class MessageApiDatasource {
-
-    Future<void> editMessage(String messageId, String newContent) async {
-      final response = await apiClient.dio.put(
-        '${ApiEndpoints.editMessage}/$messageId',
-        data: {'content': newContent},
-      );
-      if (response.statusCode != 200 || response.data['success'] != true) {
-        throw Exception(response.data['message'] ?? 'Failed to edit message');
-      }
+  Future<void> deleteMessage(String messageId, String deleteType) async {
+    final response = await apiClient.dio.delete(
+      '${ApiEndpoints.deleteMessage}/$messageId',
+      data: {'deleteType': deleteType},
+    );
+    if (response.statusCode != 200 || response.data['success'] != true) {
+      throw Exception(response.data['message'] ?? 'Failed to delete message');
     }
+  }
+
+  Future<void> editMessage(String messageId, String newContent) async {
+    final response = await apiClient.dio.put(
+      '${ApiEndpoints.editMessage}/$messageId',
+      data: {'content': newContent},
+    );
+    if (response.statusCode != 200 || response.data['success'] != true) {
+      throw Exception(response.data['message'] ?? 'Failed to edit message');
+    }
+  }
+
   final ApiClient apiClient;
 
   MessageApiDatasource(this.apiClient);

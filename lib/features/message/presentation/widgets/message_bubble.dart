@@ -208,6 +208,58 @@ class MessageBubble extends ConsumerWidget {
                                 otherUserId,
                                 listingId,
                               );
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: AnimatedOpacity(
+                                opacity: 1.0,
+                                duration: Duration(milliseconds: 400),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        Color(0xFF1976D2),
+                                        Color(0xFF42A5F5),
+                                      ],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                    ),
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  padding: EdgeInsets.symmetric(
+                                    vertical: 8,
+                                    horizontal: 8,
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.delete_forever,
+                                        color: Colors.white,
+                                      ),
+                                      SizedBox(width: 12),
+                                      Expanded(
+                                        child: Text(
+                                          'Message deleted for everyone',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              backgroundColor: Colors.transparent,
+                              elevation: 0,
+                              behavior: SnackBarBehavior.floating,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              margin: EdgeInsets.all(18),
+                              duration: Duration(seconds: 2),
+                            ),
+                          );
                         } else if (result == 'delete_me') {
                           await ref
                               .read(chatViewModelProvider.notifier)
@@ -217,6 +269,58 @@ class MessageBubble extends ConsumerWidget {
                                 otherUserId,
                                 listingId,
                               );
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: AnimatedOpacity(
+                                opacity: 1.0,
+                                duration: Duration(milliseconds: 400),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        Color(0xFF1976D2),
+                                        Color(0xFF42A5F5),
+                                      ],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                    ),
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  padding: EdgeInsets.symmetric(
+                                    vertical: 8,
+                                    horizontal: 8,
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.delete_outline,
+                                        color: Colors.white,
+                                      ),
+                                      SizedBox(width: 12),
+                                      Expanded(
+                                        child: Text(
+                                          'Message deleted for you',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              backgroundColor: Colors.transparent,
+                              elevation: 0,
+                              behavior: SnackBarBehavior.floating,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              margin: EdgeInsets.all(18),
+                              duration: Duration(seconds: 2),
+                            ),
+                          );
                         } else if (result == 'copy') {
                           await Clipboard.setData(
                             ClipboardData(text: message.content),
