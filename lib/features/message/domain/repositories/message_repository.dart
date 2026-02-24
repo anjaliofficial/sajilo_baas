@@ -1,3 +1,5 @@
+import 'package:sajilo_baas/features/message/domain/entities/message_entity.dart';
+
 abstract class MessageRepository {
   Future<List<MessageEntity>> getConversation(
     String otherUserId,

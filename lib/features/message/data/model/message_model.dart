@@ -11,8 +11,10 @@ class MessageModel extends MessageEntity {
     required super.read,
     required super.status,
     required super.createdAt,
+    super.media,
   });
 
+  // Factory constructor for JSON
   factory MessageModel.fromJson(Map<String, dynamic> json) {
     return MessageModel(
       id: json['_id'],
@@ -21,9 +23,36 @@ class MessageModel extends MessageEntity {
       listingId: json['listing'],
       content: json['content'] ?? '',
       type: json['type'],
-      read: json['read'],
-      status: json['status'],
+      read: json['read'] ?? false,
+      status: json['status'] ?? 'sent',
       createdAt: DateTime.parse(json['createdAt']),
+      media: json['media'] != null
+          ? (json['media'] as List<dynamic>)
+                .map(
+                  (m) => MessageMedia(
+                    url: m['url'],
+                    type: m['kind'],
+                    fileName: m['fileName'],
+                  ),
+                )
+                .toList()
+          : null,
+    );
+  }
+
+  // Convert model to entity
+  MessageEntity toEntity() {
+    return MessageEntity(
+      id: id,
+      senderId: senderId,
+      receiverId: receiverId,
+      listingId: listingId,
+      content: content,
+      type: type,
+      read: read,
+      status: status,
+      createdAt: createdAt,
+      media: media,
     );
   }
 }

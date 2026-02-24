@@ -6,16 +6,25 @@ class MessageSocketDatasource {
 
   void connect(String token) {
     socket = IO.io(
-      'http://YOUR_SERVER:5050',
-      IO.OptionBuilder().setTransports(['websocket']).setExtraHeaders({
-        'Authorization': 'Bearer $token',
-      }).build(),
+      'http://YOUR_SERVER_IP:5050',
+      IO.OptionBuilder()
+          .setTransports(['websocket'])
+          .enableAutoConnect()
+          .setExtraHeaders({'Authorization': 'Bearer $token'})
+          .build(),
     );
+
+    socket.connect();
   }
 
-  Stream<MessageModel> onMessage() {
-    return socket
-        .on('receiveMessage')
-        .map((data) => MessageModel.fromJson(data));
+  void onReceiveMessage(Function(MessageModel) onMessage) {
+    socket.on('receiveMessage', (data) {
+      onMessage(MessageModel.fromJson(data));
+    });
+  }
+
+  void disconnect() {
+    socket.disconnect();
+    socket.dispose();
   }
 }

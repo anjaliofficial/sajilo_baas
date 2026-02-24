@@ -3,27 +3,57 @@ import '../../model/message_model.dart';
 
 class MessageApiDatasource {
   final Dio dio;
+
   MessageApiDatasource(this.dio);
 
+  // ------------------------
+  // GET conversation
+  // ------------------------
   Future<List<MessageModel>> getConversation(
     String otherUserId,
-    String listingId,
-  ) async {
-    final res = await dio.get('/messages/$otherUserId/$listingId');
-    return (res.data['data'] as List)
-        .map((e) => MessageModel.fromJson(e))
-        .toList();
+    String listingId, {
+    int limit = 20,
+    String? cursor,
+  }) async {
+    final res = await dio.get(
+      '/api/messages/$otherUserId/$listingId',
+      queryParameters: {'limit': limit, 'cursor': cursor},
+    );
+
+    final List<dynamic> data = res.data['data'] ?? [];
+    return data.map((e) => MessageModel.fromJson(e)).toList();
   }
 
-  Future<void> sendMessage(Map<String, dynamic> body) async {
-    await dio.post('/messages', data: body);
+  // ------------------------
+  // SEND message
+  // ------------------------
+  Future<MessageModel> sendMessage(Map<String, dynamic> body) async {
+    final res = await dio.post('/api/messages/', data: body);
+    return MessageModel.fromJson(res.data['data']);
   }
 
+  // ------------------------
+  // MARK conversation read
+  // ------------------------
   Future<void> markRead(Map<String, dynamic> body) async {
-    await dio.patch('/messages/read', data: body);
+    await dio.patch('/api/messages/read', data: body);
   }
 
-  Future<void> deleteMessage(String id, String deleteType) async {
-    await dio.delete('/messages/$id', data: {'deleteType': deleteType});
+  // ------------------------
+  // DELETE message
+  // ------------------------
+  Future<void> deleteMessage(
+    String messageId,
+    Map<String, dynamic> body,
+  ) async {
+    await dio.delete('/api/messages/$messageId', data: body);
+  }
+
+  // ------------------------
+  // GET threads
+  // ------------------------
+  Future<List<Map<String, dynamic>>> getThreads() async {
+    final res = await dio.get('/api/messages/threads');
+    return List<Map<String, dynamic>>.from(res.data['data'] ?? []);
   }
 }

@@ -1,5 +1,8 @@
-send_message.dartclass SendMessage {
+import 'package:sajilo_baas/features/message/domain/repositories/message_repository.dart';
+
+class SendMessage {
   final MessageRepository repository;
+
   SendMessage(this.repository);
 
   Future<void> call({
