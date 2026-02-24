@@ -8,8 +8,6 @@ class MessageEntity {
   final bool read;
   final String status; // 'sent' | 'delivered' | 'read'
   final DateTime createdAt;
-
-  // NEW: List of media items (images/videos)
   final List<MessageMedia>? media;
 
   MessageEntity({
@@ -22,13 +20,40 @@ class MessageEntity {
     required this.read,
     required this.status,
     required this.createdAt,
-    this.media, // optional
+    this.media,
   });
+
+  // Add copyWith for immutability
+  MessageEntity copyWith({
+    String? id,
+    String? senderId,
+    String? receiverId,
+    String? listingId,
+    String? content,
+    String? type,
+    bool? read,
+    String? status,
+    DateTime? createdAt,
+    List<MessageMedia>? media,
+  }) {
+    return MessageEntity(
+      id: id ?? this.id,
+      senderId: senderId ?? this.senderId,
+      receiverId: receiverId ?? this.receiverId,
+      listingId: listingId ?? this.listingId,
+      content: content ?? this.content,
+      type: type ?? this.type,
+      read: read ?? this.read,
+      status: status ?? this.status,
+      createdAt: createdAt ?? this.createdAt,
+      media: media ?? this.media,
+    );
+  }
 }
 
 class MessageMedia {
   final String url;
-  final String type; // 'image' | 'video'
+  final String type;
   final String? fileName;
 
   MessageMedia({required this.url, required this.type, this.fileName});

@@ -1,4 +1,7 @@
 import 'dart:async';
+import 'package:sajilo_baas/features/message/data/model/message_model.dart';
+import 'package:sajilo_baas/features/message/domain/entities/thread_entity.dart';
+
 import '../../domain/entities/message_entity.dart';
 import '../../domain/repositories/message_repository.dart';
 import '../datasources/remote/message_api_datasource.dart';
@@ -67,5 +70,19 @@ class MessageRepositoryImpl implements MessageRepository {
   Future<void> deleteMessage(String messageId, String deleteType) {
     final body = {'deleteType': deleteType};
     return api.deleteMessage(messageId, body);
+  }
+
+  @override
+  Future<List<ThreadEntity>> getThreads() async {
+    final raw = await api
+        .getThreads(); // API should return List<Map<String,dynamic>>
+    return raw.map((e) {
+      return ThreadEntity(
+        otherUserId: e['otherUser']['_id'],
+        listingId: e['listing'],
+        unreadCount: e['unreadCount'],
+        lastMessage: MessageModel.fromJson(e['lastMessage']).toEntity(),
+      );
+    }).toList();
   }
 }

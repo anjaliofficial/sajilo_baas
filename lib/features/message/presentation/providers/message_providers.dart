@@ -8,6 +8,12 @@ import 'package:sajilo_baas/features/message/domain/usecases/send_message.dart';
 import 'package:sajilo_baas/features/message/presentation/state/chat_state.dart';
 import 'package:sajilo_baas/features/message/presentation/view_model/chat_view_model.dart';
 
+import 'package:sajilo_baas/features/message/domain/usecases/get_threads.dart';
+
+final getThreadsProvider = Provider<GetThreads>((ref) {
+  return GetThreads(ref.read(messageRepositoryProvider));
+});
+
 final messageApiProvider = Provider((ref) {
   return MessageApiDatasource(ref.read(dioProvider));
 });
