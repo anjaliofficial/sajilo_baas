@@ -1,3 +1,5 @@
+import '../../domain/usecases/delete_message.dart';
+
 import '../../domain/usecases/edit_message.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -19,6 +21,11 @@ import '../../presentation/view_model/chat_view_model.dart';
 import '../../presentation/view_model/threads_view_model.dart';
 import '../../presentation/state/chat_state.dart';
 import '../../presentation/state/threads_state.dart';
+
+final deleteMessageProvider = Provider<DeleteMessage>((ref) {
+  final repo = ref.read(messageRepositoryProvider);
+  return DeleteMessage(repo);
+});
 
 final editMessageProvider = Provider<EditMessage>((ref) {
   final repo = ref.read(messageRepositoryProvider);
@@ -64,10 +71,13 @@ final chatViewModelProvider = StateNotifierProvider<ChatViewModel, ChatState>((
   final getConversation = ref.read(getConversationProvider);
   final sendMessage = ref.read(sendMessageProvider);
   final editMessage = ref.read(editMessageProvider);
+  final deleteMessage = ref.read(deleteMessageProvider);
   return ChatViewModel(
     getConversation,
     sendMessage,
     (String messageId, String newContent) => editMessage(messageId, newContent),
+    (String messageId, String deleteType) =>
+        deleteMessage(messageId, deleteType),
   );
 });
 

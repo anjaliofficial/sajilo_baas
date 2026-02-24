@@ -10,9 +10,25 @@ class ChatViewModel extends StateNotifier<ChatState> {
   final SendMessage sendMessage;
   final Future<void> Function(String messageId, String newContent)
   editMessageUseCase;
+  final Future<void> Function(String messageId, String deleteType)
+  deleteMessageUseCase;
 
-  ChatViewModel(this.getConversation, this.sendMessage, this.editMessageUseCase)
-    : super(ChatState(messages: [], loading: true));
+  ChatViewModel(
+    this.getConversation,
+    this.sendMessage,
+    this.editMessageUseCase,
+    this.deleteMessageUseCase,
+  ) : super(ChatState(messages: [], loading: true));
+  Future<void> deleteMessage(
+    String messageId,
+    String deleteType,
+    String otherUserId,
+    String listingId,
+  ) async {
+    await deleteMessageUseCase(messageId, deleteType);
+    await load(otherUserId, listingId);
+  }
+
   Future<void> editMessage(
     String messageId,
     String newContent,

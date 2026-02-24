@@ -56,18 +56,37 @@ class MessageBubble extends ConsumerWidget {
               : MainAxisAlignment.start,
           children: [
             if (!isMe) ...[
-              shownProfilePicture != null
-                  ? CircleAvatar(
-                      radius: 16,
-                      backgroundColor: Colors.grey[400],
-                      backgroundImage: NetworkImage(shownProfilePicture),
-                      onBackgroundImageError: (_, __) {},
-                    )
-                  : CircleAvatar(
-                      radius: 16,
-                      backgroundColor: Colors.grey[400],
-                      child: Icon(Icons.person, size: 18, color: Colors.white),
-                    ),
+              Builder(
+                builder: (context) {
+                  final isNetwork =
+                      shownProfilePicture != null &&
+                      shownProfilePicture.isNotEmpty;
+                  print(
+                    'Avatar loading: isNetwork=$isNetwork, url=$shownProfilePicture',
+                  );
+                  return CircleAvatar(
+                    radius: 16,
+                    backgroundColor: Colors.grey[400],
+                    backgroundImage: isNetwork
+                        ? NetworkImage(shownProfilePicture)
+                        : const AssetImage('assets/images/default_avatar.jpg'),
+                    child: (!isNetwork)
+                        ? const Icon(
+                            Icons.person,
+                            size: 18,
+                            color: Colors.white,
+                          )
+                        : null,
+                    onBackgroundImageError: (_, __) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Avatar image failed to load!'),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
               SizedBox(width: 8),
             ],
             Flexible(
@@ -181,9 +200,23 @@ class MessageBubble extends ConsumerWidget {
                                 );
                           }
                         } else if (result == 'delete_everyone') {
-                          // TODO: Implement delete for everyone
+                          await ref
+                              .read(chatViewModelProvider.notifier)
+                              .deleteMessage(
+                                message.id,
+                                'for_everyone',
+                                otherUserId,
+                                listingId,
+                              );
                         } else if (result == 'delete_me') {
-                          // TODO: Implement delete for me
+                          await ref
+                              .read(chatViewModelProvider.notifier)
+                              .deleteMessage(
+                                message.id,
+                                'for_me',
+                                otherUserId,
+                                listingId,
+                              );
                         } else if (result == 'copy') {
                           await Clipboard.setData(
                             ClipboardData(text: message.content),
@@ -275,7 +308,7 @@ Widget _bubbleContent(
               itemCount: message.media!.length,
               itemBuilder: (_, index) {
                 final m = message.media![index];
-                if (m.url == null || m.url.isEmpty) {
+                if (m.url.isEmpty) {
                   return Container(
                     width: 180,
                     height: 150,

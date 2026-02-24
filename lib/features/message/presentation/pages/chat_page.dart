@@ -100,18 +100,19 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                 ),
                 onPressed: () => Navigator.of(context).pop(),
               ),
-              otherUserAvatar != null && otherUserAvatar.isNotEmpty
-                  ? CircleAvatar(
-                      radius: 20,
-                      backgroundColor: Colors.grey[400],
-                      backgroundImage: NetworkImage(otherUserAvatar),
-                      onBackgroundImageError: (_, __) {},
-                    )
-                  : CircleAvatar(
-                      radius: 20,
-                      backgroundColor: Colors.grey[400],
-                      child: Icon(Icons.person, color: Colors.white, size: 24),
-                    ),
+              CircleAvatar(
+                radius: 20,
+                backgroundColor: Colors.grey[400],
+                backgroundImage:
+                    (otherUserAvatar != null && otherUserAvatar.isNotEmpty)
+                    ? NetworkImage(otherUserAvatar)
+                    : const AssetImage('assets/images/default_avatar.jpg')
+                          as ImageProvider,
+                child: (otherUserAvatar == null || otherUserAvatar.isEmpty)
+                    ? const Icon(Icons.person, color: Colors.white, size: 24)
+                    : null,
+                onBackgroundImageError: (_, __) {},
+              ),
               SizedBox(width: 12),
               Text(
                 otherUserName,
