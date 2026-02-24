@@ -21,6 +21,11 @@ abstract class MessageRepository {
     String deleteType, // for_me | for_everyone
   );
 
+  Future<void> editMessage(
+    String messageId,
+    String newContent,
+  );
+
   Future<List<ThreadEntity>> getThreads();
 
   Stream<MessageEntity> liveMessages();

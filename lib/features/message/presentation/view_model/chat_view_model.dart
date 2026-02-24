@@ -8,9 +8,20 @@ import '../state/chat_state.dart';
 class ChatViewModel extends StateNotifier<ChatState> {
   final GetConversation getConversation;
   final SendMessage sendMessage;
+  final Future<void> Function(String messageId, String newContent)
+  editMessageUseCase;
 
-  ChatViewModel(this.getConversation, this.sendMessage)
+  ChatViewModel(this.getConversation, this.sendMessage, this.editMessageUseCase)
     : super(ChatState(messages: [], loading: true));
+  Future<void> editMessage(
+    String messageId,
+    String newContent,
+    String otherUserId,
+    String listingId,
+  ) async {
+    await editMessageUseCase(messageId, newContent);
+    await load(otherUserId, listingId);
+  }
 
   Future<void> load(String otherUserId, String listingId) async {
     try {

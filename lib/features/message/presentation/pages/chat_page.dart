@@ -152,7 +152,12 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                           final isMe =
                               currentUserId != null &&
                               msg.senderId == currentUserId;
-                          return MessageBubble(message: msg, isMe: isMe);
+                          return MessageBubble(
+                            message: msg,
+                            isMe: isMe,
+                            otherUserId: widget.otherUserId,
+                            listingId: widget.listingId,
+                          );
                         },
                       ),
                     ),

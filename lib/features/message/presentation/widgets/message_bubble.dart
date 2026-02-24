@@ -1,14 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sajilo_baas/features/message/domain/entities/message_entity.dart';
+import 'package:sajilo_baas/features/message/presentation/providers/message_providers.dart';
+import 'package:sajilo_baas/features/message/presentation/pages/chat_page.dart';
 
-class MessageBubble extends StatelessWidget {
+class MessageBubble extends ConsumerWidget {
   final MessageEntity message;
   final bool isMe;
+  final String otherUserId;
+  final String listingId;
 
-  const MessageBubble({super.key, required this.message, required this.isMe});
+  const MessageBubble({
+    super.key,
+    required this.message,
+    required this.isMe,
+    required this.otherUserId,
+    required this.listingId,
+  });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final String? displayName = isMe
         ? message.senderName
         : message.receiverName;
@@ -23,6 +35,11 @@ class MessageBubble extends StatelessWidget {
         (profilePicture == null || profilePicture.isEmpty)
         ? null
         : profilePicture;
+
+    // Debug print for troubleshooting avatar display
+    print(
+      'MessageBubble: isMe=$isMe, shownProfilePicture=$shownProfilePicture',
+    );
 
     final timeString = TimeOfDay.fromDateTime(
       message.createdAt,
@@ -39,7 +56,6 @@ class MessageBubble extends StatelessWidget {
               : MainAxisAlignment.start,
           children: [
             if (!isMe) ...[
-              // Incoming: avatar
               shownProfilePicture != null
                   ? CircleAvatar(
                       radius: 16,
@@ -55,119 +71,251 @@ class MessageBubble extends StatelessWidget {
               SizedBox(width: 8),
             ],
             Flexible(
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  vertical: 10,
-                  horizontal: 14,
-                ),
-                margin: EdgeInsets.only(
-                  left: isMe ? 40 : 0,
-                  right: isMe ? 0 : 40,
-                ),
-                decoration: BoxDecoration(
-                  color: isMe ? Color(0xFF1976D2) : Color(0xFFF1F1F1),
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(16),
-                    topRight: Radius.circular(16),
-                    bottomLeft: Radius.circular(isMe ? 16 : 4),
-                    bottomRight: Radius.circular(isMe ? 4 : 16),
-                  ),
-                  boxShadow: [
-                    if (!isMe)
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.03),
-                        blurRadius: 2,
-                        offset: Offset(0, 1),
-                      ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: isMe
-                      ? CrossAxisAlignment.end
-                      : CrossAxisAlignment.start,
-                  children: [
-                    if (!isMe)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 2.0),
-                        child: Text(
-                          shownName,
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 13,
-                            color: Colors.black87,
+              child: isMe
+                  ? GestureDetector(
+                      onLongPress: () async {
+                        final now = DateTime.now();
+                        final canEdit =
+                            now.difference(message.createdAt).inMinutes < 15;
+                        final result = await showModalBottomSheet<String>(
+                          context: context,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.vertical(
+                              top: Radius.circular(18),
+                            ),
                           ),
-                        ),
-                      ),
-                    if (message.type == 'text')
-                      Text(
-                        message.content,
-                        style: TextStyle(
-                          color: isMe ? Colors.white : Colors.black87,
-                          fontSize: 15,
-                        ),
-                        textAlign: isMe ? TextAlign.right : TextAlign.left,
-                      ),
-                    if (message.type == 'media' &&
-                        message.media != null &&
-                        message.media!.isNotEmpty)
-                      SizedBox(
-                        height: 150,
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: message.media!.length,
-                          itemBuilder: (_, index) {
-                            final m = message.media![index];
-                            if (m.url == null || m.url.isEmpty) {
-                              return Container(
-                                width: 180,
-                                height: 150,
-                                color: Colors.grey[200],
-                                child: const Center(
-                                  child: Icon(Icons.broken_image),
-                                ),
-                              );
-                            }
-                            return Container(
-                              margin: const EdgeInsets.only(right: 8),
-                              child: mediaBubble(m.url, m.type),
+                          builder: (context) {
+                            return SafeArea(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 20,
+                                      vertical: 16,
+                                    ),
+                                    child: Text(
+                                      'More',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 18,
+                                      ),
+                                    ),
+                                  ),
+                                  if (canEdit)
+                                    ListTile(
+                                      leading: Icon(Icons.edit),
+                                      title: Text('Edit'),
+                                      onTap: () =>
+                                          Navigator.pop(context, 'edit'),
+                                    ),
+                                  ListTile(
+                                    leading: Icon(Icons.delete_forever),
+                                    title: Text('Delete for everyone'),
+                                    onTap: () => Navigator.pop(
+                                      context,
+                                      'delete_everyone',
+                                    ),
+                                  ),
+                                  ListTile(
+                                    leading: Icon(Icons.delete_outline),
+                                    title: Text('Delete for me'),
+                                    onTap: () =>
+                                        Navigator.pop(context, 'delete_me'),
+                                  ),
+                                  ListTile(
+                                    leading: Icon(Icons.copy),
+                                    title: Text('Copy message'),
+                                    onTap: () => Navigator.pop(context, 'copy'),
+                                  ),
+                                  SizedBox(height: 8),
+                                ],
+                              ),
                             );
                           },
-                        ),
+                        );
+                        if (result == 'edit') {
+                          final newText = await showDialog<String>(
+                            context: context,
+                            builder: (context) {
+                              final controller = TextEditingController(
+                                text: message.content,
+                              );
+                              return AlertDialog(
+                                title: Text('Edit Message'),
+                                content: TextField(
+                                  controller: controller,
+                                  autofocus: true,
+                                  maxLines: null,
+                                  decoration: InputDecoration(
+                                    hintText: 'Edit your message',
+                                  ),
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context),
+                                    child: Text('Cancel'),
+                                  ),
+                                  ElevatedButton(
+                                    onPressed: () => Navigator.pop(
+                                      context,
+                                      controller.text.trim(),
+                                    ),
+                                    child: Text('Save'),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                          if (newText != null &&
+                              newText.isNotEmpty &&
+                              newText != message.content) {
+                            await ref
+                                .read(chatViewModelProvider.notifier)
+                                .editMessage(
+                                  message.id,
+                                  newText,
+                                  otherUserId,
+                                  listingId,
+                                );
+                          }
+                        } else if (result == 'delete_everyone') {
+                          // TODO: Implement delete for everyone
+                        } else if (result == 'delete_me') {
+                          // TODO: Implement delete for me
+                        } else if (result == 'copy') {
+                          await Clipboard.setData(
+                            ClipboardData(text: message.content),
+                          );
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Message copied')),
+                          );
+                        }
+                      },
+                      child: _bubbleContent(
+                        isMe,
+                        shownName,
+                        message,
+                        timeString,
                       ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 4.0),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            timeString,
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: isMe ? Colors.white70 : Colors.black54,
-                            ),
-                          ),
-                          if (isMe) ...[
-                            SizedBox(width: 4),
-                            Icon(
-                              message.read ? Icons.done_all : Icons.done,
-                              size: 15,
-                              color: message.read
-                                  ? Colors.greenAccent
-                                  : Colors.white70,
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+                    )
+                  : _bubbleContent(isMe, shownName, message, timeString),
             ),
           ],
         ),
       ),
     );
   }
+}
+
+// Extracted bubble content for reuse
+Widget _bubbleContent(
+  bool isMe,
+  String shownName,
+  MessageEntity message,
+  String timeString,
+) {
+  final String? shownProfilePicture = isMe
+      ? message.senderProfilePicture
+      : message.receiverProfilePicture;
+  return Container(
+    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+    margin: EdgeInsets.only(left: isMe ? 40 : 0, right: isMe ? 0 : 40),
+    decoration: BoxDecoration(
+      color: isMe ? Color(0xFF1976D2) : Color(0xFFF1F1F1),
+      borderRadius: BorderRadius.only(
+        topLeft: Radius.circular(16),
+        topRight: Radius.circular(16),
+        bottomLeft: Radius.circular(isMe ? 16 : 4),
+        bottomRight: Radius.circular(isMe ? 4 : 16),
+      ),
+      boxShadow: [
+        if (!isMe)
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 2,
+            offset: Offset(0, 1),
+          ),
+      ],
+    ),
+    child: Column(
+      crossAxisAlignment: isMe
+          ? CrossAxisAlignment.end
+          : CrossAxisAlignment.start,
+      children: [
+        if (!isMe)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 2.0),
+            child: Text(
+              shownName,
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 13,
+                color: Colors.black87,
+              ),
+            ),
+          ),
+        if (message.type == 'text')
+          Text(
+            message.content,
+            style: TextStyle(
+              color: isMe ? Colors.white : Colors.black87,
+              fontSize: 15,
+            ),
+            textAlign: isMe ? TextAlign.right : TextAlign.left,
+          ),
+        if (message.type == 'media' &&
+            message.media != null &&
+            message.media!.isNotEmpty)
+          SizedBox(
+            height: 150,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: message.media!.length,
+              itemBuilder: (_, index) {
+                final m = message.media![index];
+                if (m.url == null || m.url.isEmpty) {
+                  return Container(
+                    width: 180,
+                    height: 150,
+                    color: Colors.grey[200],
+                    child: const Center(child: Icon(Icons.broken_image)),
+                  );
+                }
+                return Container(
+                  margin: const EdgeInsets.only(right: 8),
+                  child: mediaBubble(m.url, m.type),
+                );
+              },
+            ),
+          ),
+        Padding(
+          padding: const EdgeInsets.only(top: 4.0),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                timeString,
+                style: TextStyle(
+                  fontSize: 11,
+                  color: isMe ? Colors.white70 : Colors.black54,
+                ),
+              ),
+              if (isMe) ...[
+                SizedBox(width: 4),
+                Icon(
+                  message.read ? Icons.done_all : Icons.done,
+                  size: 15,
+                  color: message.read ? Colors.greenAccent : Colors.white70,
+                ),
+              ],
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
 }
 
 // Helper widget for media display

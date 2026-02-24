@@ -6,6 +6,10 @@ import '../../domain/entities/thread_entity.dart';
 import '../../domain/repositories/message_repository.dart';
 
 class MessageRepositoryImpl implements MessageRepository {
+    @override
+    Future<void> editMessage(String messageId, String newContent) async {
+      await datasource.editMessage(messageId, newContent);
+    }
   final MessageApiDatasource datasource;
 
   MessageRepositoryImpl({required this.datasource});

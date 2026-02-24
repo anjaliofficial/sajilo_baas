@@ -1,3 +1,5 @@
+import '../../domain/usecases/edit_message.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import '../../../../core/network/dio_provider.dart';
@@ -17,6 +19,11 @@ import '../../presentation/view_model/chat_view_model.dart';
 import '../../presentation/view_model/threads_view_model.dart';
 import '../../presentation/state/chat_state.dart';
 import '../../presentation/state/threads_state.dart';
+
+final editMessageProvider = Provider<EditMessage>((ref) {
+  final repo = ref.read(messageRepositoryProvider);
+  return EditMessage(repo);
+});
 
 /// Message API Datasource provider
 final messageApiProvider = Provider<MessageApiDatasource>((ref) {
@@ -56,7 +63,12 @@ final chatViewModelProvider = StateNotifierProvider<ChatViewModel, ChatState>((
 ) {
   final getConversation = ref.read(getConversationProvider);
   final sendMessage = ref.read(sendMessageProvider);
-  return ChatViewModel(getConversation, sendMessage);
+  final editMessage = ref.read(editMessageProvider);
+  return ChatViewModel(
+    getConversation,
+    sendMessage,
+    (String messageId, String newContent) => editMessage(messageId, newContent),
+  );
 });
 
 final threadsViewModelProvider =
