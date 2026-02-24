@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:sajilo_baas/core/api/api_client.dart';
 import 'package:sajilo_baas/core/api/api_endpoints.dart';
 import '../../model/message_model.dart';
@@ -19,7 +18,7 @@ class MessageApiDatasource {
       queryParameters: {'limit': limit, 'cursor': cursor},
     );
 
-    final data = response.data['messages'] as List<dynamic>;
+    final data = response.data['data'] as List<dynamic>;
     return data.map((e) => MessageModel.fromJson(e)).toList();
   }
 
@@ -36,7 +35,7 @@ class MessageApiDatasource {
         'content': content,
       },
     );
-    return MessageModel.fromJson(response.data);
+    return MessageModel.fromJson(response.data['data']);
   }
 
   Future<void> markRead(String conversationId) async {

@@ -15,6 +15,7 @@ class ChatViewModel extends StateNotifier<ChatState> {
   Future<void> load(String otherUserId, String listingId) async {
     try {
       final msgs = await getConversation(otherUserId, listingId);
+      print('Loaded messages: \\n${msgs.map((m) => m.content).toList()}');
       state = state.copyWith(messages: msgs, loading: false);
     } catch (_) {
       state = state.copyWith(messages: [], loading: false);
@@ -28,6 +29,7 @@ class ChatViewModel extends StateNotifier<ChatState> {
       listingId: listingId,
       content: text,
     );
+    await load(receiverId, listingId); // Refresh messages after sending
   }
 
   void onIncoming(MessageEntity msg) {
