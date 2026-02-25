@@ -1,6 +1,7 @@
+import '../../model/thread_model.dart';
 import 'package:sajilo_baas/core/api/api_client.dart';
 import 'package:sajilo_baas/core/api/api_endpoints.dart';
-import '../../model/message_model.dart';
+import '../../model/message_model.dart' as msg_model;
 
 class MessageApiDatasource {
   Future<void> deleteMessage(String messageId, String deleteType) async {
@@ -27,7 +28,7 @@ class MessageApiDatasource {
 
   MessageApiDatasource(this.apiClient);
 
-  Future<List<MessageModel>> getConversation({
+  Future<List<msg_model.MessageModel>> getConversation({
     required String otherUserId,
     required String listingId,
     int limit = 20,
@@ -39,23 +40,28 @@ class MessageApiDatasource {
     );
 
     final data = response.data['data'] as List<dynamic>;
-    return data.map((e) => MessageModel.fromJson(e)).toList();
+    return data.map((e) => msg_model.MessageModel.fromJson(e)).toList();
   }
 
-  Future<MessageModel> sendMessage({
+  Future<msg_model.MessageModel> sendMessage({
     required String receiverId,
-    required String listingId,
-    required String content,
+    String? listingId,
+    String? content,
+    List<Map<String, dynamic>>? media,
   }) async {
+    final payload = {
+      'receiverId': receiverId,
+      if (listingId != null) 'listingId': listingId,
+      if (content != null) 'content': content,
+      if (media != null && media.isNotEmpty) 'media': media,
+    };
+
     final response = await apiClient.dio.post(
       ApiEndpoints.sendMessage,
-      data: {
-        'receiverId': receiverId,
-        'listingId': listingId,
-        'content': content,
-      },
+      data: payload,
     );
-    return MessageModel.fromJson(response.data['data']);
+
+    return msg_model.MessageModel.fromJson(response.data['data']);
   }
 
   Future<void> markRead(String conversationId) async {
@@ -63,5 +69,11 @@ class MessageApiDatasource {
       ApiEndpoints.markConversationRead,
       data: {'conversationId': conversationId},
     );
+  }
+
+  Future<List<ThreadModel>> getThreads() async {
+    final response = await apiClient.dio.get(ApiEndpoints.getThreads);
+    final data = response.data['threads'] as List<dynamic>;
+    return data.map((e) => ThreadModel.fromJson(e)).toList();
   }
 }

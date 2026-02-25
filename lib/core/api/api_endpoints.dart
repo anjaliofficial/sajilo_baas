@@ -2,6 +2,14 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 
 class ApiEndpoints {
+    // Socket.io base URL (no /api)
+    static String get socketBaseUrl {
+      if (isPhysicalDevice) return 'http://$compIpAddress:$apiPort';
+      if (kIsWeb) return 'http://127.0.0.1:$apiPort';
+      if (Platform.isAndroid) return 'http://10.0.2.2:$apiPort';
+      if (Platform.isIOS) return 'http://127.0.0.1:$apiPort';
+      return 'http://127.0.0.1:$apiPort';
+    }
   // ========================
   // LISTINGS ENDPOINT
   // ========================

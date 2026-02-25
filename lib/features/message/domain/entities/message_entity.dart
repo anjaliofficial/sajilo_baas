@@ -64,7 +64,13 @@ class MessageEntity {
 class MessageMedia {
   final String url;
   final String type; // 'image' | 'video'
+  final String mimeType;
   final String? fileName;
 
-  MessageMedia({required this.url, required this.type, this.fileName});
+  MessageMedia({
+    required this.url,
+    required this.type,
+    required this.mimeType,
+    this.fileName,
+  });
 }

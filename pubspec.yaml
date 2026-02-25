@@ -12,6 +12,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   image_picker: ^1.0.0
   permission_handler: ^11.3.1
+  web_socket_channel: ^2.4.0
 
   # Local Database
   hive: ^2.2.3
@@ -32,7 +33,7 @@ dependencies:
   shimmer: ^2.0.0
   pull_to_refresh: ^2.0.0
   flutter_rating_bar: ^4.0.0
-  socket_io_client: ^3.1.4
+  socket_io_client: ^2.0.3
 
 dev_dependencies:
   flutter_test:

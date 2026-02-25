@@ -36,8 +36,8 @@ class MessageRepositoryImpl implements MessageRepository {
     await datasource.sendMessage(
       receiverId: receiverId,
       listingId: listingId,
-      content: content ?? '',
-      // Add media support if needed in datasource
+      content: content,
+      media: media,
     );
   }
 
@@ -57,10 +57,8 @@ class MessageRepositoryImpl implements MessageRepository {
 
   @override
   Future<List<ThreadEntity>> getThreads() async {
-    // Implement this in datasource if needed
-    // final threads = await datasource.getThreads();
-    // return threads.map((t) => t.toEntity()).toList();
-    return [];
+    final models = await datasource.getThreads();
+    return models.map((t) => t.toEntity()).toList();
   }
 
   @override

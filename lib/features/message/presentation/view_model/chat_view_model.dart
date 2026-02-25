@@ -11,14 +11,16 @@ class ChatViewModel extends StateNotifier<ChatState> {
     String listingId,
     String fileUrl,
     String kind,
+    String mimeType,
   ) async {
-    // kind: 'image' or 'video'
+    // kind: 'image' or 'video', mimeType: e.g. 'image/png', 'video/mp4'
     final media = [
-      {'url': fileUrl, 'type': kind},
+      {'url': fileUrl, 'kind': kind, 'mimeType': mimeType},
     ];
     await sendMessage(
       receiverId: receiverId,
       listingId: listingId,
+      content: '',
       media: media,
     );
     await load(receiverId, listingId); // Refresh messages after sending
@@ -73,6 +75,7 @@ class ChatViewModel extends StateNotifier<ChatState> {
       receiverId: receiverId,
       listingId: listingId,
       content: text,
+      media: null,
     );
     await load(receiverId, listingId); // Refresh messages after sending
   }

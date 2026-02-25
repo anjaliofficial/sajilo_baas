@@ -6,6 +6,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:sajilo_baas/features/auth/presentation/providers/auth_provider.dart';
 import 'package:sajilo_baas/core/api/api_endpoints.dart';
 import '../widgets/message_bubble.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class ChatPage extends ConsumerStatefulWidget {
   final String otherUserId;
@@ -26,22 +27,49 @@ class _ChatPageState extends ConsumerState<ChatPage> {
   bool _isUploading = false;
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  IO.Socket? _socket;
 
   @override
   void initState() {
     super.initState();
-
     // Load initial conversation
     Future.microtask(
       () => ref
           .read(chatViewModelProvider.notifier)
           .load(widget.otherUserId, widget.listingId),
     );
-
     // Listen to new messages and auto-scroll
     ref.read(chatViewModelProvider.notifier).addListener((state) {
       WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
     });
+    // Socket.io for live updates
+    final authState = ref.read(authViewModelProvider);
+    final token = authState.authEntity?.token;
+    // Use ApiEndpoints.socketBaseUrl or similar constant for Socket.io URL
+    final socketUrl = ApiEndpoints.socketBaseUrl;
+    if (token != null && token.isNotEmpty && socketUrl.isNotEmpty) {
+      _socket = IO.io(socketUrl, <String, dynamic>{
+        'transports': ['websocket'],
+        'autoConnect': false,
+        'auth': {'token': token},
+      });
+      _socket!.connect();
+      _socket!.onConnect((_) {
+        debugPrint('Socket connected (chat)');
+        // Optionally join listing room
+        _socket!.emit('joinRoom', widget.listingId);
+      });
+      _socket!.on('receiveMessage', (data) {
+        ref.read(chatViewModelProvider.notifier).load(widget.otherUserId, widget.listingId);
+      });
+      // Optionally listen for messageStatusUpdate, etc.
+    }
+  }
+
+  @override
+  void dispose() {
+    _socket?.dispose();
+    super.dispose();
   }
 
   void _scrollToBottom() {
@@ -58,9 +86,22 @@ class _ChatPageState extends ConsumerState<ChatPage> {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
 
+    // Prevent sending if IDs are empty
+    if (widget.otherUserId.isEmpty || widget.listingId.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Invalid chat: missing user or listing ID"),
+        ),
+      );
+      return;
+    }
+
     ref
         .read(chatViewModelProvider.notifier)
         .send(widget.otherUserId, widget.listingId, text);
+
+    // Refresh threads list after sending a message
+    ref.read(threadsViewModelProvider.notifier).loadThreads();
 
     _controller.clear();
     _scrollToBottom();
@@ -149,14 +190,35 @@ class _ChatPageState extends ConsumerState<ChatPage> {
         );
         final fileUrl = uploaded['url'] ?? uploaded['path'] ?? '';
         if (fileUrl.isNotEmpty) {
-          // Send as message
-          ref
+          // Determine mimeType
+          String mimeType = '';
+          if (isVideo) {
+            if (fileUrl.endsWith('.mp4')) {
+              mimeType = 'video/mp4';
+            } else if (fileUrl.endsWith('.mov')) {
+              mimeType = 'video/quicktime';
+            } else {
+              mimeType = 'video/*';
+            }
+          } else {
+            if (fileUrl.endsWith('.png')) {
+              mimeType = 'image/png';
+            } else if (fileUrl.endsWith('.jpg') || fileUrl.endsWith('.jpeg')) {
+              mimeType = 'image/jpeg';
+            } else if (fileUrl.endsWith('.gif')) {
+              mimeType = 'image/gif';
+            } else {
+              mimeType = 'image/*';
+            }
+          }
+          await ref
               .read(chatViewModelProvider.notifier)
               .sendMedia(
                 widget.otherUserId,
                 widget.listingId,
                 fileUrl,
                 isVideo ? 'video' : 'image',
+                mimeType,
               );
         }
       } catch (e) {

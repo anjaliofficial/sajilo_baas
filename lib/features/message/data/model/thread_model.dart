@@ -1,26 +1,36 @@
-import 'package:sajilo_baas/features/message/domain/entities/thread_entity.dart';
+import '../../domain/entities/thread_entity.dart';
+import 'message_model.dart';
 
-import '../../domain/entities/message_entity.dart';
-
+/// ========================
+/// THREAD MODEL
+/// ========================
 class ThreadModel {
   final String otherUserId;
   final String? listingId;
+  final String? otherUserName;
+  final String? otherUserImage;
   final MessageModel lastMessage;
   final int unreadCount;
 
   ThreadModel({
     required this.otherUserId,
     this.listingId,
+    this.otherUserName,
+    this.otherUserImage,
     required this.lastMessage,
     required this.unreadCount,
   });
 
   factory ThreadModel.fromJson(Map<String, dynamic> json) {
     return ThreadModel(
-      otherUserId: json['otherUser']?['_id'] ?? '',
-      listingId: json['listing'],
+      otherUserId: json['otherUserId'] ?? '',
+      listingId: json['listingId'],
+      otherUserName: json['otherUserName'],
+      otherUserImage: json['otherUserImage'],
       unreadCount: json['unreadCount'] ?? 0,
-      lastMessage: MessageModel.fromJson(json['lastMessage']),
+      lastMessage: json['lastMessage'] != null
+          ? MessageModel.fromJson(json['lastMessage'])
+          : MessageModel.empty(),
     );
   }
 
@@ -28,89 +38,23 @@ class ThreadModel {
     return {
       'otherUserId': otherUserId,
       'listingId': listingId,
+      'otherUserName': otherUserName,
+      'otherUserImage': otherUserImage,
       'unreadCount': unreadCount,
       'lastMessage': lastMessage.toJson(),
     };
   }
 
-  // Convert to Entity for Domain layer
   ThreadEntity toEntity() {
     return ThreadEntity(
       otherUserId: otherUserId,
       listingId: listingId,
+      otherUserName: otherUserName,
+      otherUserImage: otherUserImage,
       unreadCount: unreadCount,
       lastMessage: lastMessage.toEntity(),
     );
   }
 }
 
-// ------------------------
-// MessageModel used in ThreadModel
-// ------------------------
-class MessageModel {
-  final String id;
-  final String senderId;
-  final String receiverId;
-  final String? listingId;
-  final String content;
-  final String type;
-  final bool read;
-  final String status;
-  final DateTime createdAt;
-
-  MessageModel({
-    required this.id,
-    required this.senderId,
-    required this.receiverId,
-    this.listingId,
-    required this.content,
-    required this.type,
-    required this.read,
-    required this.status,
-    required this.createdAt,
-  });
-
-  factory MessageModel.fromJson(Map<String, dynamic> json) {
-    return MessageModel(
-      id: json['_id'] ?? '',
-      senderId: json['sender'] ?? '',
-      receiverId: json['receiver'] ?? '',
-      listingId: json['listing'],
-      content: json['content'] ?? '',
-      type: json['type'] ?? 'text',
-      read: json['read'] ?? false,
-      status: json['status'] ?? 'sent',
-      createdAt: DateTime.parse(
-        json['createdAt'] ?? DateTime.now().toIso8601String(),
-      ),
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'senderId': senderId,
-      'receiverId': receiverId,
-      'listingId': listingId,
-      'content': content,
-      'type': type,
-      'read': read,
-      'status': status,
-      'createdAt': createdAt.toIso8601String(),
-    };
-  }
-
-  MessageEntity toEntity() {
-    return MessageEntity(
-      id: id,
-      senderId: senderId,
-      receiverId: receiverId,
-      listingId: listingId,
-      content: content,
-      type: type,
-      read: read,
-      status: status,
-      createdAt: createdAt,
-    );
-  }
-}
+// MessageModel and MessageMedia are now imported from message_model.dart
