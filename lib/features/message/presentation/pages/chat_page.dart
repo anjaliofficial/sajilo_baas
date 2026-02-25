@@ -265,6 +265,8 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                             isMe: isMe,
                             otherUserId: widget.otherUserId,
                             listingId: widget.listingId,
+                            headerName: otherUserName,
+                            headerAvatar: otherUserAvatar,
                           );
                         },
                       ),

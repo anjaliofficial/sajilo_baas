@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sajilo_baas/core/api/api_endpoints.dart';
 import 'package:sajilo_baas/features/message/domain/entities/message_entity.dart';
 import 'package:sajilo_baas/features/message/presentation/providers/message_providers.dart';
 
@@ -9,6 +10,8 @@ class MessageBubble extends ConsumerWidget {
   final bool isMe;
   final String otherUserId;
   final String listingId;
+  final String headerName;
+  final String? headerAvatar;
 
   const MessageBubble({
     super.key,
@@ -16,26 +19,30 @@ class MessageBubble extends ConsumerWidget {
     required this.isMe,
     required this.otherUserId,
     required this.listingId,
+    required this.headerName,
+    required this.headerAvatar,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final String? displayName = isMe
-        ? message.senderName
-        : message.receiverName;
-    final String? profilePicture = isMe
-        ? message.senderProfilePicture
-        : message.receiverProfilePicture;
-
-    final String shownName = (displayName == null || displayName.isEmpty)
-        ? (isMe ? 'You' : 'Unknown')
-        : displayName;
-    final String? shownProfilePicture =
-        (profilePicture == null || profilePicture.isEmpty)
-        ? null
-        : profilePicture;
-
+    // Always use headerName/headerAvatar for incoming messages (not isMe)
+    final String shownName = isMe
+        ? (message.senderName == null || message.senderName!.isEmpty
+              ? 'You'
+              : message.senderName!)
+        : headerName;
+    String? shownProfilePicture = isMe
+        ? ((message.senderProfilePicture == null ||
+                  message.senderProfilePicture!.isEmpty)
+              ? null
+              : message.senderProfilePicture)
+        : (headerAvatar == null || headerAvatar!.isEmpty ? null : headerAvatar);
     // Debug print for troubleshooting avatar display
+    // Prepend ApiEndpoints.staticBaseUrl if the avatar is a relative /uploads/ path
+    if (shownProfilePicture != null &&
+        shownProfilePicture.startsWith('/uploads/')) {
+      shownProfilePicture = ApiEndpoints.staticBaseUrl + shownProfilePicture;
+    }
     print(
       'MessageBubble: isMe=$isMe, shownProfilePicture=$shownProfilePicture',
     );
