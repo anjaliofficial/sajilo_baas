@@ -4,6 +4,7 @@ import 'package:sajilo_baas/features/message/presentation/providers/message_prov
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sajilo_baas/features/auth/presentation/providers/auth_provider.dart';
+import 'package:sajilo_baas/core/api/api_endpoints.dart';
 import '../widgets/message_bubble.dart';
 
 class ChatPage extends ConsumerStatefulWidget {
@@ -187,6 +188,10 @@ class _ChatPageState extends ConsumerState<ChatPage> {
       } else {
         otherUserName = firstMsg.senderName ?? 'User';
         otherUserAvatar = firstMsg.senderProfilePicture;
+      }
+      // Normalize avatar URL if needed
+      if (otherUserAvatar != null && otherUserAvatar.startsWith('/uploads/')) {
+        otherUserAvatar = ApiEndpoints.staticBaseUrl + otherUserAvatar;
       }
     }
     return Scaffold(
