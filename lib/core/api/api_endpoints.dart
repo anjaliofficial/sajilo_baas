@@ -2,6 +2,10 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 
 class ApiEndpoints {
+  // ========================
+  // LISTINGS ENDPOINT
+  // ========================
+  static const String listings = '/listings';
   ApiEndpoints._();
 
   // ========================
@@ -33,13 +37,17 @@ class ApiEndpoints {
   static const Duration receiveTimeout = Duration(seconds: 60);
 
   // ========================
-  // AUTH ENDPOINTS
+  // AUTH ENDPOINTS (for login/register/logout only)
   // ========================
   static const String register = '/auth/register';
   static const String login = '/auth/login';
-  static const String currentUser = '/auth/me';
   static const String logout = '/auth/logout';
   static const String updateProfile = '/auth/update';
+
+  // ========================
+  // USER ENDPOINTS (for profile fetching)
+  // ========================
+  static const String currentUser = '/users/me';
 
   // ========================
   // BOOKINGS

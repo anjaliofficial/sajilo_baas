@@ -164,14 +164,39 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         children: [
                           CircleAvatar(
                             radius: 50,
+                            backgroundColor: Colors.grey.shade200,
                             backgroundImage:
-                                profile.profilePicture != null &&
-                                    profile.profilePicture!.isNotEmpty
+                                (profile.profilePicture != null &&
+                                    profile.profilePicture!.isNotEmpty)
                                 ? NetworkImage(profile.profilePicture!)
                                 : const AssetImage(
                                         'assets/images/default_avatar.jpg',
                                       )
                                       as ImageProvider,
+                            onBackgroundImageError: (exception, stackTrace) {
+                              debugPrint(
+                                'Profile image load error: $exception',
+                              );
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'Failed to load profile image. Showing default.',
+                                  ),
+                                ),
+                              );
+                              setState(
+                                () {},
+                              ); // Triggers rebuild to show default avatar
+                            },
+                            child:
+                                (profile.profilePicture == null ||
+                                    profile.profilePicture!.isEmpty)
+                                ? const Icon(
+                                    Icons.person,
+                                    size: 50,
+                                    color: Colors.grey,
+                                  )
+                                : null,
                           ),
                           if (_isUploading)
                             const CircularProgressIndicator(

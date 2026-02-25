@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sajilo_baas/features/message/domain/entities/message_entity.dart';
 import 'package:sajilo_baas/features/message/presentation/providers/message_providers.dart';
-import 'package:sajilo_baas/features/message/presentation/pages/chat_page.dart';
 
 class MessageBubble extends ConsumerWidget {
   final MessageEntity message;

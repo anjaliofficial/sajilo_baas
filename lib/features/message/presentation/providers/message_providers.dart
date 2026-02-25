@@ -1,3 +1,4 @@
+import '../../data/datasources/remote/media_upload_datasource.dart';
 import '../../domain/usecases/delete_message.dart';
 
 import '../../domain/usecases/edit_message.dart';
@@ -21,6 +22,12 @@ import '../../presentation/view_model/chat_view_model.dart';
 import '../../presentation/view_model/threads_view_model.dart';
 import '../../presentation/state/chat_state.dart';
 import '../../presentation/state/threads_state.dart';
+
+/// Media upload datasource provider
+final mediaUploadDatasourceProvider = Provider<MediaUploadDatasource>((ref) {
+  final dio = ref.read(dioProvider);
+  return MediaUploadDatasource(dio);
+});
 
 final deleteMessageProvider = Provider<DeleteMessage>((ref) {
   final repo = ref.read(messageRepositoryProvider);

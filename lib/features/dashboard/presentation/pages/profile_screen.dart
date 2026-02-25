@@ -1,19 +1,2 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-class ProfileScreen extends ConsumerWidget {
-  const ProfileScreen({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Profile')),
-      body: const Center(
-        child: Text(
-          'Profile details will appear here',
-          style: TextStyle(fontSize: 18),
-        ),
-      ),
-    );
-  }
-}
+export 'package:sajilo_baas/features/profile/presentation/pages/profile_page.dart'
+    show ProfileScreen;

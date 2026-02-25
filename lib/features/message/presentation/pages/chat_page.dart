@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sajilo_baas/features/message/presentation/providers/message_providers.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:sajilo_baas/features/auth/presentation/providers/auth_provider.dart';
 import '../widgets/message_bubble.dart';
 
@@ -19,6 +21,8 @@ class ChatPage extends ConsumerStatefulWidget {
 }
 
 class _ChatPageState extends ConsumerState<ChatPage> {
+  final ImagePicker _picker = ImagePicker();
+  bool _isUploading = false;
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
@@ -59,6 +63,109 @@ class _ChatPageState extends ConsumerState<ChatPage> {
 
     _controller.clear();
     _scrollToBottom();
+  }
+
+  Future<void> _pickAndSendMedia() async {
+    // Show dialog for image or video
+    showModalBottomSheet(
+      context: context,
+      builder: (_) {
+        return SafeArea(
+          child: Wrap(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text("Image from Gallery"),
+                onTap: () async {
+                  Navigator.pop(context);
+                  await _pickMedia(ImageSource.gallery, isVideo: false);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.videocam),
+                title: const Text("Video from Gallery"),
+                onTap: () async {
+                  Navigator.pop(context);
+                  await _pickMedia(ImageSource.gallery, isVideo: true);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.camera_alt),
+                title: const Text("Take Photo"),
+                onTap: () async {
+                  Navigator.pop(context);
+                  await _pickMedia(ImageSource.camera, isVideo: false);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.videocam),
+                title: const Text("Record Video"),
+                onTap: () async {
+                  Navigator.pop(context);
+                  await _pickMedia(ImageSource.camera, isVideo: true);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _pickMedia(ImageSource source, {required bool isVideo}) async {
+    // Request permissions
+    if (source == ImageSource.gallery) {
+      final galleryStatus = await Permission.photos.request();
+      if (!galleryStatus.isGranted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Gallery permission denied")),
+        );
+        return;
+      }
+    } else if (source == ImageSource.camera) {
+      final cameraStatus = await Permission.camera.request();
+      if (!cameraStatus.isGranted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Camera permission denied")),
+        );
+        return;
+      }
+    }
+
+    XFile? pickedFile;
+    if (isVideo) {
+      pickedFile = await _picker.pickVideo(source: source);
+    } else {
+      pickedFile = await _picker.pickImage(source: source);
+    }
+    if (pickedFile != null) {
+      setState(() => _isUploading = true);
+      try {
+        // Upload file to backend (single file)
+        final mediaUploadDatasource = ref.read(mediaUploadDatasourceProvider);
+        final uploaded = await mediaUploadDatasource.uploadSingle(
+          pickedFile.path,
+        );
+        final fileUrl = uploaded['url'] ?? uploaded['path'] ?? '';
+        if (fileUrl.isNotEmpty) {
+          // Send as message
+          ref
+              .read(chatViewModelProvider.notifier)
+              .sendMedia(
+                widget.otherUserId,
+                widget.listingId,
+                fileUrl,
+                isVideo ? 'video' : 'image',
+              );
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Upload failed: $e")));
+      } finally {
+        setState(() => _isUploading = false);
+      }
+    }
   }
 
   @override
@@ -191,7 +298,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
               margin: EdgeInsets.only(right: 8),
               child: IconButton(
                 icon: Icon(Icons.attach_file_rounded, color: Colors.grey[700]),
-                onPressed: () {},
+                onPressed: _isUploading ? null : _pickAndSendMedia,
                 splashRadius: 22,
               ),
             ),
@@ -236,6 +343,15 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                 splashRadius: 24,
               ),
             ),
+            if (_isUploading)
+              const Padding(
+                padding: EdgeInsets.only(left: 8.0),
+                child: SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              ),
           ],
         ),
       ),

@@ -6,6 +6,24 @@ import '../../domain/usecases/send_message.dart';
 import '../state/chat_state.dart';
 
 class ChatViewModel extends StateNotifier<ChatState> {
+  Future<void> sendMedia(
+    String receiverId,
+    String listingId,
+    String fileUrl,
+    String kind,
+  ) async {
+    // kind: 'image' or 'video'
+    final media = [
+      {'url': fileUrl, 'type': kind},
+    ];
+    await sendMessage(
+      receiverId: receiverId,
+      listingId: listingId,
+      media: media,
+    );
+    await load(receiverId, listingId); // Refresh messages after sending
+  }
+
   final GetConversation getConversation;
   final SendMessage sendMessage;
   final Future<void> Function(String messageId, String newContent)

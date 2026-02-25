@@ -68,9 +68,12 @@ class ProfileRemoteDatasource {
   /// Upload profile picture
   Future<String> uploadProfilePicture(String filePath) async {
     try {
-      final response = await apiClient.uploadFile(
+      final form = FormData.fromMap({
+        'image': await MultipartFile.fromFile(filePath),
+      });
+      final response = await apiClient.dio.post(
         ApiEndpoints.uploadFile,
-        filePath,
+        data: form,
       );
       if (response.statusCode == 200 && response.data['success'] == true) {
         // Backend returns something like `/uploads/filename.jpg`
