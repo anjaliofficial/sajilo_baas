@@ -121,6 +121,21 @@ class _BookingPageState extends ConsumerState<BookingPage> {
       return;
     }
 
+    // Check if any selected date is already booked
+    DateTime current = checkIn!;
+    bool hasConflict = false;
+    while (!current.isAfter(checkOut!)) {
+      if (_isDateBooked(current)) {
+        hasConflict = true;
+        break;
+      }
+      current = current.add(const Duration(days: 1));
+    }
+    if (hasConflict) {
+      _showInlineToast('Selected dates are not available.', isError: true);
+      return;
+    }
+
     final createBooking = ref.read(createBookingProvider);
 
     try {
