@@ -1,11 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sajilo_baas/core/api/api_endpoints.dart';
 import '../../application/saved_bookings_provider.dart';
 import '../../../booking/presentation/providers/booking_providers.dart';
 import 'booking_details.dart';
 
 class FavoritesScreen extends ConsumerWidget {
   const FavoritesScreen({super.key});
+
+  String _getFullImageUrl(String? path) {
+    if (path == null || path.isEmpty) {
+      return 'https://via.placeholder.com/150';
+    }
+    // If already absolute URL, return as is
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return path;
+    }
+    // Normalize slashes
+    String normalized = path.replaceAll('\\', '/');
+    // Remove leading slashes
+    normalized = normalized.replaceFirst(RegExp(r'^/+'), '');
+    // Ensure 'uploads/' prefix
+    if (!normalized.startsWith('uploads/')) {
+      normalized = 'uploads/$normalized';
+    }
+    return '${ApiEndpoints.staticBaseUrl}/$normalized';
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -40,7 +60,7 @@ class FavoritesScreen extends ConsumerWidget {
                   leading:
                       b.listingImages != null && b.listingImages!.isNotEmpty
                       ? Image.network(
-                          b.listingImages!.first,
+                          _getFullImageUrl(b.listingImages!.first),
                           width: 60,
                           height: 60,
                           fit: BoxFit.cover,
