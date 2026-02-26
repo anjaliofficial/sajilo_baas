@@ -22,4 +22,18 @@ class ReviewEntity {
     required this.replies,
     required this.createdAt,
   });
+
+  ReviewEntity copyWith({List<ReplyEntity>? replies}) {
+    return ReviewEntity(
+      id: id,
+      bookingId: bookingId,
+      listingId: listingId,
+      reviewerId: reviewerId,
+      revieweeId: revieweeId,
+      rating: rating,
+      comment: comment,
+      replies: replies ?? this.replies,
+      createdAt: createdAt,
+    );
+  }
 }

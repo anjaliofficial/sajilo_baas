@@ -1,9 +1,13 @@
 import 'package:dio/dio.dart';
 import 'package:sajilo_baas/core/api/api_client.dart';
+import 'package:sajilo_baas/core/api/api_endpoints.dart';
 import 'package:sajilo_baas/features/review/data/models/review_model.dart';
 
 class ReviewRemoteDatasource {
-  final Dio dio = ApiClient().dio;
+  final Dio dio;
+
+  ReviewRemoteDatasource()
+    : dio = ApiClient(Dio(), baseUrl: ApiEndpoints.baseUrl).dio;
 
   Future<ReviewModel> createReview(
     String bookingId,
@@ -20,6 +24,7 @@ class ReviewRemoteDatasource {
 
   Future<List<ReviewModel>> getReviewsGiven() async {
     final res = await dio.get('/reviews/given');
+
     return (res.data['reviews'] as List)
         .map((e) => ReviewModel.fromJson(e))
         .toList();
@@ -27,6 +32,7 @@ class ReviewRemoteDatasource {
 
   Future<List<ReviewModel>> getReviewsReceived(String userId) async {
     final res = await dio.get('/reviews/received/$userId');
+
     return (res.data['reviews'] as List)
         .map((e) => ReviewModel.fromJson(e))
         .toList();
