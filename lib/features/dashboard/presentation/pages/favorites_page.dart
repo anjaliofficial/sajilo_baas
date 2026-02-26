@@ -5,22 +5,32 @@ import '../../application/saved_bookings_provider.dart';
 import '../../../booking/presentation/providers/booking_providers.dart';
 import 'booking_details.dart';
 
-class FavoritesScreen extends ConsumerWidget {
+class FavoritesScreen extends ConsumerStatefulWidget {
   const FavoritesScreen({super.key});
+
+  @override
+  ConsumerState<FavoritesScreen> createState() => _FavoritesScreenState();
+}
+
+class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      ref.read(savedBookingsProvider.notifier).fetchSavedBookings();
+      ref.read(bookingViewModelProvider.notifier).loadBookings();
+    });
+  }
 
   String _getFullImageUrl(String? path) {
     if (path == null || path.isEmpty) {
       return 'https://via.placeholder.com/150';
     }
-    // If already absolute URL, return as is
     if (path.startsWith('http://') || path.startsWith('https://')) {
       return path;
     }
-    // Normalize slashes
     String normalized = path.replaceAll('\\', '/');
-    // Remove leading slashes
     normalized = normalized.replaceFirst(RegExp(r'^/+'), '');
-    // Ensure 'uploads/' prefix
     if (!normalized.startsWith('uploads/')) {
       normalized = 'uploads/$normalized';
     }
@@ -28,15 +38,9 @@ class FavoritesScreen extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final savedIds = ref.watch(savedBookingsProvider);
     final bookingsAsync = ref.watch(bookingViewModelProvider);
-
-    // Ensure saved bookings and bookings are fetched when page is opened
-    Future.microtask(() {
-      ref.read(savedBookingsProvider.notifier).fetchSavedBookings();
-      ref.read(bookingViewModelProvider.notifier).loadBookings();
-    });
 
     return Scaffold(
       appBar: AppBar(title: const Text('Favorites')),
