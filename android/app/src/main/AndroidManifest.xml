@@ -1,7 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.sajilo_baas">
 
-    <!-- ✅ Permissions for image picker -->
+
+    <!-- Required for network access (image loading) -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <!-- Camera access -->
     <uses-permission android:name="android.permission.CAMERA"/>
 
