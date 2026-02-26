@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import '../../../booking/presentation/providers/booking_providers.dart';
 import 'package:sajilo_baas/core/api/api_endpoints.dart';
+import '../../application/saved_bookings_provider.dart';
 
 class BookingDetailsPage extends StatelessWidget {
   final dynamic booking;
@@ -105,8 +106,28 @@ class BookingDetailsPageFull extends ConsumerWidget {
       }
     }
 
+    final savedBookings = ref.watch(savedBookingsProvider);
+    final savedNotifier = ref.read(savedBookingsProvider.notifier);
+    final bookingId = booking.id.toString();
+    final isSaved = savedBookings.contains(bookingId);
     return Scaffold(
-      appBar: AppBar(title: const Text('Booking Details')),
+      appBar: AppBar(
+        title: const Text('Booking Details'),
+        actions: [
+          IconButton(
+            icon: Icon(isSaved ? Icons.bookmark : Icons.bookmark_border),
+            tooltip: isSaved ? 'Saved' : 'Save',
+            onPressed: () {
+              savedNotifier.toggle(bookingId);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(isSaved ? 'Removed from Saved' : 'Saved!'),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
