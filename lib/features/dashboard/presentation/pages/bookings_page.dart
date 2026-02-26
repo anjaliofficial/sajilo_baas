@@ -19,7 +19,7 @@ class _BookingsScreenState extends ConsumerState<BookingsScreen> {
     try {
       final bookingVM = ref.read(bookingViewModelProvider.notifier);
       await bookingVM.cancel(bookingId);
-      ref.invalidate(bookingViewModelProvider);
+      await bookingVM.loadBookings(); // Explicitly reload bookings after cancel
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Booking cancelled successfully'),
