@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class ImageTestWidget extends StatelessWidget {
   final String imageUrl;
-  const ImageTestWidget({Key? key, required this.imageUrl}) : super(key: key);
+  const ImageTestWidget({super.key, required this.imageUrl});
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +24,7 @@ class ImageTestWidget extends StatelessWidget {
               children: [
                 const Icon(Icons.broken_image, size: 48, color: Colors.red),
                 const SizedBox(height: 8),
-                Text('Error: ' + error.toString()),
+                Text('Error: $error'),
               ],
             );
           },
