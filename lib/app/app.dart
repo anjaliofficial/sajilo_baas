@@ -6,6 +6,7 @@ import 'package:sajilo_baas/features/onboarding/presentation/pages/onboarding_sc
 import 'package:sajilo_baas/features/splash/presentation/pages/splash_screen.dart';
 import 'package:sajilo_baas/features/auth/presentation/pages/register_page.dart';
 import 'package:sajilo_baas/features/dashboard/presentation/widgets/customer_main_navigation.dart';
+import 'package:sajilo_baas/core/utils/navigator_key.dart';
 
 class App extends ConsumerWidget {
   const App({super.key});
@@ -16,6 +17,7 @@ class App extends ConsumerWidget {
       title: 'SmartBook App',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(useMaterial3: true, primarySwatch: Colors.blue),
+      navigatorKey: navigatorKey,
       initialRoute: '/splash',
       routes: {
         '/splash': (context) => const SplashScreen(),
