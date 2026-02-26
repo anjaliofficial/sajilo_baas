@@ -60,7 +60,7 @@ class DashboardScreen extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 10),
-                    _buildSearchBar(),
+                    _buildSearchBar(ref),
                     const SizedBox(height: 30),
                     _buildSectionHeader(
                       context: context,
@@ -76,14 +76,17 @@ class DashboardScreen extends ConsumerWidget {
                       },
                     ),
                     const SizedBox(height: 15),
-                    _buildNearbyPropertyList(state.listings, context),
+                    _buildNearbyPropertyList(state.filteredListings, context),
                     const SizedBox(height: 40),
                     _buildSectionHeader(
                       title: 'Popular Destination',
                       context: context,
                     ),
                     const SizedBox(height: 15),
-                    _buildPopularDestinationList(state.listings, context),
+                    _buildPopularDestinationList(
+                      state.filteredListings,
+                      context,
+                    ),
                   ],
                 ),
               ),
@@ -133,8 +136,11 @@ class DashboardScreen extends ConsumerWidget {
   }
 
   // -------------------- SEARCH BAR --------------------
-  Widget _buildSearchBar() {
+  Widget _buildSearchBar(WidgetRef ref) {
     return TextFormField(
+      onChanged: (value) {
+        ref.read(dashboardViewModelProvider).setSearchQuery(value);
+      },
       decoration: InputDecoration(
         hintText: 'Start Your Search',
         hintStyle: const TextStyle(color: Colors.grey),
@@ -316,7 +322,7 @@ class DashboardScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Price: \$${listing.pricePerNight}/night',
+                    'Price: NPR${listing.pricePerNight}/night',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: primaryBlue,
