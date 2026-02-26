@@ -1,0 +1,43 @@
+import 'package:dio/dio.dart';
+import 'package:sajilo_baas/core/api/api_client.dart';
+import 'package:sajilo_baas/features/review/data/models/review_model.dart';
+
+class ReviewRemoteDatasource {
+  final Dio dio = ApiClient().dio;
+
+  Future<ReviewModel> createReview(
+    String bookingId,
+    int rating,
+    String? comment,
+  ) async {
+    final res = await dio.post(
+      '/reviews',
+      data: {'bookingId': bookingId, 'rating': rating, 'comment': comment},
+    );
+
+    return ReviewModel.fromJson(res.data['data']);
+  }
+
+  Future<List<ReviewModel>> getReviewsGiven() async {
+    final res = await dio.get('/reviews/given');
+    return (res.data['reviews'] as List)
+        .map((e) => ReviewModel.fromJson(e))
+        .toList();
+  }
+
+  Future<List<ReviewModel>> getReviewsReceived(String userId) async {
+    final res = await dio.get('/reviews/received/$userId');
+    return (res.data['reviews'] as List)
+        .map((e) => ReviewModel.fromJson(e))
+        .toList();
+  }
+
+  Future<ReviewModel> addReply(String reviewId, String text) async {
+    final res = await dio.post(
+      '/reviews/$reviewId/replies',
+      data: {'text': text},
+    );
+
+    return ReviewModel.fromJson(res.data['data']);
+  }
+}
