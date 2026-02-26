@@ -1,9 +1,9 @@
+import 'package:sajilo_baas/core/api/api_endpoints.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'listing_page.dart';
 import 'listing_details_page.dart';
 import '../../domain/entities/listing_entity.dart';
-// import '../../presentation/view_model/dashboard_view_model.dart';
 import '../../presentation/providers/dashboard_provider.dart';
 
 String getFullImageUrl(String path) {
@@ -14,7 +14,7 @@ String getFullImageUrl(String path) {
   if (!normalized.startsWith('/')) {
     normalized = '/$normalized';
   }
-  return 'http://10.205.75.20:5050$normalized';
+  return '${ApiEndpoints.staticBaseUrl}$normalized';
 }
 
 class DashboardScreen extends ConsumerWidget {
@@ -25,6 +25,13 @@ class DashboardScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(dashboardViewModelProvider);
+
+    // Ensure listings are fetched when page is opened
+    Future.microtask(() {
+      if (!state.isLoading && state.listings.isEmpty) {
+        ref.read(dashboardViewModelProvider).fetchListings();
+      }
+    });
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -39,37 +46,46 @@ class DashboardScreen extends ConsumerWidget {
           ? const Center(child: CircularProgressIndicator())
           : state.error != null
           ? Center(child: Text('Error: ${state.error}'))
-          : SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 10),
-                  _buildSearchBar(),
-                  const SizedBox(height: 30),
-                  _buildSectionHeader(
-                    context: context,
-                    title: 'Nearby your location',
-                    actionText: 'See all',
-                    onActionTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const ListingPage(),
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 15),
-                  _buildNearbyPropertyList(state.listings, context),
-                  const SizedBox(height: 40),
-                  _buildSectionHeader(
-                    title: 'Popular Destination',
-                    context: context,
-                  ),
-                  const SizedBox(height: 15),
-                  _buildPopularDestinationList(state.listings, context),
-                ],
+          : RefreshIndicator(
+              onRefresh: () async {
+                await ref.read(dashboardViewModelProvider).fetchListings();
+              },
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 10,
+                ),
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 10),
+                    _buildSearchBar(),
+                    const SizedBox(height: 30),
+                    _buildSectionHeader(
+                      context: context,
+                      title: 'Nearby your location',
+                      actionText: 'See all',
+                      onActionTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const ListingPage(),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 15),
+                    _buildNearbyPropertyList(state.listings, context),
+                    const SizedBox(height: 40),
+                    _buildSectionHeader(
+                      title: 'Popular Destination',
+                      context: context,
+                    ),
+                    const SizedBox(height: 15),
+                    _buildPopularDestinationList(state.listings, context),
+                  ],
+                ),
               ),
             ),
     );

@@ -32,6 +32,12 @@ class FavoritesScreen extends ConsumerWidget {
     final savedIds = ref.watch(savedBookingsProvider);
     final bookingsAsync = ref.watch(bookingViewModelProvider);
 
+    // Ensure saved bookings and bookings are fetched when page is opened
+    Future.microtask(() {
+      ref.read(savedBookingsProvider.notifier).fetchSavedBookings();
+      ref.read(bookingViewModelProvider.notifier).loadBookings();
+    });
+
     return Scaffold(
       appBar: AppBar(title: const Text('Favorites')),
       body: bookingsAsync.when(

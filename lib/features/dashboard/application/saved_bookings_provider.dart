@@ -20,12 +20,29 @@ class SavedBookingsNotifier extends StateNotifier<Set<String>> {
   Future<void> fetchSavedBookings() async {
     try {
       final response = await _dio.get(ApiEndpoints.getSavedBookings);
+      print(
+        'fetchSavedBookings response: \\nStatus: \\${response.statusCode}\\nData: \\${response.data}',
+      );
       if (response.statusCode == 200 && response.data is List) {
-        // Assuming response.data is a list of booking objects with 'id' field
-        state = Set<String>.from(response.data.map((b) => b['id'].toString()));
+        // Try to extract id or _id from each booking object
+        state = Set<String>.from(
+          response.data.map(
+            (b) => (b['id'] ?? b['_id'] ?? b['bookingId']).toString(),
+          ),
+        );
+      } else if (response.statusCode == 200 &&
+          response.data is Map &&
+          response.data['bookings'] is List) {
+        // If wrapped in { bookings: [...] }
+        final bookings = response.data['bookings'] as List;
+        state = Set<String>.from(
+          bookings.map(
+            (b) => (b['id'] ?? b['_id'] ?? b['bookingId']).toString(),
+          ),
+        );
       }
-    } catch (e) {
-      // Optionally handle error
+    } catch (e, st) {
+      print('fetchSavedBookings error: $e\\n$st');
     }
   }
 
