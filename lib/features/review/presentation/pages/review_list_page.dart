@@ -271,6 +271,28 @@ class _ReviewCardState extends ConsumerState<ReviewCard>
     final showViewMore = replies.length > 1 && !expandedReplies;
     final showViewLess = replies.length > 1 && expandedReplies;
 
+    // Determine which user to show on each side
+    final reviewer = widget.review.reviewer;
+    final reviewee = widget.review.reviewee;
+    final reviewerName = reviewer?.fullName?.isNotEmpty == true
+        ? reviewer!.fullName
+        : (widget.review.reviewerName != null &&
+              widget.review.reviewerName!.isNotEmpty)
+        ? widget.review.reviewerName!
+        : 'Unknown';
+    final revieweeName = reviewee?.fullName?.isNotEmpty == true
+        ? reviewee!.fullName
+        : (widget.review.revieweeName != null &&
+              widget.review.revieweeName!.isNotEmpty)
+        ? widget.review.revieweeName!
+        : 'Unknown';
+    final reviewerProfile =
+        reviewer?.profilePicture != null && reviewer!.profilePicture!.isNotEmpty
+        ? reviewer!.profilePicture
+        : (widget.review.reviewerProfile != null &&
+              widget.review.reviewerProfile!.isNotEmpty)
+        ? widget.review.reviewerProfile
+        : null;
     return AnimatedSize(
       duration: const Duration(milliseconds: 300),
       curve: Curves.ease,
@@ -298,16 +320,11 @@ class _ReviewCardState extends ConsumerState<ReviewCard>
                 CircleAvatar(
                   radius: 22,
                   backgroundImage:
-                      (widget.review.reviewerProfile != null &&
-                          widget.review.reviewerProfile!.isNotEmpty)
-                      ? NetworkImage(
-                          getFullImageUrl(widget.review.reviewerProfile!),
-                        )
+                      (reviewerProfile != null && reviewerProfile.isNotEmpty)
+                      ? NetworkImage(getFullImageUrl(reviewerProfile))
                       : null,
                   backgroundColor: Colors.grey.shade200,
-                  child:
-                      (widget.review.reviewerProfile == null ||
-                          widget.review.reviewerProfile!.isEmpty)
+                  child: (reviewerProfile == null || reviewerProfile.isEmpty)
                       ? const Icon(Icons.person, color: Colors.grey)
                       : null,
                 ),
@@ -320,10 +337,7 @@ class _ReviewCardState extends ConsumerState<ReviewCard>
                         children: [
                           Expanded(
                             child: Text(
-                              (widget.review.reviewerName != null &&
-                                      widget.review.reviewerName!.isNotEmpty)
-                                  ? widget.review.reviewerName!
-                                  : widget.review.reviewerId,
+                              reviewerName,
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
@@ -341,10 +355,7 @@ class _ReviewCardState extends ConsumerState<ReviewCard>
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              (widget.review.revieweeName != null &&
-                                      widget.review.revieweeName!.isNotEmpty)
-                                  ? widget.review.revieweeName!
-                                  : widget.review.revieweeId,
+                              revieweeName,
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,

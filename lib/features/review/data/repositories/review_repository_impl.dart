@@ -1,5 +1,6 @@
 import '../../domain/repositories/review_repository.dart';
 import '../../domain/entities/review_entity.dart';
+import '../models/review_model.dart';
 import '../datasource/remote/review_remote_datasource.dart';
 
 class ReviewRepositoryImpl implements ReviewRepository {
@@ -47,12 +48,12 @@ class ReviewRepositoryImpl implements ReviewRepository {
   }
 
   @override
-  Future<List<ReviewEntity>> getReviewsGiven() {
+  Future<List<ReviewModel>> getReviewsGiven() {
     return remote.getReviewsGiven();
   }
 
   @override
-  Future<List<ReviewEntity>> getReviewsReceived(String userId) {
+  Future<List<ReviewModel>> getReviewsReceived(String userId) {
     return remote.getReviewsReceived(userId);
   }
 
