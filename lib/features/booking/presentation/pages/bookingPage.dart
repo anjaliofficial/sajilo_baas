@@ -263,6 +263,23 @@ class _BookingPageState extends ConsumerState<BookingPage> {
                 const SizedBox(height: 12),
                 if (_showToast && _toastMessage != null)
                   _InlineToast(message: _toastMessage!, isError: _toastIsError),
+                // Show review button after booking is completed
+                if (_toastMessage == 'Booking successful!')
+                  Padding(
+                    padding: const EdgeInsets.only(top: 16),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                BookingReviewPage(bookingId: widget.listingId),
+                          ),
+                        );
+                      },
+                      child: const Text('Write a Review'),
+                    ),
+                  ),
               ],
             ),
           ],
