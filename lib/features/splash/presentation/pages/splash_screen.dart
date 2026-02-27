@@ -14,17 +14,16 @@ class SplashScreen extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(30.0),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: <Widget>[
-              const Spacer(flex: 1),
+              const SizedBox(height: 20),
 
               _buildLogo(),
 
-              const Spacer(flex: 2),
+              const SizedBox(height: 40),
 
-              _buildImageCollagePlaceholder(primaryBlue),
+              _buildImageCollage(primaryBlue),
 
-              const Spacer(flex: 3),
+              const Spacer(),
 
               Column(
                 children: <Widget>[
@@ -32,7 +31,7 @@ class SplashScreen extends StatelessWidget {
                     "Let's Find Your Sweet & Favorite Place",
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontSize: 28,
+                      fontSize: 26,
                       fontWeight: FontWeight.w800,
                       color: Color(0xFF1D2939),
                     ),
@@ -50,16 +49,17 @@ class SplashScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 60),
+                  const SizedBox(height: 40),
 
-                  // BUTTON
                   SizedBox(
                     width: double.infinity,
                     height: 55,
                     child: ElevatedButton(
-                      onPressed: () => Navigator.of(
-                        context,
-                      ).pushReplacementNamed('/onboarding'),
+                      onPressed: () {
+                        Navigator.of(
+                          context,
+                        ).pushReplacementNamed('/onboarding');
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: buttonColor,
                         elevation: 5,
@@ -81,7 +81,7 @@ class SplashScreen extends StatelessWidget {
                 ],
               ),
 
-              const Spacer(flex: 1),
+              const SizedBox(height: 30),
             ],
           ),
         ),
@@ -107,56 +107,49 @@ class SplashScreen extends StatelessWidget {
         ],
       ),
       clipBehavior: Clip.hardEdge,
-      child: Image.asset(
-        'assets/images/logo.png',
-        height: 200,
-        width: 200,
-        fit: BoxFit.cover,
-      ),
+      child: Image.asset('assets/images/logo.png', fit: BoxFit.cover),
     );
   }
 
   // IMAGE COLLAGE
-  Widget _buildImageCollagePlaceholder(Color primaryBlue) {
+  Widget _buildImageCollage(Color primaryBlue) {
     return SizedBox(
-      height: 300,
-      width: 250,
+      height: 260,
+      width: 240,
       child: Stack(
         alignment: Alignment.center,
         children: [
-          Positioned(
-            child: _buildImageCircle(
-              size: 180,
-              icon: Icons.home_rounded,
-              color: Colors.teal.shade100,
-              iconColor: primaryBlue,
-            ),
+          _buildImageCircle(
+            size: 160,
+            icon: Icons.home_rounded,
+            color: Colors.teal.shade100,
+            iconColor: primaryBlue,
           ),
           Positioned(
-            top: 20,
+            top: 0,
             left: 0,
             child: _buildImageCircle(
-              size: 100,
+              size: 90,
               icon: Icons.apartment,
               color: Colors.blue.shade100,
               iconColor: primaryBlue,
             ),
           ),
           Positioned(
-            bottom: 10,
-            right: 10,
+            bottom: 0,
+            right: 0,
             child: _buildImageCircle(
-              size: 120,
+              size: 110,
               icon: Icons.location_city,
               color: Colors.orange.shade100,
               iconColor: primaryBlue,
             ),
           ),
           Positioned(
-            top: 100,
+            top: 80,
             right: 0,
             child: _buildImageCircle(
-              size: 80,
+              size: 70,
               icon: Icons.map,
               color: Colors.purple.shade100,
               iconColor: primaryBlue,
