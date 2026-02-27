@@ -24,12 +24,13 @@ class _CustomerMainNavigationState
 
   @override
   Widget build(BuildContext context) {
+    // Use List<Widget> for pages to support both ConsumerWidget and ConsumerStatefulWidget
     final List<Widget> pages = [
-      DashboardScreen(),
-      MessagesScreen(), // from Threads page.dart
-      FavoritesScreen(),
-      BookingsScreen(),
-      ProfileScreen(),
+      const DashboardScreen(),
+      const MessagesScreen(),
+      const FavoritesScreen(),
+      const BookingsScreen(),
+      const ProfileScreen(),
     ];
 
     final safeIndex = (_currentIndex < pages.length) ? _currentIndex : 0;

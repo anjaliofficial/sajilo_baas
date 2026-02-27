@@ -1,6 +1,7 @@
 import 'package:sajilo_baas/core/api/api_endpoints.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sajilo_baas/features/auth/presentation/providers/auth_provider.dart';
 import 'package:sajilo_baas/features/review/presentation/pages/review_list_page.dart';
 import 'listing_page.dart';
 import 'listing_details_page.dart';
@@ -18,22 +19,32 @@ String getFullImageUrl(String path) {
   return '${ApiEndpoints.staticBaseUrl}$normalized';
 }
 
-class DashboardScreen extends ConsumerWidget {
+class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
 
+  @override
+  ConsumerState<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   final Color primaryBlue = const Color(0xFF007BFF);
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(dashboardViewModelProvider);
-
-    // Ensure listings are fetched when page is opened
-    Future.microtask(() {
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final state = ref.read(dashboardViewModelProvider);
       if (!state.isLoading && state.listings.isEmpty) {
         ref.read(dashboardViewModelProvider).fetchListings();
       }
     });
+  }
 
+  @override
+  Widget build(BuildContext context) {
+    final state = ref.watch(dashboardViewModelProvider);
+    final authState = ref.watch(authViewModelProvider);
+    final userId = authState.authEntity?.authId;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -50,14 +61,16 @@ class DashboardScreen extends ConsumerWidget {
             child: SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => ReviewListPage(userId: 'currentUserId'),
-                    ),
-                  );
-                },
+                onPressed: userId == null
+                    ? null
+                    : () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => ReviewListPage(userId: userId),
+                          ),
+                        );
+                      },
                 child: const Text('View Reviews'),
               ),
             ),

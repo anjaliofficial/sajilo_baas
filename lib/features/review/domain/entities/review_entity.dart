@@ -2,7 +2,8 @@ import 'reply_entity.dart';
 
 class ReviewEntity {
   /// Returns the author name or id (customize as needed)
-  String get authorName => reviewerId;
+  String get authorName =>
+      reviewerName?.isNotEmpty == true ? reviewerName! : reviewerId;
   final String id;
   final String bookingId;
   final String listingId;
@@ -12,6 +13,8 @@ class ReviewEntity {
   final String comment;
   final List<ReplyEntity> replies;
   final DateTime createdAt;
+  final String? reviewerName;
+  final String? reviewerProfile;
 
   ReviewEntity({
     required this.id,
@@ -23,6 +26,8 @@ class ReviewEntity {
     required this.comment,
     required this.replies,
     required this.createdAt,
+    this.reviewerName,
+    this.reviewerProfile,
   });
 
   ReviewEntity copyWith({List<ReplyEntity>? replies}) {
@@ -36,6 +41,8 @@ class ReviewEntity {
       comment: comment,
       replies: replies ?? this.replies,
       createdAt: createdAt,
+      reviewerName: reviewerName,
+      reviewerProfile: reviewerProfile,
     );
   }
 }
