@@ -304,16 +304,17 @@ class _ReviewCardState extends ConsumerState<ReviewCard>
                   radius: 22,
                   backgroundImage:
                       (widget.review.reviewerProfile != null &&
-                          widget.review.reviewerProfile.isNotEmpty)
+                          widget.review.reviewerProfile!.isNotEmpty)
                       ? NetworkImage(
-                          getFullImageUrl(widget.review.reviewerProfile),
+                          getFullImageUrl(widget.review.reviewerProfile!),
                         )
                       : null,
                   child:
                       (widget.review.reviewerProfile == null ||
-                          widget.review.reviewerProfile.isEmpty)
-                      ? const Icon(Icons.person)
+                          widget.review.reviewerProfile!.isEmpty)
+                      ? const Icon(Icons.person, color: Colors.grey)
                       : null,
+                  backgroundColor: Colors.grey.shade200,
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -321,7 +322,10 @@ class _ReviewCardState extends ConsumerState<ReviewCard>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        widget.review.reviewerName ?? 'Unknown',
+                        (widget.review.reviewerName != null &&
+                                widget.review.reviewerName!.isNotEmpty)
+                            ? widget.review.reviewerName!
+                            : widget.review.reviewerId,
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
@@ -450,18 +454,40 @@ class ReplyBubble extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            (reply.author != null &&
-                    reply.author is Map &&
-                    reply.author['fullName'] != null &&
-                    (reply.author['fullName'] as String).isNotEmpty)
-                ? reply.author['fullName']
-                : (reply.authorId ?? 'Unknown'),
-            style: TextStyle(
-              fontWeight: FontWeight.w500,
-              fontSize: 13,
-              color: isOwner ? Colors.blue : Colors.black87,
-            ),
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 12,
+                backgroundImage:
+                    (reply.author != null &&
+                        reply.author['profilePicture'] != null &&
+                        (reply.author['profilePicture'] as String).isNotEmpty)
+                    ? NetworkImage(
+                        getFullImageUrl(reply.author['profilePicture']),
+                      )
+                    : null,
+                child:
+                    (reply.author == null ||
+                        reply.author['profilePicture'] == null ||
+                        (reply.author['profilePicture'] as String).isEmpty)
+                    ? const Icon(Icons.person, size: 14, color: Colors.grey)
+                    : null,
+                backgroundColor: Colors.grey.shade200,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                (reply.author != null &&
+                        reply.author['fullName'] != null &&
+                        (reply.author['fullName'] as String).isNotEmpty)
+                    ? reply.author['fullName']
+                    : (reply.authorId ?? 'Unknown'),
+                style: TextStyle(
+                  fontWeight: FontWeight.w500,
+                  fontSize: 13,
+                  color: isOwner ? Colors.blue : Colors.black87,
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 2),
           Text(reply.text ?? '', style: const TextStyle(fontSize: 13)),
