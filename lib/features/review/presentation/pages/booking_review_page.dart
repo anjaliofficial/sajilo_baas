@@ -68,6 +68,19 @@ class _BookingReviewPageState extends ConsumerState<BookingReviewPage> {
                               rating: rating,
                               comment: commentCtrl.text,
                             );
+                        final error = ref.read(reviewProvider).error;
+                        if (error != null) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  error.replaceFirst('Exception: ', ''),
+                                ),
+                              ),
+                            );
+                          }
+                          return;
+                        }
                         // Reload reviews for the current user
                         final auth = ref.read(authViewModelProvider);
                         if (auth.authEntity != null &&

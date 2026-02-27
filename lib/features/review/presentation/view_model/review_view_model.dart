@@ -167,11 +167,16 @@ class ReviewViewModel extends StateNotifier<ReviewState> {
     required int rating,
     String? comment,
   }) async {
-    await createReviewUsecase(
-      bookingId: bookingId,
-      rating: rating,
-      comment: comment,
-    );
+    try {
+      await createReviewUsecase(
+        bookingId: bookingId,
+        rating: rating,
+        comment: comment,
+      );
+      state = state.copyWith(error: null);
+    } catch (e) {
+      state = state.copyWith(error: e.toString());
+    }
   }
 
   Future<void> loadReviews(String userId) async {

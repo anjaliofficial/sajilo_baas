@@ -42,6 +42,19 @@ class ReviewRemoteDatasource {
       data: {'bookingId': bookingId, 'rating': rating, 'comment': comment},
     );
 
+    // Handle non-200/201 responses
+    if (res.statusCode != 200 && res.statusCode != 201) {
+      final message = res.data['message'] ?? 'Failed to create review';
+      throw Exception(message);
+    }
+
+    if (res.data == null || res.data['data'] == null) {
+      final message = res.data != null && res.data['message'] != null
+          ? res.data['message']
+          : 'No review data returned';
+      throw Exception(message);
+    }
+
     return ReviewModel.fromJson(res.data['data']);
   }
 

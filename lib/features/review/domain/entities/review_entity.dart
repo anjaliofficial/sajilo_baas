@@ -15,6 +15,7 @@ class ReviewEntity {
   final DateTime createdAt;
   final String? reviewerName;
   final String? reviewerProfile;
+  final String? revieweeName;
 
   ReviewEntity({
     required this.id,
@@ -28,9 +29,10 @@ class ReviewEntity {
     required this.createdAt,
     this.reviewerName,
     this.reviewerProfile,
+    this.revieweeName,
   });
 
-  ReviewEntity copyWith({List<ReplyEntity>? replies}) {
+  ReviewEntity copyWith({List<ReplyEntity>? replies, String? revieweeName}) {
     return ReviewEntity(
       id: id,
       bookingId: bookingId,
@@ -43,6 +45,7 @@ class ReviewEntity {
       createdAt: createdAt,
       reviewerName: reviewerName,
       reviewerProfile: reviewerProfile,
+      revieweeName: revieweeName ?? this.revieweeName,
     );
   }
 }

@@ -309,27 +309,57 @@ class _ReviewCardState extends ConsumerState<ReviewCard>
                           getFullImageUrl(widget.review.reviewerProfile!),
                         )
                       : null,
+                  backgroundColor: Colors.grey.shade200,
                   child:
                       (widget.review.reviewerProfile == null ||
                           widget.review.reviewerProfile!.isEmpty)
                       ? const Icon(Icons.person, color: Colors.grey)
                       : null,
-                  backgroundColor: Colors.grey.shade200,
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        (widget.review.reviewerName != null &&
-                                widget.review.reviewerName!.isNotEmpty)
-                            ? widget.review.reviewerName!
-                            : widget.review.reviewerId,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              (widget.review.reviewerName != null &&
+                                      widget.review.reviewerName!.isNotEmpty)
+                                  ? widget.review.reviewerName!
+                                  : widget.review.reviewerId,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          const Icon(
+                            Icons.arrow_forward,
+                            size: 16,
+                            color: Colors.grey,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              (widget.review.revieweeName != null &&
+                                      widget.review.revieweeName!.isNotEmpty)
+                                  ? widget.review.revieweeName!
+                                  : widget.review.revieweeId,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                                color: Colors.blue,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 4),
                       Row(
@@ -430,7 +460,7 @@ class ReplyBubble extends StatelessWidget {
   final dynamic reply;
   final bool isOwner;
 
-  const ReplyBubble({required this.reply, this.isOwner = false});
+  const ReplyBubble({super.key, required this.reply, this.isOwner = false});
 
   String timeAgo(DateTime? date) {
     if (date == null) return '';
@@ -466,13 +496,13 @@ class ReplyBubble extends StatelessWidget {
                         getFullImageUrl(reply.author['profilePicture']),
                       )
                     : null,
+                backgroundColor: Colors.grey.shade200,
                 child:
                     (reply.author == null ||
                         reply.author['profilePicture'] == null ||
                         (reply.author['profilePicture'] as String).isEmpty)
                     ? const Icon(Icons.person, size: 14, color: Colors.grey)
                     : null,
-                backgroundColor: Colors.grey.shade200,
               ),
               const SizedBox(width: 6),
               Text(

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:sajilo_baas/features/review/presentation/pages/booking_review_page.dart';
 import '../../../booking/presentation/providers/booking_providers.dart';
 import 'package:sajilo_baas/core/api/api_endpoints.dart';
@@ -226,7 +225,8 @@ class BookingDetailsPageFull extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: 16),
-            if (booking.status.toLowerCase() == 'completed')
+            if (booking.status.toLowerCase() == 'completed' ||
+                booking.status.toLowerCase() == 'confirmed')
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

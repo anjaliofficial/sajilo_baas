@@ -14,6 +14,7 @@ class ReviewModel extends ReviewEntity {
     required super.createdAt,
     super.reviewerName,
     super.reviewerProfile,
+    super.revieweeName,
   });
 
   factory ReviewModel.fromJson(Map<String, dynamic> json) {
@@ -40,12 +41,13 @@ class ReviewModel extends ReviewEntity {
     }
 
     final reviewerObj = json['reviewer'];
+    final revieweeObj = json['reviewee'];
     return ReviewModel(
       id: json['_id'],
       bookingId: parseId(json['bookingId']),
       listingId: parseId(json['listingId']),
       reviewerId: parseId(reviewerObj),
-      revieweeId: parseId(json['reviewee']),
+      revieweeId: parseId(revieweeObj),
       rating: json['rating'],
       comment: json['comment'] ?? '',
       replies: (json['replies'] as List)
@@ -54,6 +56,7 @@ class ReviewModel extends ReviewEntity {
       createdAt: DateTime.parse(json['createdAt']),
       reviewerName: parseName(reviewerObj),
       reviewerProfile: parseProfile(reviewerObj),
+      revieweeName: parseName(revieweeObj),
     );
   }
 }
