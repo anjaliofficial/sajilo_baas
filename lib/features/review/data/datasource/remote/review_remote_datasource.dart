@@ -19,13 +19,12 @@ class ReviewRemoteDatasource {
   }
 
   Future<void> deleteReview(String reviewId) async {
-    // TODO: Implement API call
-    throw UnimplementedError();
+    await dio.delete('/reviews/$reviewId');
   }
 
   Future<ReviewModel> deleteReply(String reviewId, String replyId) async {
-    // TODO: Implement API call
-    throw UnimplementedError();
+    final res = await dio.delete('/reviews/$reviewId/replies/$replyId');
+    return ReviewModel.fromJson(res.data['data']);
   }
 
   final Dio dio;
