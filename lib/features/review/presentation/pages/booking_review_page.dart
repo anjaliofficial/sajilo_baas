@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
 import '../widgets/star_rating_widget.dart';
 import '../providers/review_provider.dart';
 
@@ -67,7 +68,17 @@ class _BookingReviewPageState extends ConsumerState<BookingReviewPage> {
                               rating: rating,
                               comment: commentCtrl.text,
                             );
-
+                        // Reload reviews for the current user
+                        final auth = ref.read(authViewModelProvider);
+                        if (auth.authEntity != null &&
+                            auth.authEntity!.authId != null) {
+                          await ref
+                              .read(reviewProvider.notifier)
+                              .loadReviews(auth.authEntity!.authId!);
+                          await ref
+                              .read(reviewProvider.notifier)
+                              .loadReviewsGiven();
+                        }
                         if (context.mounted) {
                           Navigator.pop(context);
                         }
