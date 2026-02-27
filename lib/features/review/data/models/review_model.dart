@@ -2,21 +2,18 @@ import '../../domain/entities/review_entity.dart';
 import 'reply_model.dart';
 
 class ReviewModel extends ReviewEntity {
-  final String? reviewerName;
-  final String? reviewerProfile;
-
   ReviewModel({
-    required super.id,
-    required super.bookingId,
-    required super.listingId,
-    required super.reviewerId,
-    required super.revieweeId,
-    required super.rating,
-    required super.comment,
-    required super.replies,
-    required super.createdAt,
-    this.reviewerName,
-    this.reviewerProfile,
+    required String id,
+    required String bookingId,
+    required String listingId,
+    required String reviewerId,
+    required String revieweeId,
+    required int rating,
+    required String comment,
+    required List<ReplyModel> replies,
+    required DateTime createdAt,
+    String? reviewerName,
+    String? reviewerProfile,
   }) : super(
          id: id,
          bookingId: bookingId,
@@ -27,6 +24,8 @@ class ReviewModel extends ReviewEntity {
          comment: comment,
          replies: replies,
          createdAt: createdAt,
+         reviewerName: reviewerName,
+         reviewerProfile: reviewerProfile,
        );
 
   factory ReviewModel.fromJson(Map<String, dynamic> json) {
