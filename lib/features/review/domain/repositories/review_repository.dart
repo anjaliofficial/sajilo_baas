@@ -14,4 +14,22 @@ abstract class ReviewRepository {
     required String reviewId,
     required String text,
   });
+
+  Future<ReviewEntity> editReview({
+    required String reviewId,
+    required String comment,
+  });
+
+  Future<ReviewEntity> editReply({
+    required String reviewId,
+    required String replyId,
+    required String text,
+  });
+
+  Future<void> deleteReview({required String reviewId});
+
+  Future<ReviewEntity> deleteReply({
+    required String reviewId,
+    required String replyId,
+  });
 }

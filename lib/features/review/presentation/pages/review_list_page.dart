@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/review_provider.dart';
 import 'package:sajilo_baas/core/utils/image_utils.dart';
 
 class ReviewListPage extends ConsumerStatefulWidget {
   final String userId;
+
   const ReviewListPage({super.key, required this.userId});
 
   @override
@@ -21,327 +23,339 @@ class _ReviewListPageState extends ConsumerState<ReviewListPage>
     _tabController = TabController(length: 2, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(reviewProvider.notifier).loadReviews(widget.userId);
+      ref.read(reviewProvider.notifier).loadReviewsGiven();
     });
-    _tabController.addListener(() {
-      if (_tabController.index == 0) {
-        ref.read(reviewProvider.notifier).loadReviews(widget.userId);
-      } else {
-        ref.read(reviewProvider.notifier).loadReviewsGiven();
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final reviewState = ref.watch(reviewProvider);
-    final reviews = reviewState.reviews;
-    final isLoading = reviewState.loading;
-    final isReceivedTab = _tabController.index == 0;
+    final state = ref.watch(reviewProvider);
 
-    // Calculate average rating for received reviews
-    double avgRating = 0;
-    int totalReviews = 0;
-    if (isReceivedTab && reviews.isNotEmpty) {
-      avgRating =
-          reviews.map((r) => r.rating).reduce((a, b) => a + b) / reviews.length;
-      totalReviews = reviews.length;
-    }
+    // Filter reviews for received and given
+    final receivedReviews = state.reviews
+        .where((r) => r.revieweeId == widget.userId)
+        .toList();
+    final givenReviews = state.reviews
+        .where((r) => r.reviewerId == widget.userId)
+        .toList();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F8F8),
       appBar: AppBar(
-        title: const Text('Reviews'),
-        centerTitle: true,
-        elevation: 0,
-        backgroundColor: Colors.white,
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(56),
-          child: Container(
-            color: Colors.white,
-            child: TabBar(
-              controller: _tabController,
-              indicatorColor: Theme.of(context).colorScheme.primary,
-              labelColor: Theme.of(context).colorScheme.primary,
-              unselectedLabelColor: Colors.grey,
-              tabs: const [
-                Tab(text: 'Received'),
-                Tab(text: 'Given'),
-              ],
-            ),
-          ),
+        title: const Text("Reviews"),
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: const [
+            Tab(text: "Received"),
+            Tab(text: "Given"),
+          ],
         ),
       ),
-      body: Column(
-        children: [
-          if (isReceivedTab)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16.0),
-              child: reviews.isEmpty
-                  ? const SizedBox.shrink()
-                  : Column(
-                      children: [
-                        Text(
-                          '⭐ ${avgRating.toStringAsFixed(1)} ($totalReviews Reviews)',
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
+      body: state.loading
+          ? const Center(child: CircularProgressIndicator())
+          : TabBarView(
+              controller: _tabController,
+              children: [
+                _buildList(receivedReviews, true),
+                _buildList(givenReviews, false),
+              ],
             ),
-          Expanded(
-            child: isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : reviews.isEmpty
-                ? const Center(child: Text('No reviews found.'))
-                : ListView.separated(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: reviews.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 16),
-                    itemBuilder: (context, i) {
-                      final r = reviews[i];
-                      return _ReviewCard(
-                        review: r,
-                        isReceivedTab: isReceivedTab,
-                        currentUserId: widget.userId,
-                        onReply: (replyText) async {
-                          await ref
-                              .read(reviewProvider.notifier)
-                              .addReplyOptimistic(
-                                reviewId: r.id,
-                                authorId: widget.userId,
-                                text: replyText,
-                              );
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Reply sent!')),
-                            );
-                          }
-                        },
-                      );
-                    },
-                  ),
-          ),
-        ],
-      ),
+    );
+  }
+
+  Widget _buildList(List reviews, bool isReceivedTab) {
+    if (reviews.isEmpty) {
+      return const Center(child: Text("No reviews found"));
+    }
+
+    return ListView.separated(
+      padding: const EdgeInsets.all(16),
+      itemCount: reviews.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 14),
+      itemBuilder: (context, index) {
+        return ReviewCard(
+          review: reviews[index],
+          isReceivedTab: isReceivedTab,
+          currentUserId: widget.userId,
+        );
+      },
     );
   }
 }
 
-class _ReviewCard extends StatelessWidget {
+class ReviewCard extends ConsumerWidget {
   final dynamic review;
   final bool isReceivedTab;
   final String currentUserId;
-  final Future<void> Function(String replyText)? onReply;
 
-  const _ReviewCard({
+  const ReviewCard({
+    super.key,
     required this.review,
     required this.isReceivedTab,
     required this.currentUserId,
-    this.onReply,
-    Key? key,
-  }) : super(key: key);
+  });
+
+  bool _canEditReview() {
+    return review.reviewerId == currentUserId;
+  }
+
+  bool _canEditReply() {
+    if (review.replies == null || review.replies.isEmpty) return false;
+    return review.replies.first.authorId == currentUserId;
+  }
+
+  void _showMenu(
+    BuildContext context,
+    WidgetRef ref,
+    Offset position, {
+    required bool isReply,
+  }) async {
+    final overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+
+    final selected = await showMenu<String>(
+      context: context,
+      position: RelativeRect.fromRect(
+        position & const Size(40, 40),
+        Offset.zero & overlay.size,
+      ),
+      items: [
+        if ((isReply && _canEditReply()) || (!isReply && _canEditReview()))
+          const PopupMenuItem(value: 'edit', child: Text("Edit")),
+        if ((isReply && _canEditReply()) || (!isReply && _canEditReview()))
+          const PopupMenuItem(value: 'delete', child: Text("Delete")),
+        const PopupMenuItem(value: 'copy', child: Text("Copy")),
+      ],
+    );
+
+    if (selected == 'copy') {
+      final text = isReply ? review.replies.first.text : review.comment;
+      await Clipboard.setData(ClipboardData(text: text));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Copied!")));
+    }
+
+    if (selected == 'edit') {
+      isReply ? _editReply(context, ref) : _editReview(context, ref);
+    }
+
+    if (selected == 'delete') {
+      isReply ? _deleteReply(context, ref) : _deleteReview(context, ref);
+    }
+  }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final replied = review.replies != null && review.replies.isNotEmpty;
     final reply = replied ? review.replies.first : null;
+
     final canReply =
         isReceivedTab && !replied && review.revieweeId == currentUserId;
 
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      elevation: 3,
-      margin: EdgeInsets.zero,
-      color: Colors.white,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CircleAvatar(
-                  backgroundImage:
-                      review.reviewerProfile != null &&
-                          review.reviewerProfile.isNotEmpty
-                      ? NetworkImage(getFullImageUrl(review.reviewerProfile))
-                      : null,
-                  radius: 22,
-                  child:
-                      (review.reviewerProfile == null ||
-                          review.reviewerProfile.isEmpty)
-                      ? const Icon(Icons.person)
-                      : null,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        isReceivedTab
-                            ? review.authorName
-                            : (review.propertyName ?? review.authorName),
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
+    return GestureDetector(
+      onLongPressStart: (details) =>
+          _showMenu(context, ref, details.globalPosition, isReply: false),
+      onSecondaryTapDown: (details) =>
+          _showMenu(context, ref, details.globalPosition, isReply: false),
+      child: Card(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        elevation: 3,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              /// HEADER
+              Row(
+                children: [
+                  CircleAvatar(
+                    radius: 22,
+                    backgroundImage:
+                        review.reviewerProfile != null &&
+                            review.reviewerProfile.isNotEmpty
+                        ? NetworkImage(getFullImageUrl(review.reviewerProfile))
+                        : null,
+                    child:
+                        review.reviewerProfile == null ||
+                            review.reviewerProfile.isEmpty
+                        ? const Icon(Icons.person)
+                        : null,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      review.authorName,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
                       ),
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          Icon(Icons.star, color: Colors.amber[700], size: 18),
-                          const SizedBox(width: 4),
-                          Text(
-                            review.rating.toString(),
-                            style: const TextStyle(fontWeight: FontWeight.w500),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        review.comment,
-                        style: const TextStyle(fontSize: 15),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Reviewed on: ${review.createdAt.toLocal().toString().split(" ")[0]}',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey,
-                        ),
-                      ),
-                      if (replied && reply != null)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 12, left: 8),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFF1F1F1),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            padding: const EdgeInsets.symmetric(
-                              vertical: 10,
-                              horizontal: 12,
-                            ),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Icon(
-                                  Icons.reply,
-                                  size: 18,
-                                  color: Colors.grey,
-                                ),
-                                const SizedBox(width: 6),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        isReceivedTab
-                                            ? 'Your Reply:'
-                                            : 'Owner Reply:',
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.w500,
-                                          fontSize: 13,
-                                          color: Colors.black87,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        reply.text,
-                                        style: const TextStyle(
-                                          fontSize: 14,
-                                          color: Colors.black87,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      if (canReply)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 10),
-                          child: OutlinedButton.icon(
-                            icon: const Icon(Icons.reply, size: 18),
-                            label: const Text('Reply'),
-                            style: OutlinedButton.styleFrom(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              backgroundColor: Colors.grey[100],
-                              foregroundColor: Theme.of(
-                                context,
-                              ).colorScheme.primary,
-                              side: BorderSide(color: Colors.grey[300]!),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 8,
-                              ),
-                            ),
-                            onPressed: () async {
-                              final replyText = await showDialog<String>(
-                                context: context,
-                                builder: (context) {
-                                  final TextEditingController replyController =
-                                      TextEditingController();
-                                  return AlertDialog(
-                                    title: const Text('Reply to Review'),
-                                    content: TextField(
-                                      controller: replyController,
-                                      decoration: const InputDecoration(
-                                        hintText: 'Enter your reply',
-                                      ),
-                                      maxLines: 3,
-                                    ),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () =>
-                                            Navigator.of(context).pop(),
-                                        child: const Text('Cancel'),
-                                      ),
-                                      ElevatedButton(
-                                        onPressed: () {
-                                          final text = replyController.text
-                                              .trim();
-                                          if (text.isNotEmpty) {
-                                            Navigator.of(context).pop(text);
-                                          }
-                                        },
-                                        child: const Text('Send'),
-                                      ),
-                                    ],
-                                  );
-                                },
-                              );
-                              if (replyText != null &&
-                                  replyText.isNotEmpty &&
-                                  onReply != null) {
-                                await onReply!(replyText);
-                              }
-                            },
-                          ),
-                        ),
-                    ],
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 8),
+
+              Row(
+                children: [
+                  const Icon(Icons.star, color: Colors.amber, size: 18),
+                  const SizedBox(width: 4),
+                  Text(review.rating.toString()),
+                ],
+              ),
+
+              const SizedBox(height: 8),
+              Text(review.comment),
+
+              const SizedBox(height: 6),
+              Text(
+                review.createdAt.toString().split(" ")[0],
+                style: const TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+
+              /// REPLY VIEW
+              if (replied && reply != null)
+                GestureDetector(
+                  onLongPressStart: (details) => _showMenu(
+                    context,
+                    ref,
+                    details.globalPosition,
+                    isReply: true,
+                  ),
+                  child: Container(
+                    margin: const EdgeInsets.only(top: 12),
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(reply.text),
                   ),
                 ),
-              ],
-            ),
-          ],
+
+              /// REPLY BUTTON
+              if (canReply)
+                Padding(
+                  padding: const EdgeInsets.only(top: 10),
+                  child: OutlinedButton.icon(
+                    icon: const Icon(Icons.reply),
+                    label: const Text("Reply"),
+                    onPressed: () async {
+                      final controller = TextEditingController();
+                      final result = await showDialog<String>(
+                        context: context,
+                        builder: (_) => AlertDialog(
+                          title: const Text("Reply to Review"),
+                          content: TextField(
+                            controller: controller,
+                            maxLines: 3,
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: const Text("Cancel"),
+                            ),
+                            ElevatedButton(
+                              onPressed: () => Navigator.pop(
+                                context,
+                                controller.text.trim(),
+                              ),
+                              child: const Text("Send"),
+                            ),
+                          ],
+                        ),
+                      );
+
+                      if (result != null && result.isNotEmpty) {
+                        await ref
+                            .read(reviewProvider.notifier)
+                            .addReplyOptimistic(
+                              reviewId: review.id,
+                              authorId: currentUserId,
+                              text: result,
+                            );
+                      }
+                    },
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  Future<void> _editReview(BuildContext context, WidgetRef ref) async {
+    final controller = TextEditingController(text: review.comment);
+
+    final result = await showDialog<String>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text("Edit Review"),
+        content: TextField(controller: controller, maxLines: 3),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel"),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, controller.text.trim()),
+            child: const Text("Save"),
+          ),
+        ],
+      ),
+    );
+
+    if (result != null && result.isNotEmpty) {
+      await ref
+          .read(reviewProvider.notifier)
+          .editReviewOptimistic(reviewId: review.id, comment: result);
+    }
+  }
+
+  Future<void> _deleteReview(BuildContext context, WidgetRef ref) async {
+    await ref
+        .read(reviewProvider.notifier)
+        .deleteReviewOptimistic(reviewId: review.id);
+  }
+
+  Future<void> _editReply(BuildContext context, WidgetRef ref) async {
+    final reply = review.replies.first;
+    final controller = TextEditingController(text: reply.text);
+
+    final result = await showDialog<String>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text("Edit Reply"),
+        content: TextField(controller: controller, maxLines: 3),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel"),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, controller.text.trim()),
+            child: const Text("Save"),
+          ),
+        ],
+      ),
+    );
+
+    if (result != null && result.isNotEmpty) {
+      await ref
+          .read(reviewProvider.notifier)
+          .editReplyOptimistic(
+            reviewId: review.id,
+            replyId: reply.id,
+            text: result,
+          );
+    }
+  }
+
+  Future<void> _deleteReply(BuildContext context, WidgetRef ref) async {
+    final reply = review.replies.first;
+
+    await ref
+        .read(reviewProvider.notifier)
+        .deleteReplyOptimistic(reviewId: review.id, replyId: reply.id);
   }
 }

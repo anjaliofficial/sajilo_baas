@@ -4,6 +4,30 @@ import 'package:sajilo_baas/core/api/api_endpoints.dart';
 import 'package:sajilo_baas/features/review/data/models/review_model.dart';
 
 class ReviewRemoteDatasource {
+  Future<ReviewModel> editReview(String reviewId, String comment) async {
+    // TODO: Implement API call
+    throw UnimplementedError();
+  }
+
+  Future<ReviewModel> editReply(
+    String reviewId,
+    String replyId,
+    String text,
+  ) async {
+    // TODO: Implement API call
+    throw UnimplementedError();
+  }
+
+  Future<void> deleteReview(String reviewId) async {
+    // TODO: Implement API call
+    throw UnimplementedError();
+  }
+
+  Future<ReviewModel> deleteReply(String reviewId, String replyId) async {
+    // TODO: Implement API call
+    throw UnimplementedError();
+  }
+
   final Dio dio;
 
   ReviewRemoteDatasource()
