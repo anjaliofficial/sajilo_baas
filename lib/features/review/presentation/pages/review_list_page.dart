@@ -30,13 +30,8 @@ class _ReviewListPageState extends ConsumerState<ReviewListPage>
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(reviewProvider);
-
-    final receivedReviews = state.reviews
-        .where((r) => r.revieweeId == widget.userId)
-        .toList();
-    final givenReviews = state.reviews
-        .where((r) => r.reviewerId == widget.userId)
-        .toList();
+    final receivedReviews = state.receivedReviews;
+    final givenReviews = state.givenReviews;
 
     return Scaffold(
       appBar: AppBar(

@@ -60,18 +60,20 @@ class ReviewRemoteDatasource {
 
   Future<List<ReviewModel>> getReviewsGiven() async {
     final res = await dio.get('/reviews/given');
-
-    return (res.data['reviews'] as List)
-        .map((e) => ReviewModel.fromJson(e))
-        .toList();
+    final reviewsRaw = res.data['reviews'];
+    if (reviewsRaw == null || reviewsRaw is! List) {
+      return <ReviewModel>[];
+    }
+    return reviewsRaw.map((e) => ReviewModel.fromJson(e)).toList();
   }
 
   Future<List<ReviewModel>> getReviewsReceived(String userId) async {
     final res = await dio.get('/reviews/received/$userId');
-
-    return (res.data['reviews'] as List)
-        .map((e) => ReviewModel.fromJson(e))
-        .toList();
+    final reviewsRaw = res.data['reviews'];
+    if (reviewsRaw == null || reviewsRaw is! List) {
+      return <ReviewModel>[];
+    }
+    return reviewsRaw.map((e) => ReviewModel.fromJson(e)).toList();
   }
 
   Future<ReviewModel> addReply(String reviewId, String text) async {

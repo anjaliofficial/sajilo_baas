@@ -27,7 +27,7 @@ class ReviewViewModel extends StateNotifier<ReviewState> {
     required String comment,
   }) async {
     // Optimistic update
-    final optimisticReviews = state.reviews.map((review) {
+    final optimisticReviews = state.receivedReviews.map((review) {
       if (review.id == reviewId) {
         // ReviewEntity only has copyWith({List<ReplyEntity>? replies})
         // So we need to create a new ReviewEntity with updated comment
@@ -47,16 +47,16 @@ class ReviewViewModel extends StateNotifier<ReviewState> {
       }
       return review;
     }).toList();
-    state = state.copyWith(reviews: optimisticReviews);
+    state = state.copyWith(receivedReviews: optimisticReviews);
     try {
       final updated = await getReviewsReceived.repository.editReview(
         reviewId: reviewId,
         comment: comment,
       );
-      final synced = state.reviews
+      final synced = state.receivedReviews
           .map((review) => review.id == reviewId ? updated : review)
           .toList();
-      state = state.copyWith(reviews: synced);
+      state = state.copyWith(receivedReviews: synced);
     } catch (e) {
       // Rollback
       state = state.copyWith(error: 'Failed to update feedback');
@@ -69,7 +69,7 @@ class ReviewViewModel extends StateNotifier<ReviewState> {
     required String replyId,
     required String text,
   }) async {
-    final optimisticReviews = state.reviews.map((review) {
+    final optimisticReviews = state.receivedReviews.map((review) {
       if (review.id == reviewId) {
         final updatedReplies = review.replies
             .map(
@@ -87,17 +87,17 @@ class ReviewViewModel extends StateNotifier<ReviewState> {
       }
       return review;
     }).toList();
-    state = state.copyWith(reviews: optimisticReviews);
+    state = state.copyWith(receivedReviews: optimisticReviews);
     try {
       final updated = await getReviewsReceived.repository.editReply(
         reviewId: reviewId,
         replyId: replyId,
         text: text,
       );
-      final synced = state.reviews
+      final synced = state.receivedReviews
           .map((review) => review.id == reviewId ? updated : review)
           .toList();
-      state = state.copyWith(reviews: synced);
+      state = state.copyWith(receivedReviews: synced);
     } catch (e) {
       state = state.copyWith(error: 'Failed to update reply');
     }
@@ -105,15 +105,15 @@ class ReviewViewModel extends StateNotifier<ReviewState> {
 
   /// Delete feedback (review)
   Future<void> deleteReviewOptimistic({required String reviewId}) async {
-    final prevReviews = state.reviews;
+    final prevReviews = state.receivedReviews;
     state = state.copyWith(
-      reviews: prevReviews.where((r) => r.id != reviewId).toList(),
+      receivedReviews: prevReviews.where((r) => r.id != reviewId).toList(),
     );
     try {
       await getReviewsReceived.repository.deleteReview(reviewId: reviewId);
     } catch (e) {
       state = state.copyWith(
-        reviews: prevReviews,
+        receivedReviews: prevReviews,
         error: 'Failed to delete feedback',
       );
     }
@@ -124,9 +124,9 @@ class ReviewViewModel extends StateNotifier<ReviewState> {
     required String reviewId,
     required String replyId,
   }) async {
-    final prevReviews = state.reviews;
+    final prevReviews = state.receivedReviews;
     state = state.copyWith(
-      reviews: prevReviews.map((review) {
+      receivedReviews: prevReviews.map((review) {
         if (review.id == reviewId) {
           return review.copyWith(
             replies: review.replies.where((r) => r.id != replyId).toList(),
@@ -142,7 +142,7 @@ class ReviewViewModel extends StateNotifier<ReviewState> {
       );
     } catch (e) {
       state = state.copyWith(
-        reviews: prevReviews,
+        receivedReviews: prevReviews,
         error: 'Failed to delete reply',
       );
     }
@@ -152,10 +152,14 @@ class ReviewViewModel extends StateNotifier<ReviewState> {
     state = state.copyWith(loading: true);
     try {
       final reviews = await getReviewsReceived.repository.getReviewsGiven();
-      state = state.copyWith(loading: false, reviews: reviews);
+      state = state.copyWith(
+        loading: false,
+        givenReviews: reviews ?? <ReviewEntity>[],
+      );
     } catch (e) {
       state = state.copyWith(
         loading: false,
+        givenReviews: state.givenReviews ?? <ReviewEntity>[],
         error: 'Failed to load given reviews',
       );
     }
@@ -183,10 +187,14 @@ class ReviewViewModel extends StateNotifier<ReviewState> {
     state = state.copyWith(loading: true);
     try {
       final reviews = await getReviewsReceived(userId);
-      state = state.copyWith(loading: false, reviews: reviews);
+      state = state.copyWith(
+        loading: false,
+        receivedReviews: reviews ?? <ReviewEntity>[],
+      );
     } catch (e) {
       state = state.copyWith(
         loading: false,
+        receivedReviews: state.receivedReviews ?? <ReviewEntity>[],
         error: 'Failed to load received reviews',
       );
     }
@@ -218,14 +226,14 @@ class ReviewViewModel extends StateNotifier<ReviewState> {
     );
 
     /// 1️⃣ Update UI immediately
-    final optimisticReviews = state.reviews.map((review) {
+    final optimisticReviews = state.receivedReviews.map((review) {
       if (review.id == reviewId) {
         return review.copyWith(replies: [...review.replies, optimisticReply]);
       }
       return review;
     }).toList();
 
-    state = state.copyWith(reviews: optimisticReviews);
+    state = state.copyWith(receivedReviews: optimisticReviews);
 
     try {
       /// 2️⃣ Call backend
@@ -235,17 +243,17 @@ class ReviewViewModel extends StateNotifier<ReviewState> {
       );
 
       /// 3️⃣ Replace optimistic with real backend data
-      final syncedReviews = state.reviews.map((review) {
+      final syncedReviews = state.receivedReviews.map((review) {
         if (review.id == reviewId) {
           return updatedReview;
         }
         return review;
       }).toList();
 
-      state = state.copyWith(reviews: syncedReviews);
+      state = state.copyWith(receivedReviews: syncedReviews);
     } catch (e) {
       /// 4️⃣ Rollback if failed
-      final rolledBack = state.reviews.map((review) {
+      final rolledBack = state.receivedReviews.map((review) {
         if (review.id == reviewId) {
           return review.copyWith(
             replies: review.replies
@@ -257,7 +265,7 @@ class ReviewViewModel extends StateNotifier<ReviewState> {
       }).toList();
 
       state = state.copyWith(
-        reviews: rolledBack,
+        receivedReviews: rolledBack,
         error: 'Failed to send reply',
       );
     }
