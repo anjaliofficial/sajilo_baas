@@ -1,6 +1,8 @@
 import 'reply_entity.dart';
 
 class ReviewEntity {
+  /// Returns the author name or id (customize as needed)
+  String get authorName => reviewerId;
   final String id;
   final String bookingId;
   final String listingId;

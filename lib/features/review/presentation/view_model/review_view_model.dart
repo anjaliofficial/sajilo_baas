@@ -3,14 +3,35 @@ import 'package:flutter_riverpod/legacy.dart';
 import '../state/review_state.dart';
 import '../../domain/usecases/get_reviews_received_usecase.dart';
 import '../../domain/usecases/add_reply_usecase.dart';
+import '../../domain/usecases/create_review_usecase.dart';
 import '../../domain/entities/reply_entity.dart';
 
 class ReviewViewModel extends StateNotifier<ReviewState> {
+    Future<void> loadReviewsGiven() async {
+      state = state.copyWith(loading: true);
+      final reviews = await getReviewsReceived.repository.getReviewsGiven();
+      state = state.copyWith(loading: false, reviews: reviews);
+    }
   final GetReviewsReceivedUsecase getReviewsReceived;
   final AddReplyUsecase addReplyUsecase;
+  final CreateReviewUsecase createReviewUsecase;
 
-  ReviewViewModel(this.getReviewsReceived, this.addReplyUsecase)
-    : super(ReviewState());
+  ReviewViewModel(
+    this.getReviewsReceived,
+    this.addReplyUsecase,
+    this.createReviewUsecase,
+  ) : super(ReviewState());
+  Future<void> createReview({
+    required String bookingId,
+    required int rating,
+    String? comment,
+  }) async {
+    await createReviewUsecase(
+      bookingId: bookingId,
+      rating: rating,
+      comment: comment,
+    );
+  }
 
   Future<void> loadReviews(String userId) async {
     state = state.copyWith(loading: true);

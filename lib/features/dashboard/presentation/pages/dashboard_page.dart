@@ -1,6 +1,7 @@
 import 'package:sajilo_baas/core/api/api_endpoints.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sajilo_baas/features/review/presentation/pages/review_list_page.dart';
 import 'listing_page.dart';
 import 'listing_details_page.dart';
 import '../../domain/entities/listing_entity.dart';
@@ -42,55 +43,83 @@ class DashboardScreen extends ConsumerWidget {
         toolbarHeight: 80,
         title: _buildHeader(),
       ),
-      body: state.isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : state.error != null
-          ? Center(child: Text('Error: ${state.error}'))
-          : RefreshIndicator(
-              onRefresh: () async {
-                await ref.read(dashboardViewModelProvider).fetchListings();
-              },
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 10,
-                ),
-                physics: const AlwaysScrollableScrollPhysics(),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 10),
-                    _buildSearchBar(ref),
-                    const SizedBox(height: 30),
-                    _buildSectionHeader(
-                      context: context,
-                      title: 'Nearby your location',
-                      actionText: 'See all',
-                      onActionTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const ListingPage(),
-                          ),
-                        );
-                      },
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+            child: SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ReviewListPage(userId: 'currentUserId'),
                     ),
-                    const SizedBox(height: 15),
-                    _buildNearbyPropertyList(state.filteredListings, context),
-                    const SizedBox(height: 40),
-                    _buildSectionHeader(
-                      title: 'Popular Destination',
-                      context: context,
-                    ),
-                    const SizedBox(height: 15),
-                    _buildPopularDestinationList(
-                      state.filteredListings,
-                      context,
-                    ),
-                  ],
-                ),
+                  );
+                },
+                child: const Text('View Reviews'),
               ),
             ),
+          ),
+          Expanded(
+            child: state.isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : state.error != null
+                ? Center(child: Text('Error: ${state.error}'))
+                : RefreshIndicator(
+                    onRefresh: () async {
+                      await ref
+                          .read(dashboardViewModelProvider)
+                          .fetchListings();
+                    },
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 10,
+                      ),
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 10),
+                          _buildSearchBar(ref),
+                          const SizedBox(height: 30),
+                          _buildSectionHeader(
+                            context: context,
+                            title: 'Nearby your location',
+                            actionText: 'See all',
+                            onActionTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const ListingPage(),
+                                ),
+                              );
+                            },
+                          ),
+                          const SizedBox(height: 15),
+                          _buildNearbyPropertyList(
+                            state.filteredListings,
+                            context,
+                          ),
+                          const SizedBox(height: 40),
+                          _buildSectionHeader(
+                            title: 'Popular Destination',
+                            context: context,
+                          ),
+                          const SizedBox(height: 15),
+                          _buildPopularDestinationList(
+                            state.filteredListings,
+                            context,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+          ),
+        ],
+      ),
     );
   }
 

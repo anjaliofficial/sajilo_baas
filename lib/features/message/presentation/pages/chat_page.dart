@@ -56,7 +56,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
     final token = authState.authEntity?.token;
     // Use ApiEndpoints.socketBaseUrl or similar constant for Socket.io URL
     final socketUrl = ApiEndpoints.socketBaseUrl;
-    debugPrint('Connecting to socket: ' + socketUrl);
+    debugPrint('Connecting to socket: $socketUrl');
     if (token != null && token.isNotEmpty && socketUrl.isNotEmpty) {
       _socket = IO.io(socketUrl, <String, dynamic>{
         'transports': ['websocket'],
