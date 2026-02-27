@@ -1,5 +1,6 @@
-// import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
+import 'package:sajilo_baas/features/auth/presentation/providers/auth_provider.dart';
 import 'package:sajilo_baas/features/review/domain/entities/review_entity.dart';
 import '../state/review_state.dart';
 import '../../domain/usecases/get_reviews_received_usecase.dart';
@@ -8,6 +9,18 @@ import '../../domain/usecases/create_review_usecase.dart';
 import '../../domain/entities/reply_entity.dart';
 
 class ReviewViewModel extends StateNotifier<ReviewState> {
+  final Ref ref;
+  final GetReviewsReceivedUsecase getReviewsReceived;
+  final AddReplyUsecase addReplyUsecase;
+  final CreateReviewUsecase createReviewUsecase;
+
+  ReviewViewModel(
+    this.ref,
+    this.getReviewsReceived,
+    this.addReplyUsecase,
+    this.createReviewUsecase,
+  ) : super(ReviewState());
+
   /// Edit feedback (review comment)
   Future<void> editReviewOptimistic({
     required String reviewId,
@@ -148,15 +161,7 @@ class ReviewViewModel extends StateNotifier<ReviewState> {
     }
   }
 
-  final GetReviewsReceivedUsecase getReviewsReceived;
-  final AddReplyUsecase addReplyUsecase;
-  final CreateReviewUsecase createReviewUsecase;
-
-  ReviewViewModel(
-    this.getReviewsReceived,
-    this.addReplyUsecase,
-    this.createReviewUsecase,
-  ) : super(ReviewState());
+  // Duplicate fields and constructor removed above
   Future<void> createReview({
     required String bookingId,
     required int rating,
@@ -188,11 +193,23 @@ class ReviewViewModel extends StateNotifier<ReviewState> {
     required String authorId,
     required String text,
   }) async {
+    // Get current user fullName from AuthState
+    final authState = ref.read(authViewModelProvider);
+    Map<String, dynamic>? authorObj;
+    if (authState.authEntity != null) {
+      authorObj = {
+        '_id': authState.authEntity!.authId ?? authorId,
+        'fullName': authState.authEntity!.fullName,
+        'email': authState.authEntity!.email,
+        'profilePicture': null, // Add if available in AuthEntity
+      };
+    }
     final optimisticReply = ReplyEntity(
       id: 'temp-${DateTime.now().millisecondsSinceEpoch}',
       authorId: authorId,
       text: text,
       createdAt: DateTime.now(),
+      author: authorObj,
     );
 
     /// 1️⃣ Update UI immediately
