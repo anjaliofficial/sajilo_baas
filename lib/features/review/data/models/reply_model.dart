@@ -11,8 +11,9 @@ class ReplyModel extends ReplyEntity {
   factory ReplyModel.fromJson(Map<String, dynamic> json) {
     String parseAuthorId(dynamic value) {
       if (value is String) return value;
-      if (value is Map && value.containsKey('_id'))
+      if (value is Map && value.containsKey('_id')) {
         return value['_id'] as String;
+      }
       return '';
     }
 

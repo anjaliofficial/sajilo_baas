@@ -3,48 +3,39 @@ import 'reply_model.dart';
 
 class ReviewModel extends ReviewEntity {
   ReviewModel({
-    required String id,
-    required String bookingId,
-    required String listingId,
-    required String reviewerId,
-    required String revieweeId,
-    required int rating,
-    required String comment,
-    required List<ReplyModel> replies,
-    required DateTime createdAt,
-    String? reviewerName,
-    String? reviewerProfile,
-  }) : super(
-         id: id,
-         bookingId: bookingId,
-         listingId: listingId,
-         reviewerId: reviewerId,
-         revieweeId: revieweeId,
-         rating: rating,
-         comment: comment,
-         replies: replies,
-         createdAt: createdAt,
-         reviewerName: reviewerName,
-         reviewerProfile: reviewerProfile,
-       );
+    required super.id,
+    required super.bookingId,
+    required super.listingId,
+    required super.reviewerId,
+    required super.revieweeId,
+    required super.rating,
+    required super.comment,
+    required List<ReplyModel> super.replies,
+    required super.createdAt,
+    super.reviewerName,
+    super.reviewerProfile,
+  });
 
   factory ReviewModel.fromJson(Map<String, dynamic> json) {
     String parseId(dynamic value) {
       if (value is String) return value;
-      if (value is Map && value.containsKey('_id'))
+      if (value is Map && value.containsKey('_id')) {
         return value['_id'] as String;
+      }
       return '';
     }
 
     String? parseName(dynamic value) {
-      if (value is Map && value['fullName'] != null)
+      if (value is Map && value['fullName'] != null) {
         return value['fullName'] as String;
+      }
       return null;
     }
 
     String? parseProfile(dynamic value) {
-      if (value is Map && value['profilePicture'] != null)
+      if (value is Map && value['profilePicture'] != null) {
         return value['profilePicture'] as String;
+      }
       return null;
     }
 
