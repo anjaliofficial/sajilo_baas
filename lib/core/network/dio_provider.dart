@@ -21,6 +21,9 @@ final dioProvider = Provider<Dio>((ref) {
         final token = authState.authEntity?.token;
         // Debug logging for token and Authorization header
         print('[DioProvider] Token: $token');
+        print('[DioProvider] Request: ${options.method} ${options.uri}');
+        print('[DioProvider] Request headers: ${options.headers}');
+        print('[DioProvider] Request body: ${options.data}');
         if (token != null && token.isNotEmpty) {
           options.headers['Authorization'] = 'Bearer $token';
           print('[DioProvider] Authorization header set: Bearer $token');
@@ -30,6 +33,21 @@ final dioProvider = Provider<Dio>((ref) {
           );
         }
         handler.next(options);
+      },
+      onResponse: (response, handler) {
+        print(
+          '[DioProvider] Response [${response.statusCode}]: ${response.requestOptions.uri}',
+        );
+        print('[DioProvider] Response headers: ${response.headers}');
+        print('[DioProvider] Response body: ${response.data}');
+        handler.next(response);
+      },
+      onError: (DioError error, handler) {
+        print(
+          '[DioProvider] Error [${error.response?.statusCode}]: ${error.requestOptions.uri}',
+        );
+        print('[DioProvider] Error response: ${error.response?.data}');
+        handler.next(error);
       },
     ),
   );
