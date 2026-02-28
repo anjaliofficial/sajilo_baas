@@ -9,6 +9,7 @@ class DashboardViewModel extends ChangeNotifier {
   bool isLoading = false;
   List<ListingEntity> listings = [];
   String? error;
+  String _searchQuery = '';
 
   DashboardViewModel(this.getListingsUsecase);
 
@@ -24,5 +25,23 @@ class DashboardViewModel extends ChangeNotifier {
       isLoading = false;
       notifyListeners();
     }
+  }
+
+  void setSearchQuery(String query) {
+    _searchQuery = query;
+    notifyListeners();
+  }
+
+  List<ListingEntity> get filteredListings {
+    if (_searchQuery.isEmpty) return listings;
+    final q = _searchQuery.toLowerCase();
+    return listings
+        .where(
+          (l) =>
+              l.title.toLowerCase().contains(q) ||
+              l.location.toLowerCase().contains(q) ||
+              l.propertyType.toLowerCase().contains(q),
+        )
+        .toList();
   }
 }

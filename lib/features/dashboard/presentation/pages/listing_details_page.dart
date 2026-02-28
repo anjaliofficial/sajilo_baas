@@ -57,78 +57,84 @@ class _ListingDetailsPageState extends State<ListingDetailsPage> {
   }
 
   Widget _buildAboutPage(ListingEntity listing) {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            listing.title,
-            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            listing.location,
-            style: const TextStyle(fontSize: 16, color: Colors.grey),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Price: \$${listing.pricePerNight}/night',
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 16),
-          Text('Property type: ${listing.propertyType}'),
-          Text('Max guests: ${listing.maxGuests}'),
-          Text('Min stay: ${listing.minStay} nights'),
-          Text('Cancellation: ${listing.cancellationPolicy}'),
-          const SizedBox(height: 16),
-          Text(
-            'Description',
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          Text(listing.description),
-        ],
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              listing.title,
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              listing.location,
+              style: const TextStyle(fontSize: 16, color: Colors.grey),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Price: \$${listing.pricePerNight}/night',
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            Text('Property type: ${listing.propertyType}'),
+            Text('Max guests: ${listing.maxGuests}'),
+            Text('Min stay: ${listing.minStay} nights'),
+            Text('Cancellation: ${listing.cancellationPolicy}'),
+            const SizedBox(height: 16),
+            Text(
+              'Description',
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Text(listing.description),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildAmenitiesPage(ListingEntity listing) {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Amenities',
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: listing.amenities
-                .map((a) => Chip(label: Text(a)))
-                .toList(),
-          ),
-        ],
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Amenities',
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: listing.amenities
+                  .map((a) => Chip(label: Text(a)))
+                  .toList(),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildHouseRulesPage(ListingEntity listing) {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'House rules',
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          Text(listing.houseRules),
-        ],
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'House rules',
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Text(listing.houseRules),
+          ],
+        ),
       ),
     );
   }
@@ -138,80 +144,87 @@ class _ListingDetailsPageState extends State<ListingDetailsPage> {
     if (host == null) {
       return const Center(child: Text('No host details available'));
     }
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              CircleAvatar(
-                backgroundImage: host.profilePicture.isNotEmpty
-                    ? NetworkImage(getFullImageUrl(host.profilePicture))
-                    : null,
-                radius: 32,
-                child: host.profilePicture.isEmpty
-                    ? const Icon(Icons.person, size: 32)
-                    : null,
-              ),
-              const SizedBox(width: 16),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    host.fullName,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                CircleAvatar(
+                  backgroundImage: host.profilePicture.isNotEmpty
+                      ? NetworkImage(getFullImageUrl(host.profilePicture))
+                      : null,
+                  radius: 32,
+                  child: host.profilePicture.isEmpty
+                      ? const Icon(Icons.person, size: 32)
+                      : null,
+                ),
+                const SizedBox(width: 16),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      host.fullName,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  Text('Phone: ${host.phoneNumber}'),
-                ],
-              ),
-            ],
-          ),
-        ],
+                    Text('Phone: ${host.phoneNumber}'),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildAvailabilityPage(BuildContext context, ListingEntity listing) {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Availability',
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          Text('Available from: ${_formatDate(listing.availableFrom)}'),
-          Text('Available to: ${_formatDate(listing.availableTo)}'),
-          const SizedBox(height: 16),
-          Text('Status: ${listing.status}'),
-          const SizedBox(height: 24),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => BookingPage(
-                      listingId: listing.id,
-                      pricePerNight: listing.pricePerNight.toDouble(),
-                    ),
-                  ),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-              ),
-              child: const Text('Reserve Now', style: TextStyle(fontSize: 18)),
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Availability',
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-          ),
-        ],
+            const SizedBox(height: 8),
+            Text('Available from: ${_formatDate(listing.availableFrom)}'),
+            Text('Available to: ${_formatDate(listing.availableTo)}'),
+            const SizedBox(height: 16),
+            Text('Status: ${listing.status}'),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => BookingPage(
+                        listingId: listing.id,
+                        pricePerNight: listing.pricePerNight.toDouble(),
+                      ),
+                    ),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+                child: const Text(
+                  'Reserve Now',
+                  style: TextStyle(fontSize: 18),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

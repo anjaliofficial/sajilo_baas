@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:sajilo_baas/core/api/api_endpoints.dart';
+import 'package:sajilo_baas/features/review/presentation/pages/booking_review_page.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../../booking/presentation/providers/booking_providers.dart';
 import 'booking_details.dart'; // <-- import details page
@@ -19,7 +21,7 @@ class _BookingsScreenState extends ConsumerState<BookingsScreen> {
     try {
       final bookingVM = ref.read(bookingViewModelProvider.notifier);
       await bookingVM.cancel(bookingId);
-      ref.invalidate(bookingViewModelProvider);
+      await bookingVM.loadBookings(); // Explicitly reload bookings after cancel
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Booking cancelled successfully'),
@@ -47,7 +49,7 @@ class _BookingsScreenState extends ConsumerState<BookingsScreen> {
         .replaceAll('\\', '/')
         .replaceFirst(RegExp(r'^/+'), '');
     if (!normalized.startsWith('uploads/')) normalized = 'uploads/$normalized';
-    return 'http://10.205.75.20:5050/$normalized';
+    return '${ApiEndpoints.staticBaseUrl}/$normalized';
   }
 
   Color _statusColor(String status) {
@@ -205,6 +207,24 @@ class _BookingsScreenState extends ConsumerState<BookingsScreen> {
                             ),
                           ],
                         ),
+                        if (b.status.toLowerCase() == 'confirmed' ||
+                            b.status.toLowerCase() == 'completed')
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: ElevatedButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => BookingReviewPage(
+                                      bookingId: b.id.toString(),
+                                    ),
+                                  ),
+                                );
+                              },
+                              child: const Text('Write a Review'),
+                            ),
+                          ),
                       ],
                     ),
                   ),
