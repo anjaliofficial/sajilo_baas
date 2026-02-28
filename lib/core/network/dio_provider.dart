@@ -42,7 +42,7 @@ final dioProvider = Provider<Dio>((ref) {
         print('[DioProvider] Response body: ${response.data}');
         handler.next(response);
       },
-      onError: (DioError error, handler) {
+      onError: (DioException error, handler) {
         print(
           '[DioProvider] Error [${error.response?.statusCode}]: ${error.requestOptions.uri}',
         );

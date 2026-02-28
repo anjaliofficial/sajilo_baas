@@ -6,6 +6,7 @@ import 'package:sajilo_baas/features/onboarding/presentation/pages/onboarding_sc
 import 'package:sajilo_baas/features/splash/presentation/pages/splash_screen.dart';
 import 'package:sajilo_baas/features/auth/presentation/pages/register_page.dart';
 import 'package:sajilo_baas/features/dashboard/presentation/widgets/customer_main_navigation.dart';
+import 'package:sajilo_baas/features/dashboard/presentation/pages/messages_screen.dart';
 import 'package:sajilo_baas/core/utils/navigator_key.dart';
 
 class App extends ConsumerWidget {
@@ -25,6 +26,7 @@ class App extends ConsumerWidget {
         '/login': (context) => const LoginPage(),
         '/signup': (context) => const RegisterPage(),
         '/dashboard': (context) => const CustomerMainNavigation(),
+        '/messages': (context) => const MessagesScreen(),
       },
       onGenerateRoute: (settings) {
         if (settings.name == '/chat') {

@@ -12,6 +12,21 @@ class NotificationModel extends NotificationEntity {
   });
 
   factory NotificationModel.fromJson(Map<String, dynamic> json) {
+    // Set default route based on notification type or fallback to dashboard
+    String? route = json['route']?.toString();
+    if (route == null || route.isEmpty) {
+      // Try to infer route from message or type
+      final msg = (json['message'] ?? '').toString().toLowerCase();
+      if (msg.contains('booking')) {
+        route = '/bookings';
+      } else if (msg.contains('message')) {
+        route = '/messages';
+      } else if (msg.contains('review')) {
+        route = '/reviews';
+      } else {
+        route = '/dashboard';
+      }
+    }
     return NotificationModel(
       id: (json['_id'] ?? json['id'] ?? '').toString(),
       title: (json['title'] ?? json['message'] ?? '').toString(),
@@ -20,7 +35,7 @@ class NotificationModel extends NotificationEntity {
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'].toString())
           : DateTime.now(),
-      route: json['route']?.toString(),
+      route: route,
     );
   }
 }

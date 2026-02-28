@@ -44,6 +44,7 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
           ? const Center(child: Text("No notifications"))
           : ListView.builder(
               itemCount: state.notifications.length,
+              padding: const EdgeInsets.all(12),
               itemBuilder: (context, index) {
                 final notification = state.notifications[index];
                 return Dismissible(
@@ -59,24 +60,93 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
                         .read(notificationProvider.notifier)
                         .delete(notification.id);
                   },
-                  child: ListTile(
-                    title: Text(notification.title),
-                    subtitle: Text(notification.body),
-                    trailing: notification.isRead
-                        ? null
-                        : const Icon(
-                            Icons.circle,
-                            size: 10,
-                            color: Colors.blue,
-                          ),
-                    onTap: () {
-                      ref
-                          .read(notificationProvider.notifier)
-                          .markAsRead(notification.id);
-                      if (notification.route != null) {
-                        Navigator.pushNamed(context, notification.route!);
-                      }
-                    },
+                  child: Card(
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    elevation: 3,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(16),
+                      onTap: () {
+                        ref
+                            .read(notificationProvider.notifier)
+                            .markAsRead(notification.id);
+                        print(
+                          '[NotificationPage] Tapped notification.route: ${notification.route}',
+                        );
+                        if (notification.route != null) {
+                          // Example: /chat?hostId=xxx&listingId=yyy
+                          final route = notification.route!;
+                          if (route.startsWith('/chat')) {
+                            // Extract arguments from route if present
+                            final uri = Uri.parse(route);
+                            final hostId = uri.queryParameters['hostId'];
+                            final listingId = uri.queryParameters['listingId'];
+                            Navigator.pushNamed(
+                              context,
+                              '/chat',
+                              arguments: {
+                                'hostId': hostId,
+                                'listingId': listingId,
+                              },
+                            );
+                          } else if (route == '/bookings') {
+                            Navigator.pushNamed(context, '/bookings');
+                          } else if (route == '/messages') {
+                            Navigator.pushNamed(context, '/messages');
+                          } else if (route == '/reviews') {
+                            Navigator.pushNamed(context, '/reviews');
+                          } else {
+                            // Fallback to generic route
+                            Navigator.pushNamed(context, route);
+                          }
+                        }
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    notification.title,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                if (!notification.isRead)
+                                  const Icon(
+                                    Icons.circle,
+                                    size: 10,
+                                    color: Colors.blue,
+                                  ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              notification.body,
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                            if (notification.createdAt != null)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 8.0),
+                                child: Text(
+                                  'Received: ${notification.createdAt.toLocal().toString().substring(0, 19)}',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
                 );
               },
