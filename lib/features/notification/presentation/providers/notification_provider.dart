@@ -1,7 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/legacy.dart';
-import 'package:sajilo_baas/core/api/api_endpoints.dart';
 import 'package:sajilo_baas/core/network/dio_provider.dart';
 
 import '../../data/datasources/remote/notification_remote_datasource.dart';
@@ -62,17 +60,36 @@ class NotificationNotifier extends StateNotifier<NotificationState> {
 
   void _listenToSocket() {
     if (socketDataSource == null) return;
-    socketDataSource!.listenNotifications().listen((notification) {
-      state = state.copyWith(
-        notifications: [notification, ...state.notifications],
-      );
-    });
+    socketDataSource!.listenNotifications().listen(
+      (notification) {
+        print(
+          '[NotificationProvider] WebSocket received notification: ${notification.title}',
+        );
+        state = state.copyWith(
+          notifications: [notification, ...state.notifications],
+        );
+      },
+      onError: (error) {
+        print('[NotificationProvider] WebSocket error: $error');
+      },
+      onDone: () {
+        print('[NotificationProvider] WebSocket connection closed');
+      },
+    );
   }
 
   Future<void> fetchNotifications() async {
     state = state.copyWith(isLoading: true);
-    final data = await getNotifications();
-    state = state.copyWith(isLoading: false, notifications: data);
+    try {
+      final data = await getNotifications();
+      print(
+        '[NotificationProvider] REST API fetched notifications: count=${data.length}',
+      );
+      state = state.copyWith(isLoading: false, notifications: data);
+    } catch (e) {
+      print('[NotificationProvider] REST API error: $e');
+      state = state.copyWith(isLoading: false);
+    }
   }
 
   Future<void> markAsRead(String id) async {

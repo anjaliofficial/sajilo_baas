@@ -13,12 +13,14 @@ class NotificationModel extends NotificationEntity {
 
   factory NotificationModel.fromJson(Map<String, dynamic> json) {
     return NotificationModel(
-      id: json['_id'],
-      title: json['title'],
-      body: json['body'],
-      isRead: json['isRead'],
-      createdAt: DateTime.parse(json['createdAt']),
-      route: json['route'],
+      id: (json['_id'] ?? json['id'] ?? '').toString(),
+      title: (json['title'] ?? json['message'] ?? '').toString(),
+      body: (json['body'] ?? '').toString(),
+      isRead: (json['isRead'] ?? json['read'] ?? false) as bool,
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'].toString())
+          : DateTime.now(),
+      route: json['route']?.toString(),
     );
   }
 }
