@@ -28,12 +28,20 @@ class _BookingsScreenState extends ConsumerState<BookingsScreen> {
           backgroundColor: Colors.green,
         ),
       );
-    } catch (_) {
+    } catch (e) {
+      String errorMsg = 'Failed to cancel booking';
+      if (e is Exception) {
+        final msg = e.toString();
+        // Try to extract a user-friendly message
+        final match = RegExp(r'Exception: (.*)').firstMatch(msg);
+        if (match != null &&
+            match.group(1) != null &&
+            match.group(1)!.isNotEmpty) {
+          errorMsg = match.group(1)!;
+        }
+      }
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to cancel booking'),
-          backgroundColor: Colors.red,
-        ),
+        SnackBar(content: Text(errorMsg), backgroundColor: Colors.red),
       );
     }
   }
