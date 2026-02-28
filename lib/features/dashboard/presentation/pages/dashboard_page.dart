@@ -1,9 +1,11 @@
+import 'package:sajilo_baas/core/api/api_endpoints.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sajilo_baas/features/auth/presentation/providers/auth_provider.dart';
+import 'package:sajilo_baas/features/review/presentation/pages/review_list_page.dart';
 import 'listing_page.dart';
 import 'listing_details_page.dart';
 import '../../domain/entities/listing_entity.dart';
-// import '../../presentation/view_model/dashboard_view_model.dart';
 import '../../presentation/providers/dashboard_provider.dart';
 import 'package:sajilo_baas/core/api/api_endpoints.dart';
 
@@ -16,17 +18,35 @@ String getFullImageUrl(String path) {
     normalized = '/$normalized';
   }
   return ApiEndpoints.staticBaseUrl + normalized;
+  return '${ApiEndpoints.staticBaseUrl}$normalized';
 }
 
-class DashboardScreen extends ConsumerWidget {
+class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
 
+  @override
+  ConsumerState<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   final Color primaryBlue = const Color(0xFF007BFF);
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(dashboardViewModelProvider);
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final state = ref.read(dashboardViewModelProvider);
+      if (!state.isLoading && state.listings.isEmpty) {
+        ref.read(dashboardViewModelProvider).fetchListings();
+      }
+    });
+  }
 
+  @override
+  Widget build(BuildContext context) {
+    final state = ref.watch(dashboardViewModelProvider);
+    final authState = ref.watch(authViewModelProvider);
+    final userId = authState.authEntity?.authId;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -36,43 +56,85 @@ class DashboardScreen extends ConsumerWidget {
         toolbarHeight: 80,
         title: _buildHeader(),
       ),
-      body: state.isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : state.error != null
-          ? Center(child: Text('Error: ${state.error}'))
-          : SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 10),
-                  _buildSearchBar(),
-                  const SizedBox(height: 30),
-                  _buildSectionHeader(
-                    context: context,
-                    title: 'Nearby your location',
-                    actionText: 'See all',
-                    onActionTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const ListingPage(),
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 15),
-                  _buildNearbyPropertyList(state.listings, context),
-                  const SizedBox(height: 40),
-                  _buildSectionHeader(
-                    title: 'Popular Destination',
-                    context: context,
-                  ),
-                  const SizedBox(height: 15),
-                  _buildPopularDestinationList(state.listings, context),
-                ],
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+            child: SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: userId == null
+                    ? null
+                    : () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => ReviewListPage(userId: userId),
+                          ),
+                        );
+                      },
+                child: const Text('View Reviews'),
               ),
             ),
+          ),
+          Expanded(
+            child: state.isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : state.error != null
+                ? Center(child: Text('Error: ${state.error}'))
+                : RefreshIndicator(
+                    onRefresh: () async {
+                      await ref
+                          .read(dashboardViewModelProvider)
+                          .fetchListings();
+                    },
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 10,
+                      ),
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 10),
+                          _buildSearchBar(ref),
+                          const SizedBox(height: 30),
+                          _buildSectionHeader(
+                            context: context,
+                            title: 'Nearby your location',
+                            actionText: 'See all',
+                            onActionTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const ListingPage(),
+                                ),
+                              );
+                            },
+                          ),
+                          const SizedBox(height: 15),
+                          _buildNearbyPropertyList(
+                            state.filteredListings,
+                            context,
+                          ),
+                          const SizedBox(height: 40),
+                          _buildSectionHeader(
+                            title: 'Popular Destination',
+                            context: context,
+                          ),
+                          const SizedBox(height: 15),
+                          _buildPopularDestinationList(
+                            state.filteredListings,
+                            context,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -118,8 +180,11 @@ class DashboardScreen extends ConsumerWidget {
   }
 
   // -------------------- SEARCH BAR --------------------
-  Widget _buildSearchBar() {
+  Widget _buildSearchBar(WidgetRef ref) {
     return TextFormField(
+      onChanged: (value) {
+        ref.read(dashboardViewModelProvider).setSearchQuery(value);
+      },
       decoration: InputDecoration(
         hintText: 'Start Your Search',
         hintStyle: const TextStyle(color: Colors.grey),
@@ -301,7 +366,7 @@ class DashboardScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Price: \$${listing.pricePerNight}/night',
+                    'Price: NPR${listing.pricePerNight}/night',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: primaryBlue,

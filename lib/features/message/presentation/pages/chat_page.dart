@@ -7,6 +7,7 @@ import 'package:sajilo_baas/features/auth/presentation/providers/auth_provider.d
 import 'package:sajilo_baas/core/api/api_endpoints.dart';
 import '../widgets/message_bubble.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
+import '../providers/mark_conversation_read_provider.dart';
 
 class ChatPage extends ConsumerStatefulWidget {
   final String otherUserId;
@@ -38,6 +39,14 @@ class _ChatPageState extends ConsumerState<ChatPage> {
           .read(chatViewModelProvider.notifier)
           .load(widget.otherUserId, widget.listingId),
     );
+    // Mark conversation as read when chat is opened
+    Future.microtask(() {
+      ref
+          .read(markConversationReadProvider)
+          .call(widget.otherUserId, widget.listingId);
+      // Optionally, reload threads to update unread count
+      ref.read(threadsViewModelProvider.notifier).loadThreads();
+    });
     // Listen to new messages and auto-scroll
     ref.read(chatViewModelProvider.notifier).addListener((state) {
       WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
@@ -47,6 +56,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
     final token = authState.authEntity?.token;
     // Use ApiEndpoints.socketBaseUrl or similar constant for Socket.io URL
     final socketUrl = ApiEndpoints.socketBaseUrl;
+    debugPrint('Connecting to socket: $socketUrl');
     if (token != null && token.isNotEmpty && socketUrl.isNotEmpty) {
       _socket = IO.io(socketUrl, <String, dynamic>{
         'transports': ['websocket'],
@@ -60,7 +70,9 @@ class _ChatPageState extends ConsumerState<ChatPage> {
         _socket!.emit('joinRoom', widget.listingId);
       });
       _socket!.on('receiveMessage', (data) {
-        ref.read(chatViewModelProvider.notifier).load(widget.otherUserId, widget.listingId);
+        ref
+            .read(chatViewModelProvider.notifier)
+            .load(widget.otherUserId, widget.listingId);
       });
       // Optionally listen for messageStatusUpdate, etc.
     }

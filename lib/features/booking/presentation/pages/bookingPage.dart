@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sajilo_baas/features/review/presentation/pages/booking_review_page.dart';
 import '../providers/booking_providers.dart';
 
 // Provider for booked dates
@@ -118,6 +119,21 @@ class _BookingPageState extends ConsumerState<BookingPage> {
         'Please select check-in and check-out dates',
         isError: true,
       );
+      return;
+    }
+
+    // Check if any selected date is already booked
+    DateTime current = checkIn!;
+    bool hasConflict = false;
+    while (!current.isAfter(checkOut!)) {
+      if (_isDateBooked(current)) {
+        hasConflict = true;
+        break;
+      }
+      current = current.add(const Duration(days: 1));
+    }
+    if (hasConflict) {
+      _showInlineToast('Selected dates are not available.', isError: true);
       return;
     }
 
@@ -248,6 +264,23 @@ class _BookingPageState extends ConsumerState<BookingPage> {
                 const SizedBox(height: 12),
                 if (_showToast && _toastMessage != null)
                   _InlineToast(message: _toastMessage!, isError: _toastIsError),
+                // Show review button after booking is completed
+                if (_toastMessage == 'Booking successful!')
+                  Padding(
+                    padding: const EdgeInsets.only(top: 16),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                BookingReviewPage(bookingId: widget.listingId),
+                          ),
+                        );
+                      },
+                      child: const Text('Write a Review'),
+                    ),
+                  ),
               ],
             ),
           ],

@@ -63,6 +63,10 @@ class ApiEndpoints {
   // ========================
   static const String myBookings = '/bookings/my';
   static const String cancelBooking = '/bookings/cancel';
+  // Saved Bookings (Favorites)
+  static const String saveBooking =
+      '/bookings/customer/{id}/save'; // Use .replaceFirst('{id}', bookingId)
+  static const String getSavedBookings = '/bookings/customer/saved/all';
 
   // ========================
   // FILE UPLOAD
