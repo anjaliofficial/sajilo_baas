@@ -27,7 +27,7 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
     final authState = ref.read(authViewModelProvider);
     final token = authState.authEntity?.token;
     if (token != null && token.isNotEmpty) {
-      _socket = IO.io('http://10.205.75.20:5050', <String, dynamic>{
+      _socket = IO.io(ApiEndpoints.socketBaseUrl, <String, dynamic>{
         'transports': ['websocket'],
         'autoConnect': false,
         'auth': {'token': token},

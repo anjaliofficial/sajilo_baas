@@ -5,6 +5,7 @@ import 'listing_details_page.dart';
 import '../../domain/entities/listing_entity.dart';
 // import '../../presentation/view_model/dashboard_view_model.dart';
 import '../../presentation/providers/dashboard_provider.dart';
+import 'package:sajilo_baas/core/api/api_endpoints.dart';
 
 String getFullImageUrl(String path) {
   if (path.startsWith('http')) return path;
@@ -14,7 +15,7 @@ String getFullImageUrl(String path) {
   if (!normalized.startsWith('/')) {
     normalized = '/$normalized';
   }
-  return 'http://10.205.75.20:5050$normalized';
+  return ApiEndpoints.staticBaseUrl + normalized;
 }
 
 class DashboardScreen extends ConsumerWidget {

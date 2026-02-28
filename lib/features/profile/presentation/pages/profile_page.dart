@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:sajilo_baas/core/api/api_endpoints.dart';
 import 'package:sajilo_baas/features/auth/presentation/providers/auth_provider.dart';
 import 'package:sajilo_baas/features/auth/presentation/state/auth_state.dart';
 import '../providers/profile_provider.dart';
@@ -168,7 +169,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             backgroundImage:
                                 (profile.profilePicture != null &&
                                     profile.profilePicture!.isNotEmpty)
-                                ? NetworkImage(profile.profilePicture!)
+                                ? NetworkImage(
+                                    profile.profilePicture!.startsWith('http')
+                                        ? profile.profilePicture!
+                                        : ApiEndpoints.staticBaseUrl +
+                                              profile.profilePicture!,
+                                  )
                                 : const AssetImage(
                                         'assets/images/default_avatar.jpg',
                                       )

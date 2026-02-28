@@ -64,8 +64,6 @@ class ProfileRemoteDatasource {
     }
   }
 
-  /// Upload profile picture
-  /// Upload profile picture
   Future<String> uploadProfilePicture(String filePath) async {
     try {
       final form = FormData.fromMap({
