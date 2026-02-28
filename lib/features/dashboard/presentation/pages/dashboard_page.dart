@@ -2,12 +2,13 @@ import 'package:sajilo_baas/core/api/api_endpoints.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sajilo_baas/features/auth/presentation/providers/auth_provider.dart';
+import 'package:sajilo_baas/features/notification/presentation/pages/notifications_page.dart';
+import 'package:sajilo_baas/features/notification/presentation/providers/notification_provider.dart';
 import 'package:sajilo_baas/features/review/presentation/pages/review_list_page.dart';
 import 'listing_page.dart';
 import 'listing_details_page.dart';
 import '../../domain/entities/listing_entity.dart';
 import '../../presentation/providers/dashboard_provider.dart';
-import 'package:sajilo_baas/core/api/api_endpoints.dart';
 
 String getFullImageUrl(String path) {
   if (path.startsWith('http')) return path;
@@ -167,13 +168,54 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             ),
           ],
         ),
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.red.withOpacity(0.1),
-            shape: BoxShape.circle,
+        GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const NotificationsPage()),
+            ).then((_) {
+              ref.read(notificationProvider.notifier).fetchNotifications();
+            });
+          },
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.red.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Stack(
+              children: [
+                const Icon(Icons.notifications_none, color: Colors.red),
+                Positioned(
+                  right: 0,
+                  top: 0,
+                  child: Consumer(
+                    builder: (context, ref, _) {
+                      final state = ref.watch(notificationProvider);
+                      final unreadCount = state.notifications
+                          .where((n) => !n.isRead)
+                          .length;
+                      if (unreadCount == 0) return const SizedBox();
+                      return Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: const BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Text(
+                          '$unreadCount',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
           ),
-          child: const Icon(Icons.notifications_none, color: Colors.red),
         ),
       ],
     );

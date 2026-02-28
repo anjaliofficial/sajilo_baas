@@ -83,4 +83,11 @@ class ApiEndpoints {
   static const String markConversationRead = '/messages/read';
   static const String editMessage = '/messages'; // /messages/{messageId}
   static const String deleteMessage = '/messages'; // /messages/{messageId}
+
+  // ========================
+  // NOTIFICATION ENDPOINTS
+  // ========================
+  static const String notifications = '/notifications';
+  static const String markNotificationRead = '/notifications/read';
+  static const String deleteNotification = '/notifications/delete';
 }

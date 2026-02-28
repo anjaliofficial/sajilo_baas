@@ -57,7 +57,7 @@ class _BookingsScreenState extends ConsumerState<BookingsScreen> {
         .replaceAll('\\', '/')
         .replaceFirst(RegExp(r'^/+'), '');
     if (!normalized.startsWith('uploads/')) normalized = 'uploads/$normalized';
-    return ApiEndpoints.staticBaseUrl + '/' + normalized;
+    return '${ApiEndpoints.staticBaseUrl}/$normalized';
     return '${ApiEndpoints.staticBaseUrl}/$normalized';
   }
 
