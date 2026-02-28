@@ -68,22 +68,14 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
                     ),
                     child: InkWell(
                       borderRadius: BorderRadius.circular(16),
-                      onTap: () {
-                        ref
-                            .read(notificationProvider.notifier)
-                            .markAsRead(notification.id);
-                        print(
-                          '[NotificationPage] Tapped notification.route: ${notification.route}',
-                        );
+                      onTap: () async {
                         if (notification.route != null) {
-                          // Example: /chat?hostId=xxx&listingId=yyy
                           final route = notification.route!;
                           if (route.startsWith('/chat')) {
-                            // Extract arguments from route if present
                             final uri = Uri.parse(route);
                             final hostId = uri.queryParameters['hostId'];
                             final listingId = uri.queryParameters['listingId'];
-                            Navigator.pushNamed(
+                            await Navigator.pushNamed(
                               context,
                               '/chat',
                               arguments: {
@@ -92,16 +84,21 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
                               },
                             );
                           } else if (route == '/bookings') {
-                            Navigator.pushNamed(context, '/bookings');
+                            await Navigator.pushNamed(context, '/bookings');
                           } else if (route == '/messages') {
-                            Navigator.pushNamed(context, '/messages');
+                            await Navigator.pushNamed(context, '/messages');
                           } else if (route == '/reviews') {
-                            Navigator.pushNamed(context, '/reviews');
+                            await Navigator.pushNamed(context, '/reviews');
                           } else {
-                            // Fallback to generic route
-                            Navigator.pushNamed(context, route);
+                            await Navigator.pushNamed(context, route);
                           }
                         }
+                        await ref
+                            .read(notificationProvider.notifier)
+                            .markAsRead(notification.id);
+                        await ref
+                            .read(notificationProvider.notifier)
+                            .fetchNotifications();
                       },
                       child: Padding(
                         padding: const EdgeInsets.all(16),
@@ -132,17 +129,16 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
                               notification.body,
                               style: const TextStyle(fontSize: 14),
                             ),
-                            if (notification.createdAt != null)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 8.0),
-                                child: Text(
-                                  'Received: ${notification.createdAt.toLocal().toString().substring(0, 19)}',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey[600],
-                                  ),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 8.0),
+                              child: Text(
+                                'Received: ${notification.createdAt.toLocal().toString().substring(0, 19)}',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey[600],
                                 ),
                               ),
+                            ),
                           ],
                         ),
                       ),
