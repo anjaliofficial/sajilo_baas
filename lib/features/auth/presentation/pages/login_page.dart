@@ -1,7 +1,10 @@
 // LoginPage (FULL)
 
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:local_auth/local_auth.dart';
+import 'package:sajilo_baas/core/providers/shared_pref_provider.dart';
 import 'package:sajilo_baas/features/auth/presentation/pages/register_page.dart';
 import 'package:sajilo_baas/features/auth/presentation/providers/auth_provider.dart';
 import 'package:sajilo_baas/features/dashboard/presentation/widgets/customer_main_navigation.dart';
@@ -15,11 +18,20 @@ class LoginPage extends ConsumerStatefulWidget {
 }
 
 class _LoginPageState extends ConsumerState<LoginPage> {
+  static const String _biometricEnabledKey = 'biometric_login_enabled';
+
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final LocalAuthentication _localAuth = LocalAuthentication();
+
   bool _obscurePassword = true;
   bool _rememberMe = false;
+  bool _canUseBiometric = false;
+  bool _hasEnrolledBiometric = false;
+  bool _biometricEnabled = false;
+  bool _isBiometricLoading = false;
+  bool _credentialLoginInProgress = false;
 
   final Color primaryBlue = const Color(0xFF1A82AD);
 
@@ -28,6 +40,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(authViewModelProvider.notifier).reset();
+      _initBiometricState();
     });
   }
 
@@ -40,6 +53,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   void _onLogin() {
     if (_formKey.currentState?.validate() ?? false) {
+      _credentialLoginInProgress = true;
       ref
           .read(authViewModelProvider.notifier)
           .login(
@@ -49,12 +63,114 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     }
   }
 
+  Future<void> _initBiometricState() async {
+    try {
+      final sharedPrefs = ref.read(sharedPreferencesProvider);
+      final canCheck = await _localAuth.canCheckBiometrics;
+      final isSupported = await _localAuth.isDeviceSupported();
+      final available = await _localAuth.getAvailableBiometrics();
+
+      final enabled = sharedPrefs.getBool(_biometricEnabledKey) ?? false;
+
+      if (!mounted) return;
+      setState(() {
+        _canUseBiometric = canCheck || isSupported;
+        _hasEnrolledBiometric = available.isNotEmpty;
+        if (!_hasEnrolledBiometric) {
+          _biometricEnabled = false;
+        } else {
+          _biometricEnabled = enabled;
+        }
+      });
+    } on PlatformException {
+      if (!mounted) return;
+      setState(() {
+        _canUseBiometric = false;
+        _hasEnrolledBiometric = false;
+        _biometricEnabled = false;
+      });
+    }
+  }
+
+  Future<void> _saveBiometricPreference(bool enabled) async {
+    final sharedPrefs = ref.read(sharedPreferencesProvider);
+    await sharedPrefs.setBool(_biometricEnabledKey, enabled);
+  }
+
+  Future<void> _onBiometricLogin() async {
+    if (!_canUseBiometric) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Biometric sensor is not available.')),
+      );
+      return;
+    }
+
+    if (!_hasEnrolledBiometric) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'No fingerprint/face is enrolled. Add it in phone settings first.',
+          ),
+        ),
+      );
+      return;
+    }
+
+    if (!_biometricEnabled) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Enable fingerprint login first, then sign in once.'),
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _isBiometricLoading = true;
+    });
+
+    try {
+      final didAuthenticate = await _localAuth.authenticate(
+        localizedReason: 'Authenticate to log in to Sajilo Baas',
+        options: const AuthenticationOptions(
+          biometricOnly: true,
+          stickyAuth: true,
+        ),
+      );
+
+      if (!didAuthenticate) return;
+
+      await ref.read(authViewModelProvider.notifier).checkSession();
+
+      final currentState = ref.read(authViewModelProvider);
+      if (currentState.status != AuthStatus.authenticated && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('No previous login session found. Please sign in.'),
+          ),
+        );
+      }
+    } on PlatformException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.message ?? 'Biometric authentication failed')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isBiometricLoading = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authViewModelProvider);
 
     ref.listen<AuthState>(authViewModelProvider, (previous, next) {
       if (next.status == AuthStatus.error) {
+        _credentialLoginInProgress = false;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(next.errorMessage ?? "Login failed"),
@@ -62,6 +178,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           ),
         );
       } else if (next.status == AuthStatus.authenticated) {
+        if (_credentialLoginInProgress) {
+          _credentialLoginInProgress = false;
+          _saveBiometricPreference(_biometricEnabled);
+        }
+
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => const CustomerMainNavigation()),
@@ -205,6 +326,25 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     ),
                   ],
                 ),
+                const SizedBox(height: 8),
+                SwitchListTile.adaptive(
+                  value: _biometricEnabled,
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Enable Fingerprint Login'),
+                  subtitle: Text(
+                    !_canUseBiometric
+                        ? 'Biometric sensor not available on this device'
+                        : !_hasEnrolledBiometric
+                        ? 'No fingerprint/face enrolled. Add one in device settings.'
+                        : 'Use fingerprint to log in faster on this device',
+                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                  ),
+                  onChanged: (_canUseBiometric && _hasEnrolledBiometric)
+                      ? (value) {
+                          setState(() => _biometricEnabled = value);
+                        }
+                      : null,
+                ),
                 const SizedBox(height: 30),
 
                 SizedBox(
@@ -235,6 +375,38 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 ),
 
                 const SizedBox(height: 30),
+                if (_canUseBiometric && _biometricEnabled) ...[
+                  SizedBox(
+                    width: double.infinity,
+                    height: 55,
+                    child: OutlinedButton.icon(
+                      onPressed:
+                          authState.status == AuthStatus.loading ||
+                              _isBiometricLoading
+                          ? null
+                          : _onBiometricLogin,
+                      icon: _isBiometricLoading
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.fingerprint),
+                      label: Text(
+                        _isBiometricLoading
+                            ? 'Authenticating...'
+                            : 'Login with Fingerprint',
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                ],
+
                 Row(
                   children: [
                     Expanded(child: Divider(color: Colors.grey[300])),
