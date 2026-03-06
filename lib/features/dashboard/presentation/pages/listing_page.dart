@@ -35,7 +35,9 @@ class _ListingPageState extends ConsumerState<ListingPage> {
   String _selectedPropertyType = 'All types';
   Timer? _searchDebounce;
   String _debouncedQuery = '';
-  RangeValues _priceRange = const RangeValues(0, 100000);
+  static const double _twoLakh = 200000;
+  RangeValues _priceRange = const RangeValues(0, _twoLakh);
+  bool _twoLakhPlusOnly = false;
 
   String _formatTime(DateTime dateTime) {
     final h = dateTime.hour.toString().padLeft(2, '0');
@@ -77,10 +79,11 @@ class _ListingPageState extends ConsumerState<ListingPage> {
       final matchesType =
           _selectedPropertyType == 'All types' ||
           type == _selectedPropertyType.toLowerCase();
-      final matchesMin = price >= minPrice;
-      final matchesMax = price <= maxPrice;
+      final matchesPrice = _twoLakhPlusOnly
+          ? price >= _twoLakh
+          : (price >= minPrice && price <= maxPrice);
 
-      return matchesQuery && matchesType && matchesMin && matchesMax;
+      return matchesQuery && matchesType && matchesPrice;
     }).toList();
   }
 
@@ -142,16 +145,7 @@ class _ListingPageState extends ConsumerState<ListingPage> {
   /// Build the actual listing body
   Widget _buildListingBody(vm) {
     final allListings = vm.listings;
-    final maxListingPrice = allListings.isEmpty
-        ? 100000.0
-        : allListings
-                  .map((e) => e.pricePerNight.toDouble())
-                  .reduce((a, b) => a > b ? a : b) +
-              1000;
-
-    final safeEnd = _priceRange.end > maxListingPrice
-        ? maxListingPrice
-        : _priceRange.end;
+    final safeEnd = _priceRange.end > _twoLakh ? _twoLakh : _priceRange.end;
     final safeStart = _priceRange.start > safeEnd ? 0.0 : _priceRange.start;
     final effectiveRange = RangeValues(safeStart, safeEnd);
 
@@ -212,9 +206,7 @@ class _ListingPageState extends ConsumerState<ListingPage> {
                           RangeSlider(
                             values: _priceRange,
                             min: 0,
-                            max: maxListingPrice <= 0
-                                ? 100000
-                                : maxListingPrice,
+                            max: _twoLakh,
                             divisions: 50,
                             labels: RangeLabels(
                               'NPR ${_priceRange.start.round()}',
@@ -222,7 +214,19 @@ class _ListingPageState extends ConsumerState<ListingPage> {
                             ),
                             onChanged: (RangeValues values) {
                               setState(() {
+                                _twoLakhPlusOnly = false;
                                 _priceRange = values;
+                              });
+                            },
+                          ),
+                          CheckboxListTile(
+                            contentPadding: EdgeInsets.zero,
+                            value: _twoLakhPlusOnly,
+                            title: const Text('Show only 2 Lakh+ properties'),
+                            subtitle: const Text('NPR 200000 and above'),
+                            onChanged: (value) {
+                              setState(() {
+                                _twoLakhPlusOnly = value ?? false;
                               });
                             },
                           ),
@@ -282,12 +286,11 @@ class _ListingPageState extends ConsumerState<ListingPage> {
                                     _searchController.clear();
                                     _debouncedQuery = '';
                                     _selectedPropertyType = 'All types';
-                                    _priceRange = RangeValues(
+                                    _priceRange = const RangeValues(
                                       0,
-                                      maxListingPrice <= 0
-                                          ? 100000
-                                          : maxListingPrice,
+                                      _twoLakh,
                                     );
+                                    _twoLakhPlusOnly = false;
                                   });
                                 },
                                 child: const Text('Reset'),
@@ -347,7 +350,7 @@ class _ListingPageState extends ConsumerState<ListingPage> {
                       : const Icon(Icons.home, size: 40),
                   title: Text(listing.title),
                   subtitle: Text(
-                    '${listing.location} • \$${listing.pricePerNight}/night',
+                    '${listing.location} • NPR ${listing.pricePerNight}/night',
                   ),
                   onTap: () {
                     Navigator.push(
