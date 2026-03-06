@@ -7,6 +7,8 @@ import 'package:sajilo_baas/core/api/api_endpoints.dart';
 import 'package:sajilo_baas/services/map_service.dart';
 import '../pages/listing_details_page.dart';
 import '../../domain/entities/listing_entity.dart';
+import '../widgets/map_rotation_detector.dart';
+import '../widgets/compass_button.dart';
 
 class MapPage extends StatefulWidget {
   final ListingEntity? selectedListing;
@@ -19,6 +21,7 @@ class MapPage extends StatefulWidget {
 
 class _MapPageState extends State<MapPage> {
   late MapService _mapService;
+  late MapController _mapController;
 
   LatLng? _userLocation;
   String? _currentLocationName;
@@ -32,6 +35,9 @@ class _MapPageState extends State<MapPage> {
   double? _distanceToSelected;
   int? _driveTimeMinutes;
   List<ListingEntity> _listings = [];
+
+  // Map rotation state
+  double _mapRotation = 0.0;
 
   static const LatLng _defaultLocation = LatLng(27.7172, 85.3240); // Kathmandu
 
@@ -184,6 +190,7 @@ class _MapPageState extends State<MapPage> {
   @override
   void initState() {
     super.initState();
+    _mapController = MapController();
     final dio = Dio(
       BaseOptions(
         baseUrl: ApiEndpoints.baseUrl,
@@ -404,10 +411,39 @@ class _MapPageState extends State<MapPage> {
 
     for (final listing in listingsData) {
       try {
-        final lat = listing['latitude'] ?? listing['lat'];
-        final lng = listing['longitude'] ?? listing['lng'];
+        // Handle both formats:
+        // 1. Direct latitude/longitude fields
+        // 2. MongoDB GeoJSON coordinates: [longitude, latitude]
+        double? lat;
+        double? lng;
+        String coordSource = 'unknown';
+
+        // Try direct fields first
+        if (listing['latitude'] != null && listing['longitude'] != null) {
+          lat = double.tryParse(listing['latitude'].toString());
+          lng = double.tryParse(listing['longitude'].toString());
+          coordSource = 'latitude/longitude fields';
+        }
+        // Try short names
+        else if (listing['lat'] != null && listing['lng'] != null) {
+          lat = double.tryParse(listing['lat'].toString());
+          lng = double.tryParse(listing['lng'].toString());
+          coordSource = 'lat/lng fields';
+        }
+        // Try MongoDB GeoJSON coordinates [lng, lat]
+        else if (listing['coordinates'] != null) {
+          final coords = listing['coordinates'];
+          if (coords is List && coords.length >= 2) {
+            lng = double.tryParse(coords[0].toString()); // longitude is first
+            lat = double.tryParse(coords[1].toString()); // latitude is second
+            coordSource = 'GeoJSON coordinates array';
+          }
+        }
 
         if (lat != null && lng != null) {
+          print(
+            'DEBUG: Property "${listing['title']}" - coords from $coordSource: lat=$lat, lng=$lng',
+          );
           final markerId = listing['_id'] ?? listing['id'] ?? '';
           final title = listing['title'] ?? 'Property';
           final price = listing['pricePerNight'] ?? 0;
@@ -415,33 +451,53 @@ class _MapPageState extends State<MapPage> {
           // Create marker
           newMarkers.add(
             Marker(
-              point: LatLng(
-                double.parse(lat.toString()),
-                double.parse(lng.toString()),
-              ),
-              width: 80,
-              height: 80,
+              point: LatLng(lat, lng),
+              width: 120,
+              height: 100,
               rotate: false,
               child: GestureDetector(
                 onTap: () => _showListingPreview(listing),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        title,
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
                     const Icon(Icons.location_pin, color: Colors.red, size: 30),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 4,
+                        horizontal: 6,
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(4),
+                        border: Border.all(color: Colors.red, width: 1),
                       ),
                       child: Text(
                         'NPR $price',
                         style: const TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
+                          color: Colors.red,
                         ),
                       ),
                     ),
@@ -473,15 +529,25 @@ class _MapPageState extends State<MapPage> {
               houseRules: listing['houseRules'] ?? '',
               images: List<String>.from(listing['images'] ?? []),
               status: listing['status'] ?? '',
-              latitude: double.tryParse(lat.toString()),
-              longitude: double.tryParse(lng.toString()),
+              latitude: lat,
+              longitude: lng,
             ),
           );
+        } else {
+          print(
+            'DEBUG: Skipping property "${listing['title']}" - no valid coordinates found',
+          );
+          print('DEBUG: Available fields: ${listing.keys.toList()}');
         }
       } catch (e) {
-        // Error creating marker, skipping
+        print('DEBUG: Error creating marker for listing: $e');
+        print('DEBUG: Listing data: $listing');
       }
     }
+
+    print(
+      'DEBUG: Created ${newMarkers.length - 1} property markers (${newListings.length} listings)',
+    );
 
     setState(() {
       _markers = newMarkers;
@@ -559,7 +625,51 @@ class _MapPageState extends State<MapPage> {
     setState(() {
       _radiusKm = newRadius;
     });
-    _loadMapData();
+    _updateNearbyListings();
+  }
+
+  void _onRotationUpdate(double rotation) {
+    setState(() {
+      _mapRotation = rotation;
+    });
+    _mapController.rotate(rotation);
+    print('🗺️ Map rotated to: ${rotation.toStringAsFixed(1)}°');
+  }
+
+  void _resetRotation() {
+    setState(() {
+      _mapRotation = 0.0;
+    });
+    _mapController.rotate(0.0);
+    print('🧭 Compass reset - Map rotation: 0°');
+  }
+
+  Future<void> _updateNearbyListings() async {
+    if (_userLocation == null) return;
+
+    try {
+      final listingsData = await _mapService.getNearbyListings(
+        latitude: _userLocation!.latitude,
+        longitude: _userLocation!.longitude,
+        radiusKm: _radiusKm,
+      );
+
+      print(
+        'DEBUG: Fetched ${listingsData.length} listings for radius $_radiusKm km',
+      );
+
+      if (mounted) {
+        _createMarkers(listingsData);
+      }
+    } catch (e) {
+      print('DEBUG: Error fetching listings: $e');
+      if (mounted) {
+        setState(() {
+          _markers = [];
+          _listings = [];
+        });
+      }
+    }
   }
 
   @override
@@ -603,19 +713,27 @@ class _MapPageState extends State<MapPage> {
         children: [
           // Flutter Map (OpenStreetMap - FREE, no API key needed)
           if (_userLocation != null && !_isLoading)
-            FlutterMap(
-              options: MapOptions(
-                initialCenter: _userLocation ?? _defaultLocation,
-                initialZoom: 14,
-              ),
-              children: [
-                TileLayer(
-                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                  userAgentPackageName: 'com.example.sajilo_baas',
+            MapRotationDetector(
+              onRotationUpdate: _onRotationUpdate,
+              initialRotation: _mapRotation,
+              child: FlutterMap(
+                mapController: _mapController,
+                options: MapOptions(
+                  initialCenter: _userLocation ?? _defaultLocation,
+                  initialZoom: 14,
+                  initialRotation: _mapRotation,
                 ),
-                if (_polylines.isNotEmpty) PolylineLayer(polylines: _polylines),
-                MarkerLayer(markers: _markers),
-              ],
+                children: [
+                  TileLayer(
+                    urlTemplate:
+                        'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                    userAgentPackageName: 'com.example.sajilo_baas',
+                  ),
+                  if (_polylines.isNotEmpty)
+                    PolylineLayer(polylines: _polylines),
+                  MarkerLayer(markers: _markers),
+                ],
+              ),
             )
           else if (_isLoading)
             const Center(child: CircularProgressIndicator())
@@ -720,6 +838,16 @@ class _MapPageState extends State<MapPage> {
                     ),
                   ],
                 ),
+              ),
+            ),
+          // Compass button to reset rotation (top right corner)
+          if (!_isLoading)
+            Positioned(
+              top: 20,
+              right: 20,
+              child: CompassButton(
+                rotation: _mapRotation,
+                onResetRotation: _resetRotation,
               ),
             ),
           // Info card at bottom
@@ -945,12 +1073,99 @@ class _MapPageState extends State<MapPage> {
                         onChanged: _updateRadius,
                       ),
                       Text(
-                        '${_markers.length} properties found',
+                        '${_listings.length} properties found',
                         style: const TextStyle(
                           fontSize: 12,
-                          color: Colors.grey,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
                         ),
                       ),
+                      if (_listings.isNotEmpty) ...[
+                        const SizedBox(height: 12),
+                        const Divider(height: 1),
+                        const SizedBox(height: 8),
+                        ConstrainedBox(
+                          constraints: const BoxConstraints(maxHeight: 150),
+                          child: ListView.separated(
+                            shrinkWrap: true,
+                            itemCount: _listings.length,
+                            separatorBuilder: (context, index) =>
+                                const SizedBox(height: 6),
+                            itemBuilder: (context, index) {
+                              final listing = _listings[index];
+                              return InkWell(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) =>
+                                          ListingDetailsPage(listing: listing),
+                                    ),
+                                  );
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 6,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.blue.withValues(alpha: 0.05),
+                                    borderRadius: BorderRadius.circular(6),
+                                    border: Border.all(
+                                      color: Colors.blue.withValues(alpha: 0.2),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.location_on,
+                                        color: Colors.red,
+                                        size: 18,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              listing.title,
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 13,
+                                              ),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                            Text(
+                                              listing.location,
+                                              style: TextStyle(
+                                                fontSize: 11,
+                                                color: Colors.grey[600],
+                                              ),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        'NPR ${listing.pricePerNight}',
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 12,
+                                          color: Colors.green,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
                     ],
                   ],
                 ),

@@ -142,6 +142,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
   // -------------------- HEADER --------------------
   Widget _buildHeader() {
+    final state = ref.watch(dashboardViewModelProvider);
+    final listings = state.listings;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -197,10 +200,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 children: [
                   Icon(Icons.map, color: Colors.blue),
                   SizedBox(width: 12),
-                  Text('Map View'),
+                  Text('Nearby Properties'),
                 ],
               ),
             ),
+            const PopupMenuDivider(),
             const PopupMenuItem<String>(
               value: 'settings',
               child: Row(

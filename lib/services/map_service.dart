@@ -45,8 +45,12 @@ class MapService {
     int limit = 50,
   }) async {
     try {
+      print(
+        'DEBUG MapService: Fetching listings - lat: $latitude, lng: $longitude, radius: $radiusKm km',
+      );
+
       final response = await _dio.get(
-        '${ApiEndpoints.baseUrl}/listings',
+        ApiEndpoints.listings,
         queryParameters: {
           'lat': latitude,
           'lng': longitude,
@@ -56,21 +60,35 @@ class MapService {
         },
       );
 
+      print('DEBUG MapService: Response status: ${response.statusCode}');
+      print(
+        'DEBUG MapService: Response data type: ${response.data.runtimeType}',
+      );
+
       // Check if response has data property or is directly a list
       if (response.data is Map<String, dynamic>) {
         final data = response.data as Map<String, dynamic>;
         if (data.containsKey('data')) {
-          return List<Map<String, dynamic>>.from(data['data'] ?? []);
+          final listings = List<Map<String, dynamic>>.from(data['data'] ?? []);
+          print(
+            'DEBUG MapService: Parsed ${listings.length} listings from data.data',
+          );
+          return listings;
         }
       }
 
       if (response.data is List) {
-        return List<Map<String, dynamic>>.from(response.data ?? []);
+        final listings = List<Map<String, dynamic>>.from(response.data ?? []);
+        print(
+          'DEBUG MapService: Parsed ${listings.length} listings from direct list',
+        );
+        return listings;
       }
 
+      print('DEBUG MapService: No listings found in response');
       return [];
     } catch (e) {
-      // Error fetching nearby listings
+      print('DEBUG MapService: Error fetching nearby listings: $e');
       return [];
     }
   }
