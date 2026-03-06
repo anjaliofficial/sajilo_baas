@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../domain/entities/listing_entity.dart';
 import 'package:sajilo_baas/core/api/api_endpoints.dart';
 import '../../../booking/presentation/pages/bookingPage.dart';
+import 'map_page.dart';
 
 String getFullImageUrl(String path) {
   if (path.startsWith('http')) return path;
@@ -176,6 +177,59 @@ class _ListingDetailsPageState extends State<ListingDetailsPage> {
                   ],
                 ),
               ],
+            ),
+            const SizedBox(height: 24),
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => MapPage(selectedListing: listing),
+                  ),
+                );
+              },
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.blue.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.blue.withValues(alpha: 0.3)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.location_on, color: Colors.blue, size: 24),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Property Location',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            listing.location,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Icon(
+                      Icons.arrow_forward,
+                      color: Colors.blue,
+                      size: 20,
+                    ),
+                  ],
+                ),
+              ),
             ),
           ],
         ),

@@ -11,8 +11,8 @@ class ReviewState {
     List<ReviewEntity>? receivedReviews,
     List<ReviewEntity>? givenReviews,
     this.error,
-  })  : receivedReviews = receivedReviews ?? const [],
-        givenReviews = givenReviews ?? const [];
+  }) : receivedReviews = receivedReviews ?? const [],
+       givenReviews = givenReviews ?? const [];
 
   ReviewState copyWith({
     bool? loading,

@@ -36,6 +36,10 @@ dependencies:
   socket_io_client: ^2.0.3
   fluttertoast: ^8.2.8
   gal: ^2.3.2
+  flutter_map: ^8.0.0
+  latlong2: ^0.9.1
+  geolocator: ^10.1.0
+  maps_launcher: ^3.0.0
 
 dev_dependencies:
   flutter_test:
@@ -46,6 +50,12 @@ dev_dependencies:
   # Code Generation
   build_runner: ^2.4.13
   hive_generator: ^2.0.1
+
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  web_socket_channel: ^2.4.0
+  firebase_core: ^2.27.0
+  firebase_messaging: ^14.7.10
 
 flutter:
   uses-material-design: true

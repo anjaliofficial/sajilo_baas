@@ -15,6 +15,8 @@ class ListingEntity {
   final List<String> images;
   final HostEntity? host;
   final String status;
+  final double? latitude;
+  final double? longitude;
 
   ListingEntity({
     required this.id,
@@ -33,6 +35,8 @@ class ListingEntity {
     required this.images,
     this.host,
     required this.status,
+    this.latitude,
+    this.longitude,
   });
 
   factory ListingEntity.fromJson(Map<String, dynamic> json) {
@@ -67,6 +71,12 @@ class ListingEntity {
           ? HostEntity.fromJson(json['hostId'] as Map<String, dynamic>)
           : null,
       status: json['status'] ?? '',
+      latitude: json['latitude'] != null
+          ? double.tryParse(json['latitude'].toString())
+          : null,
+      longitude: json['longitude'] != null
+          ? double.tryParse(json['longitude'].toString())
+          : null,
     );
   }
 }
