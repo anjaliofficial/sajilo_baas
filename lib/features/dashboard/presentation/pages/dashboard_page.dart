@@ -47,8 +47,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(dashboardViewModelProvider);
-    final authState = ref.watch(authViewModelProvider);
-    final userId = authState.authEntity?.authId;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -60,25 +58,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       ),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
-            child: SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: userId == null
-                    ? null
-                    : () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => ReviewListPage(userId: userId),
-                          ),
-                        );
-                      },
-                child: const Text('View Reviews'),
-              ),
-            ),
-          ),
           Expanded(
             child: state.isLoading
                 ? const Center(child: CircularProgressIndicator())
@@ -142,6 +121,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
   // -------------------- HEADER --------------------
   Widget _buildHeader() {
+    final userId = ref.read(authViewModelProvider).authEntity?.authId;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -173,6 +154,20 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 context,
                 MaterialPageRoute(builder: (_) => const MapPage()),
               );
+            } else if (value == 'reviews') {
+              if (userId == null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Please login to view reviews')),
+                );
+                return;
+              }
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ReviewListPage(userId: userId),
+                ),
+              );
             } else if (value == 'settings') {
               Navigator.push(
                 context,
@@ -198,6 +193,16 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   Icon(Icons.map, color: Colors.blue),
                   SizedBox(width: 12),
                   Text('Nearby Properties'),
+                ],
+              ),
+            ),
+            const PopupMenuItem<String>(
+              value: 'reviews',
+              child: Row(
+                children: [
+                  Icon(Icons.rate_review, color: Colors.teal),
+                  SizedBox(width: 12),
+                  Text('View Reviews'),
                 ],
               ),
             ),

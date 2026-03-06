@@ -81,7 +81,30 @@ class ReviewRemoteDatasource {
       '/reviews/$reviewId/replies',
       data: {'text': text},
     );
+    final payload = res.data;
+    if (payload is Map<String, dynamic>) {
+      dynamic reviewJson =
+          payload['data'] ?? payload['review'] ?? payload['result'];
 
-    return ReviewModel.fromJson(res.data['data']);
+      // Handle nested response like { data: { review: {...} } }
+      if (reviewJson is Map<String, dynamic>) {
+        reviewJson = reviewJson['review'] ?? reviewJson['data'] ?? reviewJson;
+      }
+
+      // Handle top-level review object response
+      if (reviewJson == null &&
+          (payload['_id'] != null || payload['id'] != null)) {
+        reviewJson = payload;
+      }
+
+      if (reviewJson is Map<String, dynamic>) {
+        return ReviewModel.fromJson(reviewJson);
+      }
+      if (reviewJson is Map) {
+        return ReviewModel.fromJson(Map<String, dynamic>.from(reviewJson));
+      }
+    }
+
+    throw Exception('Unexpected response while adding reply');
   }
 }

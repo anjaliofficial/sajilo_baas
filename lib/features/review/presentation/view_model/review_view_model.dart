@@ -152,7 +152,11 @@ class ReviewViewModel extends StateNotifier<ReviewState> {
     state = state.copyWith(loading: true);
     try {
       final reviews = await getReviewsReceived.repository.getReviewsGiven();
-      state = state.copyWith(loading: false, givenReviews: reviews);
+      state = state.copyWith(
+        loading: false,
+        givenReviews: reviews,
+        error: null,
+      );
     } catch (e) {
       state = state.copyWith(
         loading: false,
@@ -184,7 +188,11 @@ class ReviewViewModel extends StateNotifier<ReviewState> {
     state = state.copyWith(loading: true);
     try {
       final reviews = await getReviewsReceived(userId);
-      state = state.copyWith(loading: false, receivedReviews: reviews);
+      state = state.copyWith(
+        loading: false,
+        receivedReviews: reviews,
+        error: null,
+      );
     } catch (e) {
       state = state.copyWith(
         loading: false,
@@ -244,7 +252,7 @@ class ReviewViewModel extends StateNotifier<ReviewState> {
         return review;
       }).toList();
 
-      state = state.copyWith(receivedReviews: syncedReviews);
+      state = state.copyWith(receivedReviews: syncedReviews, error: null);
     } catch (e) {
       /// 4️⃣ Rollback if failed
       final rolledBack = state.receivedReviews.map((review) {

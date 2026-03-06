@@ -24,12 +24,32 @@ class ReviewModel extends ReviewEntity {
   });
 
   factory ReviewModel.fromJson(Map<String, dynamic> json) {
+    bool isLikelyMongoId(String value) {
+      return RegExp(r'^[a-fA-F0-9]{24}$').hasMatch(value);
+    }
+
     String parseId(dynamic value) {
       if (value is String) return value;
       if (value is Map && value.containsKey('_id')) {
         return value['_id'] as String;
       }
       return '';
+    }
+
+    String? parseDisplayName(dynamic primary, dynamic fallback) {
+      String? fromValue(dynamic value) {
+        if (value is Map && value['fullName'] != null) {
+          final fullName = value['fullName'].toString().trim();
+          if (fullName.isNotEmpty) return fullName;
+        }
+        if (value is String) {
+          final text = value.trim();
+          if (text.isNotEmpty && !isLikelyMongoId(text)) return text;
+        }
+        return null;
+      }
+
+      return fromValue(primary) ?? fromValue(fallback);
     }
 
     String? parseProfile(dynamic value) {
@@ -39,17 +59,19 @@ class ReviewModel extends ReviewEntity {
       return null;
     }
 
-    final reviewerObj = json['reviewer'];
-    final revieweeObj = json['reviewee'];
+    final reviewerObj = json['reviewer'] ?? json['reviewerId'];
+    final revieweeObj = json['reviewee'] ?? json['revieweeId'];
 
     String reviewerId = parseId(reviewerObj);
     String revieweeId = parseId(revieweeObj);
-    String reviewerName = reviewerObj is Map && reviewerObj['fullName'] != null
-        ? reviewerObj['fullName'] as String
-        : reviewerId;
-    String revieweeName = revieweeObj is Map && revieweeObj['fullName'] != null
-        ? revieweeObj['fullName'] as String
-        : revieweeId;
+    final String? reviewerName = parseDisplayName(
+      reviewerObj,
+      json['reviewerName'] ?? json['reviewerFullName'],
+    );
+    final String? revieweeName = parseDisplayName(
+      revieweeObj,
+      json['revieweeName'] ?? json['revieweeFullName'],
+    );
 
     UserModel? reviewerUser = reviewerObj is Map
         ? UserModel.fromJson(Map<String, dynamic>.from(reviewerObj))
@@ -59,17 +81,21 @@ class ReviewModel extends ReviewEntity {
         : null;
 
     return ReviewModel(
-      id: json['_id'],
+      id: (json['_id'] ?? json['id'] ?? '').toString(),
       bookingId: parseId(json['bookingId']),
       listingId: parseId(json['listingId']),
       reviewerId: reviewerId,
       revieweeId: revieweeId,
-      rating: json['rating'],
+      rating: (json['rating'] is num)
+          ? (json['rating'] as num).toInt()
+          : int.tryParse(json['rating']?.toString() ?? '0') ?? 0,
       comment: json['comment'] ?? '',
-      replies: (json['replies'] as List)
+      replies: ((json['replies'] as List?) ?? const [])
           .map((e) => ReplyModel.fromJson(e))
           .toList(),
-      createdAt: DateTime.parse(json['createdAt']),
+      createdAt:
+          DateTime.tryParse(json['createdAt']?.toString() ?? '') ??
+          DateTime.now(),
       reviewerName: reviewerName,
       reviewerProfile: parseProfile(reviewerObj),
       revieweeName: revieweeName,

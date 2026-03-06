@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/review_provider.dart';
 import 'package:sajilo_baas/core/utils/image_utils.dart';
+import '../../domain/entities/review_entity.dart';
 
 class ReviewListPage extends ConsumerStatefulWidget {
   final String userId;
@@ -28,6 +29,16 @@ class _ReviewListPageState extends ConsumerState<ReviewListPage>
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(reviewProvider, (previous, next) {
+      if (next.error != null &&
+          next.error!.isNotEmpty &&
+          next.error != previous?.error) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(next.error!), backgroundColor: Colors.red),
+        );
+      }
+    });
+
     final state = ref.watch(reviewProvider);
     final receivedReviews = state.receivedReviews;
     final givenReviews = state.givenReviews;
@@ -55,7 +66,7 @@ class _ReviewListPageState extends ConsumerState<ReviewListPage>
     );
   }
 
-  Widget _buildList(List reviews, bool isReceivedTab) {
+  Widget _buildList(List<ReviewEntity> reviews, bool isReceivedTab) {
     if (reviews.isEmpty) {
       return const Center(child: Text("No reviews found"));
     }
@@ -77,7 +88,7 @@ class _ReviewListPageState extends ConsumerState<ReviewListPage>
 
 // ---------------- Review Card ----------------
 class ReviewCard extends ConsumerStatefulWidget {
-  final dynamic review;
+  final ReviewEntity review;
   final bool isReceivedTab;
   final String currentUserId;
 
@@ -150,32 +161,36 @@ class _ReviewCardState extends ConsumerState<ReviewCard>
 
   @override
   Widget build(BuildContext context) {
-    final replies = widget.review.replies ?? [];
+    final replies = widget.review.replies;
     final showViewMore = replies.length > 1 && !expandedReplies;
     final showViewLess = replies.length > 1 && expandedReplies;
 
+    bool isLikelyMongoId(String value) {
+      return RegExp(r'^[a-fA-F0-9]{24}$').hasMatch(value);
+    }
+
+    String normalizeDisplayName(String? value, String? userId) {
+      final name = value?.trim() ?? '';
+      if (name.isNotEmpty && !isLikelyMongoId(name)) return name;
+      if ((userId ?? '').isNotEmpty && userId == widget.currentUserId) {
+        return 'You';
+      }
+      if ((userId ?? '').isNotEmpty && !isLikelyMongoId(userId!)) {
+        return userId;
+      }
+      return 'User';
+    }
+
     // Determine which user to show on each side
-    final reviewer = widget.review.reviewer;
-    final reviewee = widget.review.reviewee;
-    final reviewerName = reviewer?.fullName?.isNotEmpty == true
-        ? reviewer!.fullName
-        : (widget.review.reviewerName != null &&
-              widget.review.reviewerName!.isNotEmpty)
-        ? widget.review.reviewerName!
-        : 'Unknown';
-    final revieweeName = reviewee?.fullName?.isNotEmpty == true
-        ? reviewee!.fullName
-        : (widget.review.revieweeName != null &&
-              widget.review.revieweeName!.isNotEmpty)
-        ? widget.review.revieweeName!
-        : 'Unknown';
-    final reviewerProfile =
-        reviewer?.profilePicture != null && reviewer!.profilePicture!.isNotEmpty
-        ? reviewer!.profilePicture
-        : (widget.review.reviewerProfile != null &&
-              widget.review.reviewerProfile!.isNotEmpty)
-        ? widget.review.reviewerProfile
-        : null;
+    final reviewerId = widget.review.reviewerId;
+    final revieweeId = widget.review.revieweeId;
+
+    final reviewerNameRaw = widget.review.reviewerName;
+    final revieweeNameRaw = widget.review.revieweeName;
+
+    final reviewerName = normalizeDisplayName(reviewerNameRaw, reviewerId);
+    final revieweeName = normalizeDisplayName(revieweeNameRaw, revieweeId);
+    final reviewerProfile = widget.review.reviewerProfile;
     return AnimatedSize(
       duration: const Duration(milliseconds: 300),
       curve: Curves.ease,
@@ -259,7 +274,7 @@ class _ReviewCardState extends ConsumerState<ReviewCard>
                         ],
                       ),
                       const SizedBox(height: 8),
-                      Text(widget.review.comment ?? ''),
+                      Text(widget.review.comment),
                       const SizedBox(height: 6),
                       Text(
                         widget.review.createdAt.toString().split(" ")[0],
