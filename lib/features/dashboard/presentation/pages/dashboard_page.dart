@@ -148,8 +148,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           children: [
             Text(
               'Current location',
-              style: TextStyle(fontSize: 12, color: Colors.grey),
-            ),
+              style: TextStyle(fontSize: 12, color: Colors.grey),         ),
             Row(
               children: [
                 Icon(Icons.location_on, size: 18, color: Colors.black),
