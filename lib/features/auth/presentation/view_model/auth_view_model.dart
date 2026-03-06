@@ -97,12 +97,18 @@ class AuthViewModel extends Notifier<AuthState> {
   Future<void> logout() async {
     state = const AuthState.loading();
 
+    // Clear token from secure storage
+    final apiClient = ref.read(apiClientProvider);
+    await apiClient.removeToken();
+
     final repo = ref.read(authRepositoryProvider);
     final result = await repo.logout();
 
-    result.fold(
-      (failure) => state = AuthState.error(failure.message),
-      (_) => state = const AuthState.loggedOut(),
-    );
+    // Always set logged out state, even if backend call fails
+    result.fold((failure) {
+      // Log error but still logout locally
+      print('Logout API error: ${failure.message}');
+      state = const AuthState.loggedOut();
+    }, (_) => state = const AuthState.loggedOut());
   }
 }

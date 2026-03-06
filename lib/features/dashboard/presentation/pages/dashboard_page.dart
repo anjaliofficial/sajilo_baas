@@ -142,9 +142,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
   // -------------------- HEADER --------------------
   Widget _buildHeader() {
-    final state = ref.watch(dashboardViewModelProvider);
-    final listings = state.listings;
-
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [

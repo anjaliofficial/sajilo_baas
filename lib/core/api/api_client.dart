@@ -16,6 +16,9 @@ class ApiClient {
   final _secureStorage = const FlutterSecureStorage();
   static const _tokenKey = 'auth_token';
 
+  // Expose secure storage for biometric authentication
+  FlutterSecureStorage get secureStorage => _secureStorage;
+
   ApiClient(Dio dio, {required String baseUrl}) {
     _dio = Dio(
       BaseOptions(

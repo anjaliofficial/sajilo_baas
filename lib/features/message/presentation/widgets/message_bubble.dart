@@ -361,9 +361,6 @@ Widget _bubbleContent(
   MessageEntity message,
   String timeString,
 ) {
-  final String? shownProfilePicture = isMe
-      ? message.senderProfilePicture
-      : message.receiverProfilePicture;
   return Container(
     padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
     margin: EdgeInsets.only(left: isMe ? 40 : 0, right: isMe ? 0 : 40),

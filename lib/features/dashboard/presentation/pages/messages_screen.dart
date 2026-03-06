@@ -53,8 +53,6 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
   Widget build(BuildContext context) {
     final threadsState = ref.watch(threadsViewModelProvider);
     final threads = threadsState.threads;
-    final authState = ref.watch(authViewModelProvider);
-    final currentUserId = authState.authEntity?.authId ?? '';
     // Group threads by otherUserId and keep only the latest (by lastMessage.createdAt)
     final Map<String, dynamic> latestThreadsMap = {};
     for (final thread in threads) {

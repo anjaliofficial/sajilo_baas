@@ -81,9 +81,19 @@ class AuthRemoteDatasource {
       final response = await _apiClient.post(ApiEndpoints.logout);
 
       print("LOGOUT STATUS: ${response.statusCode}");
+
+      // Handle 404 gracefully - backend might not have logout endpoint
+      if (response.statusCode == 404) {
+        print(
+          "LOGOUT: Backend endpoint not found, continuing with local logout",
+        );
+        return;
+      }
+
       print("LOGOUT DATA: ${response.data}");
     } catch (e) {
       print("LOGOUT ERROR: $e");
+      // Don't throw - allow local logout to proceed
     }
   }
 }

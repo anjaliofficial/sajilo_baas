@@ -32,13 +32,6 @@ class ReviewModel extends ReviewEntity {
       return '';
     }
 
-    String? parseName(dynamic value) {
-      if (value is Map && value['fullName'] != null) {
-        return value['fullName'] as String;
-      }
-      return null;
-    }
-
     String? parseProfile(dynamic value) {
       if (value is Map && value['profilePicture'] != null) {
         return value['profilePicture'] as String;

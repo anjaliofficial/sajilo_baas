@@ -152,14 +152,11 @@ class ReviewViewModel extends StateNotifier<ReviewState> {
     state = state.copyWith(loading: true);
     try {
       final reviews = await getReviewsReceived.repository.getReviewsGiven();
-      state = state.copyWith(
-        loading: false,
-        givenReviews: reviews ?? <ReviewEntity>[],
-      );
+      state = state.copyWith(loading: false, givenReviews: reviews);
     } catch (e) {
       state = state.copyWith(
         loading: false,
-        givenReviews: state.givenReviews ?? <ReviewEntity>[],
+        givenReviews: state.givenReviews,
         error: 'Failed to load given reviews',
       );
     }
@@ -187,14 +184,11 @@ class ReviewViewModel extends StateNotifier<ReviewState> {
     state = state.copyWith(loading: true);
     try {
       final reviews = await getReviewsReceived(userId);
-      state = state.copyWith(
-        loading: false,
-        receivedReviews: reviews ?? <ReviewEntity>[],
-      );
+      state = state.copyWith(loading: false, receivedReviews: reviews);
     } catch (e) {
       state = state.copyWith(
         loading: false,
-        receivedReviews: state.receivedReviews ?? <ReviewEntity>[],
+        receivedReviews: state.receivedReviews,
         error: 'Failed to load received reviews',
       );
     }

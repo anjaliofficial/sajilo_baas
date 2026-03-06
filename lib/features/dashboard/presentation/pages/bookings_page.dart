@@ -58,7 +58,6 @@ class _BookingsScreenState extends ConsumerState<BookingsScreen> {
         .replaceFirst(RegExp(r'^/+'), '');
     if (!normalized.startsWith('uploads/')) normalized = 'uploads/$normalized';
     return '${ApiEndpoints.staticBaseUrl}/$normalized';
-    return '${ApiEndpoints.staticBaseUrl}/$normalized';
   }
 
   Color _statusColor(String status) {

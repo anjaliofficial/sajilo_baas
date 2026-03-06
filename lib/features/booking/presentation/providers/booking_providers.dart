@@ -47,7 +47,5 @@ final bookingViewModelProvider =
       (ref) => BookingViewModel(
         ref.read(getMyBookingsProvider),
         ref.read(cancelBookingProvider),
-        ref.read(createBookingProvider),
-        ref.read(getBookedDatesProvider),
       ),
     );

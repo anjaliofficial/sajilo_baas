@@ -1,7 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
-import 'package:sajilo_baas/features/booking/domain/usecases/create_booking.dart';
-import 'package:sajilo_baas/features/booking/domain/usecases/get_booked_dates.dart';
 import '../../domain/entities/booking_entity.dart';
 import '../../domain/entities/booking_filter.dart';
 import '../../domain/usecases/get_my_bookings.dart';
@@ -10,17 +8,11 @@ import '../../domain/usecases/cancel_booking.dart';
 class BookingViewModel extends StateNotifier<AsyncValue<List<BookingEntity>>> {
   final GetMyBookings _getMyBookings;
   final CancelBooking _cancelBooking;
-  final CreateBooking _createBooking;
-  final GetBookedDates _getBookedDates;
 
   List<BookingEntity> _allBookings = [];
 
-  BookingViewModel(
-    this._getMyBookings,
-    this._cancelBooking,
-    this._createBooking,
-    this._getBookedDates,
-  ) : super(const AsyncLoading());
+  BookingViewModel(this._getMyBookings, this._cancelBooking)
+    : super(const AsyncLoading());
 
   // -------------------
   // Load bookings

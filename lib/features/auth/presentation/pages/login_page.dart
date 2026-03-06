@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:local_auth/local_auth.dart';
+import 'package:sajilo_baas/core/api/api_client.dart';
 import 'package:sajilo_baas/core/providers/shared_pref_provider.dart';
 import 'package:sajilo_baas/features/auth/presentation/pages/register_page.dart';
 import 'package:sajilo_baas/features/auth/presentation/providers/auth_provider.dart';
@@ -72,6 +73,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
       final enabled = sharedPrefs.getBool(_biometricEnabledKey) ?? false;
 
+      print('🔍 Login Page - Biometric Check:');
+      print('   Can check biometrics: $canCheck');
+      print('   Device supported: $isSupported');
+      print('   Available types: $available');
+      print('   Has enrolled: ${available.isNotEmpty}');
+      print('   Saved preference: $enabled');
+
       if (!mounted) return;
       setState(() {
         _canUseBiometric = canCheck || isSupported;
@@ -82,7 +90,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           _biometricEnabled = enabled;
         }
       });
+
+      print('   Final enabled state: $_biometricEnabled');
+      print(
+        '   Fingerprint button will ${_biometricEnabled ? "SHOW" : "HIDE"}',
+      );
     } on PlatformException {
+      print('❌ Login Page - Biometric check failed');
       if (!mounted) return;
       setState(() {
         _canUseBiometric = false;
@@ -93,8 +107,33 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   }
 
   Future<void> _saveBiometricPreference(bool enabled) async {
+    // Only save credentials when biometric is already enabled
+    if (!enabled) return;
+
     final sharedPrefs = ref.read(sharedPreferencesProvider);
-    await sharedPrefs.setBool(_biometricEnabledKey, enabled);
+    final isEnabled = sharedPrefs.getBool(_biometricEnabledKey) ?? false;
+
+    print('🔐 Saving biometric credentials... Enabled: $isEnabled');
+
+    // Only store credentials if user has enabled biometric in profile
+    if (isEnabled) {
+      await _saveCredentialsSecurely(
+        _emailController.text.trim(),
+        _passwordController.text.trim(),
+      );
+      print('✅ Biometric credentials saved successfully');
+    } else {
+      print('⚠️ Biometric not enabled in profile, credentials not saved');
+    }
+  }
+
+  Future<void> _saveCredentialsSecurely(String email, String password) async {
+    final apiClient = ref.read(apiClientProvider);
+    await apiClient.secureStorage.write(key: 'biometric_email', value: email);
+    await apiClient.secureStorage.write(
+      key: 'biometric_password',
+      value: password,
+    );
   }
 
   Future<void> _onBiometricLogin() async {
@@ -140,13 +179,35 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
       if (!didAuthenticate) return;
 
-      await ref.read(authViewModelProvider.notifier).checkSession();
+      // Retrieve stored credentials and perform real login
+      final apiClient = ref.read(apiClientProvider);
+      final email = await apiClient.secureStorage.read(key: 'biometric_email');
+      final password = await apiClient.secureStorage.read(
+        key: 'biometric_password',
+      );
+
+      if (email == null || password == null) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'No saved credentials. Please login with email first.',
+            ),
+          ),
+        );
+        return;
+      }
+
+      // Perform actual login to get fresh user data
+      await ref
+          .read(authViewModelProvider.notifier)
+          .login(email: email, password: password);
 
       final currentState = ref.read(authViewModelProvider);
       if (currentState.status != AuthStatus.authenticated && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('No previous login session found. Please sign in.'),
+            content: Text('Login failed. Please try again with email.'),
           ),
         );
       }
@@ -180,7 +241,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       } else if (next.status == AuthStatus.authenticated) {
         if (_credentialLoginInProgress) {
           _credentialLoginInProgress = false;
-          _saveBiometricPreference(_biometricEnabled);
+          // Save credentials if biometric is enabled
+          _saveBiometricPreference(true);
         }
 
         Navigator.pushReplacement(
@@ -326,25 +388,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
-                SwitchListTile.adaptive(
-                  value: _biometricEnabled,
-                  contentPadding: EdgeInsets.zero,
-                  title: const Text('Enable Fingerprint Login'),
-                  subtitle: Text(
-                    !_canUseBiometric
-                        ? 'Biometric sensor not available on this device'
-                        : !_hasEnrolledBiometric
-                        ? 'No fingerprint/face enrolled. Add one in device settings.'
-                        : 'Use fingerprint to log in faster on this device',
-                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                  ),
-                  onChanged: (_canUseBiometric && _hasEnrolledBiometric)
-                      ? (value) {
-                          setState(() => _biometricEnabled = value);
-                        }
-                      : null,
-                ),
                 const SizedBox(height: 30),
 
                 SizedBox(
@@ -374,8 +417,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   ),
                 ),
 
-                const SizedBox(height: 30),
-                if (_canUseBiometric && _biometricEnabled) ...[
+                const SizedBox(height: 20),
+                // Show fingerprint button only if already enabled in profile
+                if (_biometricEnabled) ...[
                   SizedBox(
                     width: double.infinity,
                     height: 55,
