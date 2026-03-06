@@ -121,8 +121,21 @@ Widget mediaBubble(String url, String kind) {
                       children: [
                         Icon(Icons.broken_image),
                         SizedBox(height: 8),
-                        Text('Image error:', style: TextStyle(fontSize: 12)),
+                        Text(
+                          'Image error:',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                         Text(error.toString(), style: TextStyle(fontSize: 10)),
+                        SizedBox(height: 6),
+                        Text(
+                          'URL: $fullUrl',
+                          style: TextStyle(fontSize: 7, color: Colors.red),
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ],
                     ),
                   ),

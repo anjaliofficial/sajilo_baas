@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
-import 'package:sajilo_baas/core/network/dio_provider.dart';
+import 'package:sajilo_baas/core/api/api_client.dart';
 
 import '../../data/datasources/remote/notification_remote_datasource.dart';
 import '../../data/datasources/remote/notification_socket_datasource.dart';
@@ -15,8 +15,8 @@ import '../../domain/usecases/delete_notification.dart';
 // Repository Provider (Remote Only)
 // ------------------------
 final notificationRepositoryProvider = Provider<NotificationRepository>((ref) {
-  final dio = ref.watch(dioProvider);
-  final remote = NotificationRemoteDataSourceImpl(dio);
+  final apiClient = ref.watch(apiClientProvider);
+  final remote = NotificationRemoteDataSourceImpl(apiClient.dio);
   return NotificationRepositoryImpl(remote);
 });
 

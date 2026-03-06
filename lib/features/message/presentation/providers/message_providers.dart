@@ -22,8 +22,8 @@ import '../../presentation/state/threads_state.dart';
 
 /// Media upload datasource provider
 final mediaUploadDatasourceProvider = Provider<MediaUploadDatasource>((ref) {
-  final dio = ref.read(dioProvider);
-  return MediaUploadDatasource(dio);
+  final apiClient = ref.read(apiClientProvider);
+  return MediaUploadDatasource(apiClient.dio);
 });
 
 final deleteMessageProvider = Provider<DeleteMessage>((ref) {

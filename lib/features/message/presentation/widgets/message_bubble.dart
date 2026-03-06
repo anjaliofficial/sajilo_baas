@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sajilo_baas/core/api/api_endpoints.dart';
+import 'package:sajilo_baas/core/utils/image_utils.dart';
 import 'package:sajilo_baas/features/message/domain/entities/message_entity.dart';
 import 'package:sajilo_baas/features/message/presentation/providers/message_providers.dart';
 
@@ -96,6 +97,7 @@ class MessageBubble extends ConsumerWidget {
               SizedBox(width: 8),
             ],
             Flexible(
+              fit: FlexFit.loose,
               child: isMe
                   ? GestureDetector(
                       onLongPress: () async {
@@ -464,10 +466,11 @@ Widget _bubbleContent(
 // Helper widget for media display
 Widget mediaBubble(String url, String kind) {
   if (kind == 'image') {
+    final fullUrl = getFullImageUrl(url);
     return ClipRRect(
       borderRadius: BorderRadius.circular(12),
       child: Image.network(
-        url,
+        fullUrl,
         width: 180,
         height: 150,
         fit: BoxFit.cover,

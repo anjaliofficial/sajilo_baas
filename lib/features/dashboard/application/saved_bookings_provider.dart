@@ -1,13 +1,13 @@
 // import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/legacy.dart';
-import 'package:sajilo_baas/core/network/dio_provider.dart';
+import 'package:sajilo_baas/core/api/api_client.dart';
 import 'package:sajilo_baas/core/api/api_endpoints.dart';
 
 final savedBookingsProvider =
     StateNotifierProvider<SavedBookingsNotifier, Set<String>>((ref) {
-      final dio = ref.read(dioProvider);
-      return SavedBookingsNotifier(dio);
+      final apiClient = ref.read(apiClientProvider);
+      return SavedBookingsNotifier(apiClient.dio);
     });
 
 class SavedBookingsNotifier extends StateNotifier<Set<String>> {
