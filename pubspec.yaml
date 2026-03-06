@@ -36,6 +36,10 @@ dependencies:
   socket_io_client: ^2.0.3
   fluttertoast: ^8.2.8
   gal: ^2.3.2
+  flutter_map: ^8.0.0
+  latlong2: ^0.9.1
+  geolocator: ^10.1.0
+  maps_launcher: ^3.0.0
 
 dev_dependencies:
   flutter_test:

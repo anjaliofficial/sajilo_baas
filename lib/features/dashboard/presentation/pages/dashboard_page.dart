@@ -5,8 +5,10 @@ import 'package:sajilo_baas/features/auth/presentation/providers/auth_provider.d
 import 'package:sajilo_baas/features/notification/presentation/pages/notifications_page.dart';
 import 'package:sajilo_baas/features/notification/presentation/providers/notification_provider.dart';
 import 'package:sajilo_baas/features/review/presentation/pages/review_list_page.dart';
+import 'package:sajilo_baas/features/dashboard/presentation/pages/map_page.dart';
 import 'listing_page.dart';
 import 'listing_details_page.dart';
+import 'profile_screen.dart';
 import '../../domain/entities/listing_entity.dart';
 import '../../presentation/providers/dashboard_provider.dart';
 
@@ -18,7 +20,6 @@ String getFullImageUrl(String path) {
   if (!normalized.startsWith('/')) {
     normalized = '/$normalized';
   }
-  return ApiEndpoints.staticBaseUrl + normalized;
   return '${ApiEndpoints.staticBaseUrl}$normalized';
 }
 
@@ -148,74 +149,69 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Current location',
-              style: TextStyle(fontSize: 12, color: Colors.grey),
-            ),
-            Row(
-              children: [
-                Icon(Icons.location_on, size: 18, color: Colors.black),
-                SizedBox(width: 4),
-                Text(
-                  'Kathmandu, Pepsicola',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
-                ),
-                Icon(Icons.keyboard_arrow_down),
-              ],
+              'Sajilo Baas',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
             ),
           ],
         ),
-        GestureDetector(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const NotificationsPage()),
-            ).then((_) {
-              ref.read(notificationProvider.notifier).fetchNotifications();
-            });
+        PopupMenuButton<String>(
+          icon: const Icon(Icons.menu, size: 28, color: Colors.black),
+          onSelected: (String value) {
+            if (value == 'notifications') {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const NotificationsPage()),
+              ).then((_) {
+                ref.read(notificationProvider.notifier).fetchNotifications();
+              });
+            } else if (value == 'map') {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const MapPage()),
+              );
+            } else if (value == 'settings') {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ProfileScreen()),
+              );
+            }
           },
-          child: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.red.withOpacity(0.1),
-              shape: BoxShape.circle,
+          itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+            const PopupMenuItem<String>(
+              value: 'notifications',
+              child: Row(
+                children: [
+                  Icon(Icons.notifications, color: Colors.red),
+                  SizedBox(width: 12),
+                  Text('Notifications'),
+                ],
+              ),
             ),
-            child: Stack(
-              children: [
-                const Icon(Icons.notifications_none, color: Colors.red),
-                Positioned(
-                  right: 0,
-                  top: 0,
-                  child: Consumer(
-                    builder: (context, ref, _) {
-                      final state = ref.watch(notificationProvider);
-                      final unreadCount = state.notifications
-                          .where((n) => !n.isRead)
-                          .length;
-                      if (unreadCount == 0) return const SizedBox();
-                      return Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: const BoxDecoration(
-                          color: Colors.red,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Text(
-                          '$unreadCount',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ],
+            const PopupMenuItem<String>(
+              value: 'map',
+              child: Row(
+                children: [
+                  Icon(Icons.map, color: Colors.blue),
+                  SizedBox(width: 12),
+                  Text('Map View'),
+                ],
+              ),
             ),
-          ),
+            const PopupMenuItem<String>(
+              value: 'settings',
+              child: Row(
+                children: [
+                  Icon(Icons.settings, color: Colors.grey),
+                  SizedBox(width: 12),
+                  Text('Settings'),
+                ],
+              ),
+            ),
+          ],
         ),
       ],
     );
