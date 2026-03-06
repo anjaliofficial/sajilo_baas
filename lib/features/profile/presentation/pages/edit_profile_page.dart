@@ -17,8 +17,8 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
   late TextEditingController emailController;
   late TextEditingController phoneController;
   late TextEditingController addressController;
-
   bool _isSaving = false;
+  final _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
@@ -39,22 +39,18 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
   }
 
   Future<void> _saveProfile() async {
+    if (!_formKey.currentState!.validate()) return;
     setState(() => _isSaving = true);
-
     final updated = ProfileEntity(
       id: widget.profile.id,
-      fullName: nameController.text,
-      email: emailController.text,
-      phoneNumber: phoneController.text,
-      address: addressController.text,
+      fullName: nameController.text.trim(),
+      email: emailController.text.trim(),
+      phoneNumber: phoneController.text.trim(),
+      address: addressController.text.trim(),
       role: widget.profile.role,
-      profilePicture: widget.profile.profilePicture,
     );
-
     try {
       await ref.read(profileViewModelProvider.notifier).updateProfile(updated);
-
-      // Watch the state after update
       final state = ref.read(profileViewModelProvider);
       if (state.status == ProfileStatus.loaded) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -75,34 +71,51 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Edit Profile")),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            TextField(
-              controller: nameController,
-              decoration: const InputDecoration(labelText: "Full Name"),
-            ),
-            TextField(
-              controller: emailController,
-              decoration: const InputDecoration(labelText: "Email"),
-            ),
-            TextField(
-              controller: phoneController,
-              decoration: const InputDecoration(labelText: "Phone"),
-            ),
-            TextField(
-              controller: addressController,
-              decoration: const InputDecoration(labelText: "Address"),
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: _isSaving ? null : _saveProfile,
-              child: _isSaving
-                  ? const CircularProgressIndicator(color: Colors.white)
-                  : const Text("Save"),
-            ),
-          ],
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              TextFormField(
+                controller: nameController,
+                decoration: const InputDecoration(labelText: "Full Name"),
+                validator: (v) =>
+                    v == null || v.trim().isEmpty ? 'Name required' : null,
+              ),
+              TextFormField(
+                controller: emailController,
+                decoration: const InputDecoration(labelText: "Email"),
+                validator: (v) =>
+                    v == null || v.trim().isEmpty ? 'Email required' : null,
+              ),
+              TextFormField(
+                controller: phoneController,
+                decoration: const InputDecoration(labelText: "Phone"),
+                validator: (v) =>
+                    v == null || v.trim().isEmpty ? 'Phone required' : null,
+              ),
+              TextFormField(
+                controller: addressController,
+                decoration: const InputDecoration(labelText: "Address"),
+                validator: (v) =>
+                    v == null || v.trim().isEmpty ? 'Address required' : null,
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                icon: const Icon(Icons.save),
+                onPressed: _isSaving ? null : _saveProfile,
+                label: _isSaving
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : const Text("Save"),
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(48),
+                  backgroundColor: Colors.blue,
+                  foregroundColor: Colors.white,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

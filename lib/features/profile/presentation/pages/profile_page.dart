@@ -14,6 +14,7 @@ import 'package:sajilo_baas/features/auth/presentation/state/auth_state.dart';
 import '../providers/profile_provider.dart';
 import '../state/profile_state.dart';
 import 'edit_profile_page.dart';
+import 'package:sajilo_baas/features/auth/presentation/providers/change_password_provider.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -778,6 +779,102 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       ),
                     ),
                     const SizedBox(height: 30),
+                    // Change Password Button
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: () async {
+                          final result = await showDialog<Map<String, String>?>(
+                            context: context,
+                            builder: (context) {
+                              final oldPasswordController =
+                                  TextEditingController();
+                              final newPasswordController =
+                                  TextEditingController();
+                              return AlertDialog(
+                                title: const Text('Change Password'),
+                                content: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    TextField(
+                                      controller: oldPasswordController,
+                                      obscureText: true,
+                                      decoration: const InputDecoration(
+                                        labelText: 'Current Password',
+                                      ),
+                                    ),
+                                    const SizedBox(height: 12),
+                                    TextField(
+                                      controller: newPasswordController,
+                                      obscureText: true,
+                                      decoration: const InputDecoration(
+                                        labelText: 'New Password',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.pop(context, null),
+                                    child: const Text('Cancel'),
+                                  ),
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      Navigator.pop(context, {
+                                        'old': oldPasswordController.text,
+                                        'new': newPasswordController.text,
+                                      });
+                                    },
+                                    child: const Text('Change'),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                          if (result != null &&
+                              result['old']!.isNotEmpty &&
+                              result['new']!.isNotEmpty) {
+                            final success = await ref
+                                .read(changePasswordProvider.notifier)
+                                .changePassword(
+                                  oldPassword: result['old']!,
+                                  newPassword: result['new']!,
+                                );
+                            final changed = ref.read(changePasswordProvider);
+                            if (changed) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'Password changed successfully!',
+                                  ),
+                                ),
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Failed to change password.'),
+                                ),
+                              );
+                            }
+                          }
+                        },
+                        icon: const Icon(Icons.lock),
+                        label: const Text(
+                          'Change Password',
+                          style: TextStyle(fontSize: 16),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
                     // Logout Button
                     SizedBox(
                       width: double.infinity,
@@ -807,15 +904,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                               ],
                             ),
                           );
-
                           if (confirm == true) {
-                            // Don't clear biometric credentials on logout
-                            // They should persist for fingerprint login
-
                             await ref
                                 .read(authViewModelProvider.notifier)
                                 .logout();
-
                             print('🚪 Logout complete, navigating to login...');
                             if (mounted) {
                               Navigator.of(context).pushNamedAndRemoveUntil(
