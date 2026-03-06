@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sajilo_baas/features/dashboard/sensors/widgets/shake_detector_widget.dart';
+import 'package:sajilo_baas/features/dashboard/domain/entities/listing_entity.dart';
+import 'dart:async';
 import '../providers/dashboard_provider.dart';
 import 'listing_details_page.dart';
 import 'package:sajilo_baas/features/dashboard/sensors/pages/sensors_page.dart';
@@ -29,12 +31,57 @@ class ListingPage extends ConsumerStatefulWidget {
 
 class _ListingPageState extends ConsumerState<ListingPage> {
   DateTime? _lastShakeAt;
+  final TextEditingController _searchController = TextEditingController();
+  String _selectedPropertyType = 'All types';
+  Timer? _searchDebounce;
+  String _debouncedQuery = '';
+  RangeValues _priceRange = const RangeValues(0, 100000);
 
   String _formatTime(DateTime dateTime) {
     final h = dateTime.hour.toString().padLeft(2, '0');
     final m = dateTime.minute.toString().padLeft(2, '0');
     final s = dateTime.second.toString().padLeft(2, '0');
     return '$h:$m:$s';
+  }
+
+  @override
+  void dispose() {
+    _searchDebounce?.cancel();
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _onSearchChanged(String value) {
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(const Duration(milliseconds: 350), () {
+      if (!mounted) return;
+      setState(() {
+        _debouncedQuery = value.trim().toLowerCase();
+      });
+    });
+  }
+
+  List<ListingEntity> _filteredListings(List<ListingEntity> source) {
+    final query = _debouncedQuery;
+    final minPrice = _priceRange.start;
+    final maxPrice = _priceRange.end;
+
+    return source.where((listing) {
+      final title = listing.title.toLowerCase();
+      final location = listing.location.toLowerCase();
+      final type = listing.propertyType.toLowerCase();
+      final price = listing.pricePerNight;
+
+      final matchesQuery =
+          query.isEmpty || title.contains(query) || location.contains(query);
+      final matchesType =
+          _selectedPropertyType == 'All types' ||
+          type == _selectedPropertyType.toLowerCase();
+      final matchesMin = price >= minPrice;
+      final matchesMax = price <= maxPrice;
+
+      return matchesQuery && matchesType && matchesMin && matchesMax;
+    }).toList();
   }
 
   @override
@@ -94,13 +141,38 @@ class _ListingPageState extends ConsumerState<ListingPage> {
 
   /// Build the actual listing body
   Widget _buildListingBody(vm) {
+    final allListings = vm.listings;
+    final maxListingPrice = allListings.isEmpty
+        ? 100000.0
+        : allListings
+                  .map((e) => e.pricePerNight.toDouble())
+                  .reduce((a, b) => a > b ? a : b) +
+              1000;
+
+    final safeEnd = _priceRange.end > maxListingPrice
+        ? maxListingPrice
+        : _priceRange.end;
+    final safeStart = _priceRange.start > safeEnd ? 0.0 : _priceRange.start;
+    final effectiveRange = RangeValues(safeStart, safeEnd);
+
+    if (effectiveRange != _priceRange) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        setState(() {
+          _priceRange = effectiveRange;
+        });
+      });
+    }
+
+    final filtered = _filteredListings(allListings);
+
     return vm.isLoading
         ? const Center(child: CircularProgressIndicator())
         : vm.error != null
         ? Center(child: Text('Error: ${vm.error}'))
         : ListView.builder(
             padding: EdgeInsets.zero,
-            itemCount: vm.listings.length + 1,
+            itemCount: filtered.isEmpty ? 2 : filtered.length + 1,
             itemBuilder: (context, index) {
               if (index == 0) {
                 // Filter card at the top
@@ -116,58 +188,43 @@ class _ListingPageState extends ConsumerState<ListingPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Location
+                          // Search by property name or location
                           const Text(
-                            'Location',
+                            'Search',
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 4),
-                          const TextField(
+                          TextField(
+                            controller: _searchController,
+                            onChanged: _onSearchChanged,
                             decoration: InputDecoration(
-                              hintText: 'Kathmandu',
-                              prefixIcon: Icon(Icons.location_on),
-                              border: OutlineInputBorder(),
+                              hintText: 'Search by name or location',
+                              prefixIcon: const Icon(Icons.search),
+                              border: const OutlineInputBorder(),
                             ),
                           ),
                           const SizedBox(height: 12),
 
-                          // Price Range
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: const [
-                                    Text('Min price'),
-                                    SizedBox(height: 4),
-                                    TextField(
-                                      keyboardType: TextInputType.number,
-                                      decoration: InputDecoration(
-                                        hintText: '100',
-                                        border: OutlineInputBorder(),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: const [
-                                    Text('Max price'),
-                                    SizedBox(height: 4),
-                                    TextField(
-                                      keyboardType: TextInputType.number,
-                                      decoration: InputDecoration(
-                                        hintText: '400',
-                                        border: OutlineInputBorder(),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
+                          // Price Range Slider
+                          Text(
+                            'Price range: NPR ${_priceRange.start.round()} - NPR ${_priceRange.end.round()}',
+                          ),
+                          RangeSlider(
+                            values: _priceRange,
+                            min: 0,
+                            max: maxListingPrice <= 0
+                                ? 100000
+                                : maxListingPrice,
+                            divisions: 50,
+                            labels: RangeLabels(
+                              'NPR ${_priceRange.start.round()}',
+                              'NPR ${_priceRange.end.round()}',
+                            ),
+                            onChanged: (RangeValues values) {
+                              setState(() {
+                                _priceRange = values;
+                              });
+                            },
                           ),
 
                           const SizedBox(height: 12),
@@ -192,7 +249,13 @@ class _ListingPageState extends ConsumerState<ListingPage> {
                                       ),
                                     )
                                     .toList(),
-                            onChanged: (value) {},
+                            onChanged: (value) {
+                              if (value == null) return;
+                              setState(() {
+                                _selectedPropertyType = value;
+                              });
+                            },
+                            value: _selectedPropertyType,
                             decoration: const InputDecoration(
                               border: OutlineInputBorder(),
                             ),
@@ -200,65 +263,66 @@ class _ListingPageState extends ConsumerState<ListingPage> {
 
                           const SizedBox(height: 12),
 
-                          // Check-in / out
                           Row(
                             children: [
                               Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: const [
-                                    Text('Check-in'),
-                                    SizedBox(height: 4),
-                                    TextField(
-                                      decoration: InputDecoration(
-                                        hintText: 'dd-mm-yyyy',
-                                        border: OutlineInputBorder(),
-                                      ),
-                                    ),
-                                  ],
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    setState(() {});
+                                  },
+                                  child: Text(
+                                    'Apply Filters (${filtered.length})',
+                                  ),
                                 ),
                               ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: const [
-                                    Text('Check-out'),
-                                    SizedBox(height: 4),
-                                    TextField(
-                                      decoration: InputDecoration(
-                                        hintText: 'dd-mm-yyyy',
-                                        border: OutlineInputBorder(),
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                              const SizedBox(width: 8),
+                              OutlinedButton(
+                                onPressed: () {
+                                  setState(() {
+                                    _searchController.clear();
+                                    _debouncedQuery = '';
+                                    _selectedPropertyType = 'All types';
+                                    _priceRange = RangeValues(
+                                      0,
+                                      maxListingPrice <= 0
+                                          ? 100000
+                                          : maxListingPrice,
+                                    );
+                                  });
+                                },
+                                child: const Text('Reset'),
                               ),
                             ],
                           ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              }
 
-                          const SizedBox(height: 12),
-
-                          // Guests
-                          const Text('Guests'),
-                          const SizedBox(height: 4),
-                          const TextField(
-                            keyboardType: TextInputType.number,
-                            decoration: InputDecoration(
-                              hintText: '2',
-                              border: OutlineInputBorder(),
+              if (filtered.isEmpty && index == 1) {
+                return const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+                  child: Card(
+                    child: Padding(
+                      padding: EdgeInsets.all(20),
+                      child: Column(
+                        children: [
+                          Icon(Icons.search_off, size: 40, color: Colors.grey),
+                          SizedBox(height: 10),
+                          Text(
+                            'No results found',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
-
-                          const SizedBox(height: 16),
-
-                          // Apply filters
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                              onPressed: () {},
-                              child: const Text('Apply filters'),
-                            ),
+                          SizedBox(height: 6),
+                          Text(
+                            'Try another name, location, property type, or price range.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(color: Colors.grey),
                           ),
                         ],
                       ),
@@ -268,7 +332,7 @@ class _ListingPageState extends ConsumerState<ListingPage> {
               }
 
               // Listing items
-              final listing = vm.listings[index - 1];
+              final listing = filtered[index - 1];
 
               return Card(
                 margin: const EdgeInsets.only(left: 16, right: 16, bottom: 12),
