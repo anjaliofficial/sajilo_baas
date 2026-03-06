@@ -3,6 +3,7 @@ import '../../domain/entities/listing_entity.dart';
 import 'package:sajilo_baas/core/api/api_endpoints.dart';
 import '../../../booking/presentation/pages/bookingPage.dart';
 import 'map_page.dart';
+import 'host_profile_page.dart';
 
 String getFullImageUrl(String path) {
   if (path.startsWith('http')) return path;
@@ -163,20 +164,54 @@ class _ListingDetailsPageState extends State<ListingDetailsPage> {
                       : null,
                 ),
                 const SizedBox(width: 16),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      host.fullName,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        host.fullName,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    Text('Phone: ${host.phoneNumber}'),
-                  ],
+                      Text('Phone: ${host.phoneNumber}'),
+                    ],
+                  ),
                 ),
               ],
+            ),
+            const SizedBox(height: 16),
+            // View Full Profile Button
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => HostProfilePage(host: host),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.person_outline, color: Colors.white),
+                label: const Text(
+                  'View Full Profile & Reviews',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF007BFF),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 2,
+                ),
+              ),
             ),
             const SizedBox(height: 24),
             GestureDetector(
