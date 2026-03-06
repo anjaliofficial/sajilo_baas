@@ -53,23 +53,26 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
   Widget build(BuildContext context) {
     final threadsState = ref.watch(threadsViewModelProvider);
     final threads = threadsState.threads;
-    // Group threads by otherUserId and keep only the latest (by lastMessage.createdAt)
-    final Map<String, dynamic> latestThreadsMap = {};
+    // Group threads by otherUserId (host) and keep only the latest (by lastMessage.createdAt)
+    final Map<String, List<dynamic>> hostThreadsMap = {};
     for (final thread in threads) {
-      if (thread.otherUserId.isEmpty ||
-          thread.listingId == null ||
-          thread.listingId!.isEmpty) {
+      if (thread.otherUserId.isEmpty) {
         continue;
       }
-      final existing = latestThreadsMap[thread.otherUserId];
-      if (existing == null ||
-          thread.lastMessage.createdAt.isAfter(
-            existing.lastMessage.createdAt,
-          )) {
-        latestThreadsMap[thread.otherUserId] = thread;
+      // Only include threads with at least one message
+      if ((thread.lastMessage.content.trim().isEmpty)) {
+        continue;
       }
+      hostThreadsMap.putIfAbsent(thread.otherUserId, () => []);
+      hostThreadsMap[thread.otherUserId]!.add(thread);
     }
-    List filteredThreads = latestThreadsMap.values.toList();
+    // For display, keep only the latest thread per host
+    List filteredThreads = hostThreadsMap.values.map((threads) {
+      threads.sort(
+        (a, b) => b.lastMessage.createdAt.compareTo(a.lastMessage.createdAt),
+      );
+      return threads.first;
+    }).toList();
     // Optionally, apply search
     if (_search.isNotEmpty) {
       filteredThreads = filteredThreads.where((thread) {
@@ -102,6 +105,7 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
                     },
                   ),
                 ),
+                // ...existing code...
                 Expanded(
                   child: filteredThreads.isEmpty
                       ? const Center(
@@ -124,7 +128,15 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
                               avatar = ApiEndpoints.staticBaseUrl + avatar;
                             }
                             final keyString =
-                                '${thread.otherUserId}_${thread.listingId ?? ''}_${lastMsg.id}';
+                                '${thread.otherUserId}_${lastMsg.id}';
+                            final validListingId =
+                                thread.listingId ?? lastMsg.listingId ?? '';
+                            final allListingIds =
+                                hostThreadsMap[thread.otherUserId]
+                                    ?.map((t) => t.listingId)
+                                    .whereType<String>()
+                                    .toList() ??
+                                [];
                             return Dismissible(
                               key: Key(keyString),
                               direction: DismissDirection.endToStart,
@@ -140,15 +152,11 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
                                 ),
                               ),
                               onDismissed: (direction) {
-                                // TODO: Implement delete thread logic (API call or local remove)
-                                // For now, just show a snackbar
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                     content: Text('Conversation deleted'),
                                   ),
                                 );
-                                // Optionally, remove from provider/state
-                                // You should implement a method in your ViewModel to remove the thread
                               },
                               child: ListTile(
                                 leading: CircleAvatar(
@@ -199,7 +207,8 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
                                     MaterialPageRoute(
                                       builder: (_) => ChatPage(
                                         otherUserId: thread.otherUserId,
-                                        listingId: thread.listingId ?? '',
+                                        listingId: validListingId,
+                                        allListingIds: allListingIds,
                                       ),
                                     ),
                                   );

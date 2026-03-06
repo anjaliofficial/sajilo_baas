@@ -6,17 +6,46 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:sajilo_baas/features/auth/presentation/providers/auth_provider.dart';
 import 'package:sajilo_baas/core/api/api_endpoints.dart';
 import '../widgets/message_bubble.dart';
+import '../../domain/entities/message_entity.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import '../providers/mark_conversation_read_provider.dart';
+
+Future<void> _loadAndMergeAllHostMessages(
+  WidgetRef ref,
+  String otherUserId,
+  String listingId,
+  List<String>? allListingIds,
+) async {
+  final chatVM = ref.read(chatViewModelProvider.notifier);
+  List<String> listingIds = allListingIds ?? [listingId];
+  List<MessageEntity> messages = [];
+  for (final id in listingIds) {
+    final msgs = await chatVM.getConversation(otherUserId, id);
+    messages.addAll(msgs);
+  }
+  messages = messages.toSet().toList();
+  messages.sort(
+    (a, b) =>
+        (a.createdAt ?? DateTime(0)).compareTo(b.createdAt ?? DateTime(0)),
+  );
+  chatVM.state = chatVM.state.copyWith(messages: messages, loading: false);
+  // Mark all conversations as read
+  for (final id in listingIds) {
+    await ref.read(markConversationReadProvider).call(otherUserId, id);
+  }
+  ref.read(threadsViewModelProvider.notifier).loadThreads();
+}
 
 class ChatPage extends ConsumerStatefulWidget {
   final String otherUserId;
   final String listingId;
+  final List<String>? allListingIds;
 
   const ChatPage({
     super.key,
     required this.otherUserId,
     required this.listingId,
+    this.allListingIds,
   });
 
   @override
@@ -33,18 +62,25 @@ class _ChatPageState extends ConsumerState<ChatPage> {
   @override
   void initState() {
     super.initState();
-    // Load initial conversation
-    Future.microtask(
-      () => ref
-          .read(chatViewModelProvider.notifier)
-          .load(widget.otherUserId, widget.listingId),
-    );
-    // Mark conversation as read when chat is opened
-    Future.microtask(() {
-      ref
-          .read(markConversationReadProvider)
-          .call(widget.otherUserId, widget.listingId);
-      // Optionally, reload threads to update unread count
+    // Load and merge messages from all listings for this host
+    Future.microtask(() async {
+      final chatVM = ref.read(chatViewModelProvider.notifier);
+      List<String> listingIds = widget.allListingIds ?? [widget.listingId];
+      List<MessageEntity> messages = [];
+      for (final id in listingIds) {
+        final msgs = await chatVM.getConversation(widget.otherUserId, id);
+        messages.addAll(msgs);
+      }
+      // Sort and deduplicate messages
+      messages = messages.toSet().toList().cast<MessageEntity>();
+      messages.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+      chatVM.state = chatVM.state.copyWith(messages: messages, loading: false);
+      // Mark all conversations as read
+      for (final id in listingIds) {
+        await ref
+            .read(markConversationReadProvider)
+            .call(widget.otherUserId, id);
+      }
       ref.read(threadsViewModelProvider.notifier).loadThreads();
     });
     // Listen to new messages and auto-scroll
@@ -54,7 +90,6 @@ class _ChatPageState extends ConsumerState<ChatPage> {
     // Socket.io for live updates
     final authState = ref.read(authViewModelProvider);
     final token = authState.authEntity?.token;
-    // Use ApiEndpoints.socketBaseUrl or similar constant for Socket.io URL
     final socketUrl = ApiEndpoints.socketBaseUrl;
     debugPrint('Connecting to socket: $socketUrl');
     if (token != null && token.isNotEmpty && socketUrl.isNotEmpty) {
@@ -66,15 +101,30 @@ class _ChatPageState extends ConsumerState<ChatPage> {
       _socket!.connect();
       _socket!.onConnect((_) {
         debugPrint('Socket connected (chat)');
-        // Optionally join listing room
-        _socket!.emit('joinRoom', widget.listingId);
+        // Optionally join all listing rooms
+        for (final id in widget.allListingIds ?? [widget.listingId]) {
+          _socket!.emit('joinRoom', id);
+        }
       });
-      _socket!.on('receiveMessage', (data) {
-        ref
-            .read(chatViewModelProvider.notifier)
-            .load(widget.otherUserId, widget.listingId);
+      _socket!.on('receiveMessage', (data) async {
+        final chatVM = ref.read(chatViewModelProvider.notifier);
+        List<String> listingIds = widget.allListingIds ?? [widget.listingId];
+        List<MessageEntity> messages = [];
+        for (final id in listingIds) {
+          final msgs = await chatVM.getConversation(widget.otherUserId, id);
+          messages.addAll(msgs);
+        }
+        messages = messages.toSet().toList();
+        messages.sort(
+          (a, b) => (a.createdAt ?? DateTime(0)).compareTo(
+            b.createdAt ?? DateTime(0),
+          ),
+        );
+        chatVM.state = chatVM.state.copyWith(
+          messages: messages,
+          loading: false,
+        );
       });
-      // Optionally listen for messageStatusUpdate, etc.
     }
   }
 
@@ -94,7 +144,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
     }
   }
 
-  void _sendMessage() {
+  void _sendMessage(WidgetRef ref) async {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
 
@@ -108,18 +158,22 @@ class _ChatPageState extends ConsumerState<ChatPage> {
       return;
     }
 
-    ref
+    await ref
         .read(chatViewModelProvider.notifier)
         .send(widget.otherUserId, widget.listingId, text);
 
-    // Refresh threads list after sending a message
-    ref.read(threadsViewModelProvider.notifier).loadThreads();
+    await _loadAndMergeAllHostMessages(
+      ref,
+      widget.otherUserId,
+      widget.listingId,
+      widget.allListingIds,
+    );
 
     _controller.clear();
     _scrollToBottom();
   }
 
-  Future<void> _pickAndSendMedia() async {
+  Future<void> _pickAndSendMedia(WidgetRef ref) async {
     // Show dialog for image or video
     showModalBottomSheet(
       context: context,
@@ -133,6 +187,12 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                 onTap: () async {
                   Navigator.pop(context);
                   await _pickMedia(ImageSource.gallery, isVideo: false);
+                  await _loadAndMergeAllHostMessages(
+                    ref,
+                    widget.otherUserId,
+                    widget.listingId,
+                    widget.allListingIds,
+                  );
                 },
               ),
               ListTile(
@@ -141,6 +201,12 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                 onTap: () async {
                   Navigator.pop(context);
                   await _pickMedia(ImageSource.gallery, isVideo: true);
+                  await _loadAndMergeAllHostMessages(
+                    ref,
+                    widget.otherUserId,
+                    widget.listingId,
+                    widget.allListingIds,
+                  );
                 },
               ),
               ListTile(
@@ -149,6 +215,12 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                 onTap: () async {
                   Navigator.pop(context);
                   await _pickMedia(ImageSource.camera, isVideo: false);
+                  await _loadAndMergeAllHostMessages(
+                    ref,
+                    widget.otherUserId,
+                    widget.listingId,
+                    widget.allListingIds,
+                  );
                 },
               ),
               ListTile(
@@ -157,6 +229,12 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                 onTap: () async {
                   Navigator.pop(context);
                   await _pickMedia(ImageSource.camera, isVideo: true);
+                  await _loadAndMergeAllHostMessages(
+                    ref,
+                    widget.otherUserId,
+                    widget.listingId,
+                    widget.allListingIds,
+                  );
                 },
               ),
             ],
@@ -323,9 +401,12 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                   ? const Center(child: Text('No messages yet.'))
                   : RefreshIndicator(
                       onRefresh: () async {
-                        await ref
-                            .read(chatViewModelProvider.notifier)
-                            .load(widget.otherUserId, widget.listingId);
+                        await _loadAndMergeAllHostMessages(
+                          ref,
+                          widget.otherUserId,
+                          widget.listingId,
+                          widget.allListingIds,
+                        );
                       },
                       child: ListView.builder(
                         controller: _scrollController,
@@ -351,14 +432,14 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                       ),
                     ),
             ),
-            _buildInputBar(),
+            _buildInputBar(ref),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildInputBar() {
+  Widget _buildInputBar(WidgetRef ref) {
     return SafeArea(
       child: Container(
         decoration: BoxDecoration(
@@ -379,7 +460,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
               margin: EdgeInsets.only(right: 8),
               child: IconButton(
                 icon: Icon(Icons.attach_file_rounded, color: Colors.grey[700]),
-                onPressed: _isUploading ? null : _pickAndSendMedia,
+                onPressed: _isUploading ? null : () => _pickAndSendMedia(ref),
                 splashRadius: 22,
               ),
             ),
@@ -420,7 +501,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
               ),
               child: IconButton(
                 icon: Icon(Icons.send_rounded, color: Colors.white),
-                onPressed: _sendMessage,
+                onPressed: () => _sendMessage(ref),
                 splashRadius: 24,
               ),
             ),

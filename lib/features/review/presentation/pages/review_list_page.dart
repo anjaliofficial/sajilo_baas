@@ -338,8 +338,7 @@ class _ReviewCardState extends ConsumerState<ReviewCard>
                           reply: r,
                           isOwner: r.authorId == widget.review.revieweeId,
                         ),
-                      )
-                      .toList(),
+                      ),
                   if (showViewMore)
                     TextButton(
                       onPressed: _toggleReplies,

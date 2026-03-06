@@ -1,5 +1,4 @@
 import 'package:sajilo_baas/core/api/api_client.dart';
-import 'package:sajilo_baas/core/api/api_endpoints.dart';
 
 class ChangePasswordRemoteDatasource {
   final ApiClient apiClient;

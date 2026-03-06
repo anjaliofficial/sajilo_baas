@@ -237,7 +237,7 @@ class _ListingPageState extends ConsumerState<ListingPage> {
                           const Text('Property type'),
                           const SizedBox(height: 4),
                           DropdownButtonFormField<String>(
-                            initialValue: 'All types',
+                            initialValue: _selectedPropertyType,
                             items:
                                 [
                                       'All types',
@@ -259,7 +259,6 @@ class _ListingPageState extends ConsumerState<ListingPage> {
                                 _selectedPropertyType = value;
                               });
                             },
-                            value: _selectedPropertyType,
                             decoration: const InputDecoration(
                               border: OutlineInputBorder(),
                             ),
