@@ -333,14 +333,14 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(10),
-                child: Image.network(
-                  listing.images.isNotEmpty
-                      ? getFullImageUrl(listing.images[0])
-                      : 'https://via.placeholder.com/80',
-                  width: 80,
-                  height: 80,
-                  fit: BoxFit.cover,
-                ),
+                child: listing.images.isNotEmpty
+                    ? Image.network(
+                        getFullImageUrl(listing.images[0]),
+                        width: 80,
+                        height: 80,
+                        fit: BoxFit.cover,
+                      )
+                    : const Icon(Icons.home, size: 60),
               ),
               const SizedBox(width: 15),
               Expanded(
@@ -382,14 +382,14 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(20),
               ),
-              child: Image.network(
-                listing.images.isNotEmpty
-                    ? getFullImageUrl(listing.images[0])
-                    : 'https://via.placeholder.com/80',
-                height: 200,
-                width: double.infinity,
-                fit: BoxFit.cover,
-              ),
+              child: listing.images.isNotEmpty
+                  ? Image.network(
+                      getFullImageUrl(listing.images[0]),
+                      height: 200,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    )
+                  : const Icon(Icons.home, size: 80),
             ),
             Padding(
               padding: const EdgeInsets.all(16),

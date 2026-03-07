@@ -32,19 +32,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   final LocalAuthentication _localAuth = LocalAuthentication();
   static const _biometricEnabledKey = 'biometric_login_enabled';
 
+  bool _profileFetched = false;
+
   @override
   void initState() {
     super.initState();
     _initBiometricState();
-    Future.microtask(() {
-      final authState = ref.read(authViewModelProvider);
-      if (authState.status == AuthStatus.authenticated) {
-        ref.read(profileViewModelProvider.notifier).fetchProfile();
-      } else {
-        print(' User not authenticated. Skipping profile fetch.');
-      }
-    });
   }
+
+  // Duplicate build method removed. Only the main build method below remains.
 
   Future<void> _initBiometricState() async {
     try {
