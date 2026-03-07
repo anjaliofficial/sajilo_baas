@@ -40,12 +40,19 @@ class ListingListItem extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-                child: Image.network(
-                  imageUrl,
-                  height: 260,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                ),
+                child: imageUrl.startsWith('assets/')
+                    ? Image.asset(
+                        imageUrl,
+                        height: 260,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                      )
+                    : Image.network(
+                        imageUrl,
+                        height: 260,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                      ),
               ),
               Positioned(
                 top: 16,

@@ -181,3 +181,14 @@ Widget mediaBubble(String url, String kind) {
     child: const Center(child: Icon(Icons.help_outline)),
   );
 }
+
+class MediaBubble extends StatelessWidget {
+  final String url;
+  final String kind;
+  const MediaBubble({super.key, required this.url, required this.kind});
+
+  @override
+  Widget build(BuildContext context) {
+    return mediaBubble(url, kind);
+  }
+}

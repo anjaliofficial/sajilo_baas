@@ -16,7 +16,7 @@ class CompassButton extends StatelessWidget {
   Widget build(BuildContext context) {
     // Only show compass when map is rotated
     if (rotation.abs() < 0.1) {
-      return const SizedBox.shrink();
+      return Container();
     }
 
     return Material(

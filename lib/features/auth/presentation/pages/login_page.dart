@@ -308,6 +308,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 TextFormField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
+                  key: const Key('emailField'),
                   decoration: _inputDecoration("Please Enter Your Email"),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -335,6 +336,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 TextFormField(
                   controller: _passwordController,
                   obscureText: _obscurePassword,
+                  key: const Key('passwordField'),
                   decoration: _inputDecoration("Please Enter Your Password")
                       .copyWith(
                         suffixIcon: IconButton(
@@ -394,6 +396,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   width: double.infinity,
                   height: 55,
                   child: ElevatedButton(
+                    key: const Key('loginButton'),
                     onPressed: authState.status == AuthStatus.loading
                         ? null
                         : _onLogin,
