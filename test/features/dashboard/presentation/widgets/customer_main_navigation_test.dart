@@ -35,7 +35,7 @@ class _MockDashboardViewModel extends DashboardViewModel {
   @override
   String? error;
   @override
-  String _searchQuery = '';
+  final String _searchQuery = '';
   @override
   List<ListingEntity> get filteredListings => listings;
   @override

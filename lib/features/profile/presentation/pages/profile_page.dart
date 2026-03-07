@@ -32,7 +32,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   final LocalAuthentication _localAuth = LocalAuthentication();
   static const _biometricEnabledKey = 'biometric_login_enabled';
 
-  bool _profileFetched = false;
+  final bool _profileFetched = false;
 
   @override
   void initState() {
