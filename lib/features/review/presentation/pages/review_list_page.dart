@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+// import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/review_provider.dart';
 import 'package:sajilo_baas/core/utils/image_utils.dart';
 import '../../domain/entities/review_entity.dart';
@@ -74,7 +75,7 @@ class _ReviewListPageState extends ConsumerState<ReviewListPage>
     return ListView.separated(
       padding: const EdgeInsets.all(16),
       itemCount: reviews.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 14),
+      separatorBuilder: (_, _) => const SizedBox(height: 14),
       itemBuilder: (context, index) {
         return ReviewCard(
           review: reviews[index],

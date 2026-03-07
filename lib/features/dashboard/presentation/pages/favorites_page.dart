@@ -93,7 +93,7 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
                 return ListView.separated(
                   padding: const EdgeInsets.all(16),
                   itemCount: savedBookings.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 12),
+                  separatorBuilder: (_, _) => const SizedBox(height: 12),
                   itemBuilder: (context, i) {
                     final b = savedBookings[i];
                     return Card(

@@ -319,7 +319,7 @@ class _HostProfilePageState extends ConsumerState<HostProfilePage> {
                       height: 110,
                       width: double.infinity,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Container(
+                      errorBuilder: (_, _, _) => Container(
                         height: 110,
                         color: Colors.grey[300],
                         child: const Icon(Icons.home, size: 48),

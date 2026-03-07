@@ -1,4 +1,4 @@
-import 'package:flutter_riverpod/legacy.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../state/profile_state.dart';
 import '../../domain/usecases/profile_usecase.dart';
 import '../../domain/entities/profile_entity.dart';

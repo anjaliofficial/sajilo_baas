@@ -1,5 +1,5 @@
 // import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart' show StateNotifier;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sajilo_baas/features/message/domain/entities/thread_entity.dart';
 import '../../domain/usecases/get_threads.dart';
 import '../state/threads_state.dart';

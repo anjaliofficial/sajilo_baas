@@ -116,7 +116,7 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
                         )
                       : ListView.separated(
                           itemCount: filteredThreads.length,
-                          separatorBuilder: (_, __) => Divider(height: 1),
+                          separatorBuilder: (_, _) => Divider(height: 1),
                           itemBuilder: (context, index) {
                             final thread = filteredThreads[index];
                             final lastMsg = thread.lastMessage;

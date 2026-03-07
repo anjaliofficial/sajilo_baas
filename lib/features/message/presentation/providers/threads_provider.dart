@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
 import 'package:sajilo_baas/features/message/presentation/providers/message_providers.dart';
 import 'package:sajilo_baas/features/message/presentation/state/threads_state.dart';
 import '../view_model/threads_view_model.dart';

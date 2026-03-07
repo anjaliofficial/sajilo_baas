@@ -1,4 +1,4 @@
-import 'package:flutter_riverpod/legacy.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/usecases/change_password_usecase.dart';
 
 class ChangePasswordViewModel extends StateNotifier<bool> {

@@ -92,8 +92,8 @@ class _BookingsScreenState extends ConsumerState<BookingsScreen> {
     return ListView.separated(
       padding: const EdgeInsets.all(16),
       itemCount: 6,
-      separatorBuilder: (_, __) => const SizedBox(height: 12),
-      itemBuilder: (_, __) => Shimmer.fromColors(
+      separatorBuilder: (_, _) => const SizedBox(height: 12),
+      itemBuilder: (_, _) => Shimmer.fromColors(
         baseColor: Colors.grey.shade300,
         highlightColor: Colors.grey.shade100,
         child: Card(
@@ -157,7 +157,7 @@ class _BookingsScreenState extends ConsumerState<BookingsScreen> {
                   return ListView.separated(
                     padding: const EdgeInsets.all(16),
                     itemCount: bookings.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 12),
+                    separatorBuilder: (_, _) => const SizedBox(height: 12),
                     itemBuilder: (context, i) {
                       final b = bookings[i];
                       return Card(

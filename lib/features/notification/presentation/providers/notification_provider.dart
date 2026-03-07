@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
 import 'package:sajilo_baas/core/api/api_client.dart';
 
 import '../../data/datasources/remote/notification_remote_datasource.dart';

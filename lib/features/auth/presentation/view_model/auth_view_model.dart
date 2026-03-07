@@ -1,5 +1,6 @@
 // features/auth/presentation/view_model/auth_view_model.dart
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sajilo_baas/features/auth/domain/repositories/auth_repository.dart';
 import '../../../../core/api/api_client.dart';
 import '../../data/repositories/auth_repository.dart';
 import '../../domain/entities/auth_entity.dart';
@@ -8,12 +9,20 @@ import '../../../profile/presentation/providers/profile_provider.dart'
     hide apiClientProvider;
 
 class AuthViewModel extends Notifier<AuthState> {
+  final IAuthRepository? _repoOverride;
+  final bool fetchProfileAfterLogin;
+
+  AuthViewModel([this._repoOverride, this.fetchProfileAfterLogin = true]);
+
   @override
   AuthState build() => const AuthState.initial();
 
   void reset() {
     state = const AuthState.initial();
   }
+
+  IAuthRepository get _repo =>
+      _repoOverride ?? ref.read(authRepositoryProvider);
 
   Future<void> register({
     required String fullName,
@@ -26,7 +35,6 @@ class AuthViewModel extends Notifier<AuthState> {
   }) async {
     state = const AuthState.loading();
 
-    final repo = ref.read(authRepositoryProvider);
     final authEntity = AuthEntity(
       authId: null,
       fullName: fullName,
@@ -35,10 +43,10 @@ class AuthViewModel extends Notifier<AuthState> {
       address: address,
       password: password,
       role: role,
-      token: '', // ✅ registration doesn’t return token yet
+      token: '',
     );
 
-    final result = await repo.register(
+    final result = await _repo.register(
       authEntity,
       confirmPassword: confirmPassword,
     );
@@ -51,23 +59,15 @@ class AuthViewModel extends Notifier<AuthState> {
 
   Future<void> login({required String email, required String password}) async {
     state = const AuthState.loading();
-
-    final repo = ref.read(authRepositoryProvider);
-    final result = await repo.login(email, password);
-
+    final result = await _repo.login(email, password);
     if (result.isRight()) {
       final entity = result.getOrElse(() => throw Exception('Login failed'));
-      // Add debug print for role and token
-      print('🔑 Logged in user role: \\${entity.role}');
-      print('🔑 Logged in user token: \\${entity.token.substring(0, 20)}...');
-      // ✅ Save token securely BEFORE any API calls
       final apiClient = ref.read(apiClientProvider);
       await apiClient.saveToken(entity.token);
-
       state = AuthState.authenticated(entity);
-
-      // ✅ Trigger profile fetch after login (token is already saved)
-      ref.read(profileViewModelProvider.notifier).fetchProfile();
+      if (fetchProfileAfterLogin) {
+        ref.read(profileViewModelProvider.notifier).fetchProfile();
+      }
     } else {
       final failure = result.fold((f) => f, (r) => null);
       state = AuthState.error(failure?.message ?? 'Login failed');
@@ -77,8 +77,7 @@ class AuthViewModel extends Notifier<AuthState> {
   Future<void> checkSession() async {
     state = const AuthState.loading();
 
-    final repo = ref.read(authRepositoryProvider);
-    final result = await repo.checkSession();
+    final result = await _repo.checkSession();
 
     if (result.isRight()) {
       final entity = result.getOrElse(() => null);
@@ -96,18 +95,10 @@ class AuthViewModel extends Notifier<AuthState> {
 
   Future<void> logout() async {
     state = const AuthState.loading();
-
-    // Clear token from secure storage
     final apiClient = ref.read(apiClientProvider);
     await apiClient.removeToken();
-
-    final repo = ref.read(authRepositoryProvider);
-    final result = await repo.logout();
-
-    // Always set logged out state, even if backend call fails
+    final result = await _repo.logout();
     result.fold((failure) {
-      // Log error but still logout locally
-      print('Logout API error: ${failure.message}');
       state = const AuthState.loggedOut();
     }, (_) => state = const AuthState.loggedOut());
   }

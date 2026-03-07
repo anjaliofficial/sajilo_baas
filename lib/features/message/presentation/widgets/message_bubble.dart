@@ -84,7 +84,7 @@ class MessageBubble extends ConsumerWidget {
                             color: Colors.white,
                           )
                         : null,
-                    onBackgroundImageError: (_, __) {
+                    onBackgroundImageError: (_, _) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text('Avatar image failed to load!'),

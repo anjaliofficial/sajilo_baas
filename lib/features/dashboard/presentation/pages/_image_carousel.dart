@@ -39,7 +39,7 @@ class _ImageCarouselState extends State<_ImageCarousel> {
                     fit: BoxFit.cover,
                     width: double.infinity,
                     height: 220,
-                    errorBuilder: (_, __, ___) => Center(
+                    errorBuilder: (_, _, _) => Center(
                       child: Icon(
                         Icons.broken_image,
                         size: 60,

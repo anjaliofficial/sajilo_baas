@@ -1,5 +1,5 @@
 // import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/message_entity.dart';
 import '../../domain/usecases/get_conversation.dart';
 import '../../domain/usecases/send_message.dart';

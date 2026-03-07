@@ -23,7 +23,7 @@ dependencies:
   uuid: ^4.3.3
   equatable: ^2.0.7
   dartz: ^0.10.1
-  flutter_riverpod: ^3.1.0 # ✅ keep only this
+  flutter_riverpod: ^2.6.1 # downgraded for compatibility
   pretty_dio_logger: ^1.4.0
   shared_preferences: ^2.5.4
   connectivity_plus: ^7.0.0
@@ -48,6 +48,8 @@ dev_dependencies:
     sdk: flutter
 
   flutter_lints: ^6.0.0
+
+  mocktail: ^1.0.3
 
   # Code Generation
   build_runner: ^2.4.13

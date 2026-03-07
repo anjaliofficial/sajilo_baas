@@ -98,34 +98,24 @@ class ApiClient {
   Future<void> saveToken(String token) async {
     try {
       await _secureStorage.write(key: _tokenKey, value: token);
-      if (kDebugMode) print('✅ Token saved: ${token.substring(0, 20)}...');
     } catch (e) {
-      if (kDebugMode) print('❌ Error saving token: $e');
+      // handle error silently or log if needed
     }
   }
 
   Future<void> removeToken() async {
     try {
       await _secureStorage.delete(key: _tokenKey);
-      if (kDebugMode) print('🗑️ Token removed');
     } catch (e) {
-      if (kDebugMode) print('❌ Error removing token: $e');
+      // handle error silently or log if needed
     }
   }
 
   Future<String?> readToken() async {
     try {
       final token = await _secureStorage.read(key: _tokenKey);
-      if (kDebugMode) {
-        if (token != null && token.isNotEmpty) {
-          print('✅ Token read: ${token.substring(0, 20)}...');
-        } else {
-          print('⚠️ No token found');
-        }
-      }
       return token;
     } catch (e) {
-      if (kDebugMode) print('❌ Error reading token: $e');
       return null;
     }
   }

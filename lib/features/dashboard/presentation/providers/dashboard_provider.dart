@@ -1,4 +1,4 @@
-import 'package:flutter_riverpod/legacy.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sajilo_baas/core/api/api_client.dart';
 import 'package:sajilo_baas/core/api/api_endpoints.dart';
 import 'package:dio/dio.dart';

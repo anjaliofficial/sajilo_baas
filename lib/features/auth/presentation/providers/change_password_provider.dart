@@ -1,4 +1,4 @@
-import 'package:flutter_riverpod/legacy.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../view_model/change_password_view_model.dart';
 import '../../domain/usecases/change_password_usecase.dart';
 import '../../data/repositories/change_password_repository_impl.dart';

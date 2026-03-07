@@ -31,4 +31,26 @@ class AuthEntity extends Equatable {
     role,
     token,
   ];
+
+  AuthEntity copyWith({
+    String? authId,
+    String? fullName,
+    String? email,
+    String? phoneNumber,
+    String? address,
+    String? password,
+    String? role,
+    String? token,
+  }) {
+    return AuthEntity(
+      authId: authId ?? this.authId,
+      fullName: fullName ?? this.fullName,
+      email: email ?? this.email,
+      phoneNumber: phoneNumber ?? this.phoneNumber,
+      address: address ?? this.address,
+      password: password ?? this.password,
+      role: role ?? this.role,
+      token: token ?? this.token,
+    );
+  }
 }

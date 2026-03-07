@@ -375,7 +375,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                 child: (otherUserAvatar == null || otherUserAvatar.isEmpty)
                     ? const Icon(Icons.person, color: Colors.white, size: 24)
                     : null,
-                onBackgroundImageError: (_, __) {},
+                onBackgroundImageError: (_, _) {},
               ),
               SizedBox(width: 12),
               Text(

@@ -2,7 +2,6 @@ import '../../data/datasources/remote/media_upload_datasource.dart';
 import '../../domain/usecases/delete_message.dart';
 import '../../domain/usecases/edit_message.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
 import '../../../../core/network/dio_provider.dart';
 import '../../../../core/api/api_client.dart';
 import '../../../../core/api/api_endpoints.dart'; // <-- import ApiEndpoints

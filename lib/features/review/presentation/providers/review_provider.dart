@@ -1,4 +1,4 @@
-import 'package:flutter_riverpod/legacy.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sajilo_baas/features/review/presentation/state/review_state.dart';
 import 'package:sajilo_baas/features/review/presentation/view_model/review_view_model.dart';
 

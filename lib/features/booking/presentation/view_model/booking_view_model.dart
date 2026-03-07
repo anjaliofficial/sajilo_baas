@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
 import '../../domain/entities/booking_entity.dart';
 import '../../domain/entities/booking_filter.dart';
 import '../../domain/usecases/get_my_bookings.dart';
