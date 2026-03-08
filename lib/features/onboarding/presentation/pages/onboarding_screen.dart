@@ -38,11 +38,14 @@ class OnboardingScreen extends StatefulWidget {
 class _OnboardingScreenState extends State<OnboardingScreen> {
   int currentPage = 0;
   final PageController _controller = PageController();
-  final Color primaryBlue = Colors.blue;
+  final Color accentColor = Color(0xFF2196F3); // Splash screen blue
+  final Color iconBgColor = Colors.blue.shade50;
 
   void _handleNext() {
     if (currentPage == contents.length - 1) {
-      Navigator.of(context).pushReplacementNamed('/login');
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const LoginPage()),
+      );
     } else {
       _controller.nextPage(
         duration: const Duration(milliseconds: 300),
@@ -55,37 +58,43 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Stack(
-        children: [
-          // Only show Skip button on first onboarding page
-          if (currentPage == 0)
+      body: SafeArea(
+        child: Stack(
+          children: [
+            // Always visible Skip button
             Positioned(
               top: 40,
               right: 30,
-              child: TextButton(
+              child: ElevatedButton(
                 onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => const LoginPage()),
-                  );
+                  Navigator.of(context).pushReplacementNamed('/login');
                 },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: accentColor,
+                  elevation: 5,
+                  shadowColor: accentColor.withOpacity(0.5),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 8,
+                  ),
+                ),
                 child: const Text(
                   'Skip',
                   style: TextStyle(
-                    color: Colors.blue,
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
+                    color: Colors.white,
                   ),
                 ),
               ),
             ),
 
-          // Main onboarding content
-          IgnorePointer(
-            ignoring: currentPage == 0,
-            child: Column(
+            // Main onboarding content
+            Column(
               children: [
-                // PAGEVIEW
                 Expanded(
                   flex: 3,
                   child: PageView.builder(
@@ -96,50 +105,48 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     itemBuilder: (_, i) {
                       return Padding(
                         padding: const EdgeInsets.only(
-                          top: 100,
-                          left: 40,
-                          right: 40,
+                          top: 80,
+                          left: 30,
+                          right: 30,
                           bottom: 20,
                         ),
                         child: Column(
                           children: [
-                            Container(
-                              height: 250,
-                              width: 250,
+                            AnimatedContainer(
+                              duration: const Duration(milliseconds: 400),
+                              curve: Curves.easeInOut,
+                              height: 180,
+                              width: 180,
                               decoration: BoxDecoration(
-                                color: Colors.grey.shade100,
-                                borderRadius: BorderRadius.circular(20),
+                                color: iconBgColor,
+                                borderRadius: BorderRadius.circular(24),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.grey.withOpacity(0.2),
-                                    blurRadius: 10,
-                                    offset: const Offset(0, 5),
+                                    color: accentColor.withOpacity(0.12),
+                                    blurRadius: 12,
+                                    offset: const Offset(0, 6),
                                   ),
                                 ],
                               ),
-                              child: Icon(
-                                Icons.location_city,
-                                size: 100,
-                                color: primaryBlue,
-                              ),
+                              child: Center(child: _getOnboardingIcon(i)),
                             ),
-                            const SizedBox(height: 50),
+                            const SizedBox(height: 32),
                             Text(
                               contents[i].title,
                               textAlign: TextAlign.center,
                               style: const TextStyle(
-                                fontSize: 28,
-                                fontWeight: FontWeight.w900,
-                                color: Color(0xFF1D2939),
+                                fontSize: 26,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.black87,
                               ),
                             ),
-                            const SizedBox(height: 20),
+                            const SizedBox(height: 16),
                             Text(
                               contents[i].description,
                               textAlign: TextAlign.center,
                               style: const TextStyle(
                                 fontSize: 15,
-                                color: Colors.grey,
+                                color: Colors.black54,
                                 height: 1.4,
                               ),
                             ),
@@ -149,7 +156,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     },
                   ),
                 ),
-
                 // Bottom Section
                 Expanded(
                   flex: 1,
@@ -169,7 +175,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           ),
                         ),
                         const Spacer(),
-
                         // BUTTON
                         SizedBox(
                           width: double.infinity,
@@ -177,7 +182,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           child: ElevatedButton(
                             onPressed: _handleNext,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: primaryBlue,
+                              backgroundColor: accentColor,
+                              elevation: 5,
+                              shadowColor: accentColor.withOpacity(0.5),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(15),
                               ),
@@ -200,10 +207,24 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 ),
               ],
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
+  }
+
+  // Get icon for each onboarding slide
+  Widget _getOnboardingIcon(int index) {
+    switch (index) {
+      case 0:
+        return Icon(Icons.home_rounded, size: 80, color: accentColor);
+      case 1:
+        return Icon(Icons.lock_rounded, size: 80, color: accentColor);
+      case 2:
+        return Icon(Icons.support_agent, size: 80, color: accentColor);
+      default:
+        return Icon(Icons.location_city, size: 80, color: accentColor);
+    }
   }
 
   // DOT indicator
@@ -214,7 +235,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       height: 8,
       width: currentPage == index ? 24 : 8,
       decoration: BoxDecoration(
-        color: currentPage == index ? primaryBlue : Colors.grey.shade300,
+        color: currentPage == index ? accentColor : Colors.grey.shade300,
         borderRadius: BorderRadius.circular(4),
       ),
     );
