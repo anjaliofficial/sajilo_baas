@@ -7,7 +7,6 @@ import 'package:sajilo_baas/features/dashboard/presentation/widgets/customer_mai
 import 'package:sajilo_baas/features/dashboard/presentation/providers/dashboard_provider.dart';
 import 'package:sajilo_baas/features/dashboard/presentation/view_model/dashboard_view_model.dart';
 import 'package:sajilo_baas/features/dashboard/domain/usecases/get_listings_usecases.dart';
-import 'package:sajilo_baas/features/dashboard/domain/entities/listing_entity.dart';
 
 void main() {
   testWidgets('renders CustomerMainNavigation', (WidgetTester tester) async {

@@ -17,11 +17,7 @@ void main() async {
 
   runApp(
     ProviderScope(
-      overrides: [
-        sharedPreferencesProvider.overrideWithValue(
-          prefs,
-        ), // ✅ Provide instance
-      ],
+      overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
       child: const App(),
     ),
   );

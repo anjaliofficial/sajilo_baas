@@ -10,7 +10,6 @@ import 'package:sajilo_baas/core/api/api_endpoints.dart';
 import 'package:sajilo_baas/core/api/api_client.dart' as core_api;
 import 'package:sajilo_baas/features/auth/data/repositories/auth_repository.dart';
 import 'package:sajilo_baas/features/auth/presentation/providers/auth_provider.dart';
-import 'package:sajilo_baas/features/auth/presentation/state/auth_state.dart';
 import '../providers/profile_provider.dart';
 import '../state/profile_state.dart';
 import 'edit_profile_page.dart';

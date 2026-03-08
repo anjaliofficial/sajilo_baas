@@ -308,8 +308,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 TextFormField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
-                  key: const Key('emailField'),
-                  decoration: _inputDecoration("Please Enter Your Email"),
+                    key: const Key('emailField'),
+                    decoration: _inputDecoration("Please Enter Your Email"),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Email is required';
@@ -336,21 +336,21 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 TextFormField(
                   controller: _passwordController,
                   obscureText: _obscurePassword,
-                  key: const Key('passwordField'),
-                  decoration: _inputDecoration("Please Enter Your Password")
-                      .copyWith(
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscurePassword
-                                ? Icons.visibility_outlined
-                                : Icons.visibility_off_outlined,
-                            color: Colors.black54,
-                          ),
-                          onPressed: () => setState(
-                            () => _obscurePassword = !_obscurePassword,
+                    key: const Key('passwordField'),
+                    decoration: _inputDecoration("Please Enter Your Password")
+                        .copyWith(
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscurePassword
+                                  ? Icons.visibility_outlined
+                                  : Icons.visibility_off_outlined,
+                              color: Colors.black54,
+                            ),
+                            onPressed: () => setState(
+                              () => _obscurePassword = !_obscurePassword,
+                            ),
                           ),
                         ),
-                      ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Password is required';
@@ -395,29 +395,29 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 SizedBox(
                   width: double.infinity,
                   height: 55,
-                  child: ElevatedButton(
-                    key: const Key('loginButton'),
-                    onPressed: authState.status == AuthStatus.loading
-                        ? null
-                        : _onLogin,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: primaryBlue,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                    child: ElevatedButton(
+                      key: const Key('loginButton'),
+                      onPressed: authState.status == AuthStatus.loading
+                          ? null
+                          : _onLogin,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primaryBlue,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
-                    ),
-                    child: authState.status == AuthStatus.loading
-                        ? const CircularProgressIndicator(color: Colors.white)
-                        : const Text(
-                            "Sign In",
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
+                      child: authState.status == AuthStatus.loading
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : const Text(
+                              "Sign In",
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                          ),
-                  ),
+                    ),
                 ),
 
                 const SizedBox(height: 20),

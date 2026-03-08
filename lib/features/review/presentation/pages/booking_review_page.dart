@@ -52,51 +52,53 @@ class _BookingReviewPageState extends ConsumerState<BookingReviewPage> {
               ),
             ),
 
-            const Spacer(),
+            const SizedBox(height: 32),
 
-            /// 🚀 SUBMIT
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: rating == 0
-                    ? null
-                    : () async {
-                        await ref
-                            .read(reviewProvider.notifier)
-                            .createReview(
-                              bookingId: widget.bookingId,
-                              rating: rating,
-                              comment: commentCtrl.text,
-                            );
-                        final error = ref.read(reviewProvider).error;
-                        if (error != null) {
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  error.replaceFirst('Exception: ', ''),
+            /// 🚀 SUBMIT (centered)
+            Center(
+              child: SizedBox(
+                width: 220,
+                child: ElevatedButton(
+                  onPressed: rating == 0
+                      ? null
+                      : () async {
+                          await ref
+                              .read(reviewProvider.notifier)
+                              .createReview(
+                                bookingId: widget.bookingId,
+                                rating: rating,
+                                comment: commentCtrl.text,
+                              );
+                          final error = ref.read(reviewProvider).error;
+                          if (error != null) {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    error.replaceFirst('Exception: ', ''),
+                                  ),
                                 ),
-                              ),
-                            );
+                              );
+                            }
+                            return;
                           }
-                          return;
-                        }
-                        // Reload reviews for the current user
-                        final auth = ref.read(authViewModelProvider);
-                        if (auth.authEntity != null &&
-                            auth.authEntity!.authId != null) {
-                          await ref
-                              .read(reviewProvider.notifier)
-                              .loadReviews(auth.authEntity!.authId!);
-                          await ref
-                              .read(reviewProvider.notifier)
-                              .loadReviewsGiven();
-                        }
-                        if (context.mounted) {
-                          Navigator.pop(context);
-                        }
-                      },
-                child: const Text('Submit Review'),
+                          // Reload reviews for the current user
+                          final auth = ref.read(authViewModelProvider);
+                          if (auth.authEntity != null &&
+                              auth.authEntity!.authId != null) {
+                            await ref
+                                .read(reviewProvider.notifier)
+                                .loadReviews(auth.authEntity!.authId!);
+                            await ref
+                                .read(reviewProvider.notifier)
+                                .loadReviewsGiven();
+                          }
+                          if (context.mounted) {
+                            Navigator.pop(context);
+                          }
+                        },
+                  child: const Text('Submit Review'),
+                ),
               ),
             ),
           ],

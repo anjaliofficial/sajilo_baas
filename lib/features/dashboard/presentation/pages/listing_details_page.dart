@@ -76,7 +76,7 @@ class _ListingDetailsPageState extends State<ListingDetailsPage> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Price: \$${listing.pricePerNight}/night',
+              'Price: NPR ${listing.pricePerNight}/night',
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
